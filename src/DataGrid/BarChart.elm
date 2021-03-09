@@ -50,16 +50,17 @@ render cfg model =
         labels = Utils.fsts model
         dScale = dataScale dataEnd cfg.padding cfg.dataMin cfg.dataMax
         lScale = labelScale labelEnd cfg.padding labels
-        ticks = genTicks cfg.dataAxisTicks cfg.dataMax
+        tickCt = getTickCt cfg.dataAxisTicks cfg.dataMax
         draw = (drawBar cfg.orientation dataEnd cfg.padding cfg.labelFormat
                     dScale lScale)
     in svg
         [ viewBox 0 0 cfg.w cfg.h ]
         [ style [] [ text <| genStyle cfg.fillColor cfg.styleOverride ]
-        , g [ transform [ Translate (cfg.padding - 1) (labelEnd - cfg.padding) ] ]
+        , g [ transform [ Translate (cfg.padding - 1)
+                              (dataEnd - cfg.padding) ] ]
             [ labelAxis cfg.labelFormat lScale ]
         , g [ transform [ Translate (cfg.padding - 1) cfg.padding ] ]
-            [ dataAxis ticks dScale ]
+            [ dataAxis tickCt dScale ]
         , g [ transform [ Translate cfg.padding cfg.padding ]
             , class [ "series" ] ] <|
             List.map draw  model
@@ -139,8 +140,8 @@ dataScale end padding  dataMin dataMax =
      Scale.linear (end - 2 * padding, 0) (dataMin, dataMax)
 
 dataAxis : Int -> ContinuousScale Float -> Svg msg
-dataAxis n dScale =
-    Axis.left [ Axis.tickCount n ] dScale
+dataAxis tickCt dScale =
+    Axis.left [ Axis.tickCount tickCt ] dScale
 
 labelScale : Float -> Float -> List label -> BandScale label
 labelScale end padding labels =
@@ -151,8 +152,8 @@ labelAxis : (label -> String) -> BandScale label -> Svg msg
 labelAxis fmt lScale =
      Axis.bottom [] (Scale.toRenderable fmt lScale)
 
-genTicks : Maybe Int -> Float -> Int
-genTicks maybeDataAxisTicks dataMax =
+getTickCt : Maybe Int -> Float -> Int
+getTickCt maybeDataAxisTicks dataMax =
     case maybeDataAxisTicks of
         (Just dataAxisTicks) -> dataAxisTicks
         Nothing -> min 10 (round dataMax)
