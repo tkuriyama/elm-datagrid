@@ -17,7 +17,7 @@ cfg : BarChartConfig Time.Posix
 cfg = { w = 900
       , h = 450
       , padding = 30
-      , orientation = Vertical
+      , orientation = Horizontal
       , labelFormat = dateFormat
       , dataMin = 0
       , dataMax = 5
@@ -46,3 +46,4 @@ dateFormat =
                   , DateFormat.text " "
                   , DateFormat.monthNameAbbreviated ]
     in DateFormat.format fmtArgs Time.utc
+
