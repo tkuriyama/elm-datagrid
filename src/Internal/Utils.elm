@@ -1,5 +1,8 @@
 module Internal.Utils exposing (..)
 
+import FormatNumber
+import FormatNumber.Locales exposing (Decimals(..), usLocale)
+
 --------------------------------------------------------------------------------
 -- Tuples
 
@@ -18,3 +21,13 @@ snds = List.map snd
 
 splitPairs : List (a, b) -> (List a, List b)
 splitPairs pairs = (fsts pairs, snds pairs)
+
+
+--------------------------------------------------------------------------------
+-- Formatting
+
+fmtFloat : Int -> Float -> String
+fmtFloat dp f =
+    let cfg = { usLocale | decimals = Exact dp }
+    in FormatNumber.format cfg f
+
