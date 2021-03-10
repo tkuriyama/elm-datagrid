@@ -17,7 +17,7 @@ import TypedSvg.Attributes.InPx exposing (height, width, x, y)
 import TypedSvg.Core exposing (Svg, text)
 import TypedSvg.Types exposing (AnchorAlignment(..), Transform(..))
 
-import Internal.Utils as Utils exposing (..)
+import Internal.Utils as Utils
 
 
 --------------------------------------------------------------------------------
@@ -47,6 +47,20 @@ type alias ChartEnv label =
     , style : String
     }
 
+genChartEnv : BarChartConfig label -> List (label, Float) -> ChartEnv label
+genChartEnv cfg model =
+    { w = cfg.w
+    , h = cfg.h
+    , pad = cfg.padding
+    , dataScale = genDataScale cfg.h cfg.padding <| Utils.snds model
+    , labelScale = genLabelScale cfg.w cfg.padding <| Utils.fsts model
+    , labelShow = cfg.showLabels
+    , labelFmt = cfg.labelFormatter
+    , dataTickCt = min cfg.dataAxisTicks 10
+    , style = genStyle cfg.showLabels cfg.fillColor cfg.hoverColor
+              cfg.styleOverride
+    }
+
 
 --------------------------------------------------------------------------------
 -- Render
@@ -69,28 +83,17 @@ render cfg model =
             List.map (barV env) model
         ]
 
-
-genChartEnv : BarChartConfig label -> List (label, Float) -> ChartEnv label
-genChartEnv cfg model =
-    { w = cfg.w
-    , h = cfg.h
-    , pad = cfg.padding
-    , dataScale = genDataScale cfg.h cfg.padding <| snds model
-    , labelScale = genLabelScale cfg.w cfg.padding <| fsts model
-    , labelShow = cfg.showLabels
-    , labelFmt = cfg.labelFormatter
-    , dataTickCt = min cfg.dataAxisTicks 10
-    , style = genStyle cfg.showLabels cfg.fillColor cfg.hoverColor
-              cfg.styleOverride
-    }
-
-
---------------------------------------------------------------------------------
--- Draw
-
 barV : ChartEnv label -> (label, Float) -> Svg msg
 barV env (lbl, val) =
-    svg []
+    let textX = Scale.convert (Scale.toRenderable env.labelFmt env.labelScale)
+                lbl
+        e = (toFloat (String.length <| env.labelFmt lbl)) / 2.0 * 8
+        anchor =
+            if textX - e < 0 then AnchorStart else
+            if textX + e > (env.w - env.pad * 2) then AnchorEnd else
+            AnchorMiddle
+    in svg
+        []
         [ g [ class [ "bar" ] ]
           [ rect
                 [ x <| Scale.convert env.labelScale lbl
@@ -102,10 +105,9 @@ barV env (lbl, val) =
                 []
             , text_
                 [ class [ "tooltip" ]
-                , x <| Scale.convert
-                    (Scale.toRenderable env.labelFmt env.labelScale) lbl
+                , x <| textX
                 , y <| env.h - (env.pad * 2) + 12
-                , textAnchor AnchorMiddle
+                , textAnchor <| anchor
                 ]
                 [ "{{lbl}}: {{val}}"
                 |> String.Format.namedValue "lbl" (env.labelFmt lbl)
