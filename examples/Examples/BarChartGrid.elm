@@ -11,29 +11,28 @@ import Examples.BarChart as BC
 
 main : Html msg
 main =
-    Layout.chartGrid 0 0 charts
+    Layout.chartGrid cfg charts
 
 cfg : Layout.LayoutConfig
-cfg = 
+cfg =
     { w = 1800
-    , spacing = 10
+    , colSpacing = 0
+    , rowSpacing = 5
+    , padding = 0
     , title = Just "Demo Chart Grid"
     , description = Just "Demo chart grid description here."
-    , gridBaseFontSize = 20
-    , cellBaseFontSize = 14
+    , gridBaseFontSize = 24
+    , cellBaseFontSize = 18
     }
 
-charts : List (Layout.Chart msg)
-charts = [ { title = Just "Chart 1"
-           , description = Just "descrption 1"
-           , chart = BC.main |> Element.html
-           }
-         , { title = Just "Chart 2"
-           , description = Just "descrption 2"
-           , chart = BC.main |> Element.html
-           }
-         , { title = Just "Chart 3"
-           , description = Just "descrption 3"
-           , chart = BC.main |> Element.html
-           }
-         ]
+charts : List (List (Layout.Chart msg))
+charts =
+    let labels = [ [ 1, 2, 3 ]
+                 , [ 4, 5 ]
+--                 , [ 7, 8 ]
+                 ]
+        f i = { title = Just <| "Chart " ++ (String.fromInt i)
+              , description = Just <| "descrption " ++ (String.fromInt i)
+              , chart = BC.main |> Element.html
+              }
+    in List.map (List.map f) labels
