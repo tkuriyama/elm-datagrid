@@ -1,11 +1,11 @@
 module Examples.BarChart exposing (main)
 
-import DateFormat
-import TypedSvg exposing (svg)
 import TypedSvg.Core exposing (Svg)
 
 import DataGrid.BarChart exposing (BarChartConfig, render)
 import Internal.Utils as Utils
+
+
 --------------------------------------------------------------------------------
 
 main : Svg msg

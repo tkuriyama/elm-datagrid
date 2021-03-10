@@ -1,7 +1,8 @@
 module DataGrid.BarChart exposing (BarChartConfig, render)
 
-{-| Module for rendering a single Barchart with some limited config options.
-it should work for many simple use cases, but YMMV; in particular, customizing
+{-| Render a a single Barchart with some limited config options.
+
+It should work for most simple use cases, but YMMV; in particular, customizing
 axes is better handled by direct interaction with the elm-visualization API.
 
 -}
