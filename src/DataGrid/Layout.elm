@@ -7,7 +7,6 @@ where an element is an elm-ui `Element msg`.
 
 -}
 
-
 import Element exposing (Element, el, text, row, alignRight, fill, width, px,
                              paragraph,
                          rgb255, spacing, centerY, padding, wrappedRow, column)
@@ -16,9 +15,10 @@ import Element.Border as Border
 import Element.Font as Font
 import Html exposing (Html)
 
+import Internal.Defaults as Defaults
+
 
 --------------------------------------------------------------------------------
-
 
 type alias LayoutConfig =
     { w : Int
@@ -51,7 +51,7 @@ chartGrid cfg xss =
     let rows = List.map genRow xss
         genRow xs = row [ width fill, spacing cfg.colSpacing ]
                         (List.map (chartCell cfg) xs)
-        gridTitle = title cfg Nothing cfg.gridBaseFontSize
+        gridTitle = title cfg cfg.fontColor cfg.gridBaseFontSize
     in
         Element.layout
             []
@@ -65,7 +65,7 @@ chartCell cfg c =
         d = Maybe.withDefault "" c.description
     in column
         [ width fill ]
-        [ title c Nothing cfg.cellBaseFontSize
+        [ title c cfg.fontColor cfg.cellBaseFontSize
         , c.chart ]
 
 
@@ -76,10 +76,12 @@ title : HasTitleDesc a -> Maybe Element.Color -> Int -> Element msg
 title r mColor baseFont =
     let t = Maybe.withDefault "" r.title
         d = Maybe.withDefault "" r.description
+        fc = Maybe.withDefault (Defaults.rgbToElmUI Defaults.defaultTextColor)
+             mColor
         smallFont = round <| (toFloat baseFont) * 0.8
     in paragraph
-        [ Font.color (rgb255 64 64 64) ]
+        [ Font.color fc ]
         [ el [ Font.bold, Font.size baseFont ] (text t)
         , text " | "
-        , el [ Font.size smallFont ] (text d) 
+        , el [ Font.size smallFont ] (text d)
         ]

@@ -29,6 +29,10 @@ rgbaToString ((r, g, b), a) =
 rgbToElmUI : RGB -> Element.Color
 rgbToElmUI (r, g, b) = Element.rgb255 r g b
 
+rgbaToElmUI : RGBA -> Element.Color
+rgbaToElmUI ((r, g, b), a) = Element.rgba255 r g b a
+
+
 defaultTextColor : RGB
 defaultTextColor = (64, 64, 64)
 
