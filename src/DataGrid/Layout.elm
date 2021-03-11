@@ -27,6 +27,8 @@ type alias LayoutConfig =
     , padding : Int
     , title : Maybe String
     , description : Maybe String
+    , fontColor : Maybe Element.Color
+    , fontFamily : Maybe Font.Font
     , gridBaseFontSize : Int
     , cellBaseFontSize : Int
     }
@@ -62,9 +64,10 @@ chartCell cfg c =
     let t = Maybe.withDefault "" c.title
         d = Maybe.withDefault "" c.description
     in column
-        [ padding 0 , width fill ]
+        [ width fill ]
         [ title c Nothing cfg.cellBaseFontSize
         , c.chart ]
+
 
 --------------------------------------------------------------------------------
 -- Helpers

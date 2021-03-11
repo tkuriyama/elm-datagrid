@@ -21,6 +21,8 @@ cfg =
     , padding = 0
     , title = Just "Demo Chart Grid"
     , description = Just "Demo chart grid description here."
+    , fontColor = Nothing
+    , fontFamily = Nothing
     , gridBaseFontSize = 24
     , cellBaseFontSize = 18
     }
