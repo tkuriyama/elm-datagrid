@@ -25,6 +25,7 @@ cfg = { w = 900
       , fillColor = Nothing
       , hoverColor = Nothing
       , textColor = Nothing
+      , typeface = Nothing
       }
 
 timeSeries : List (String, Float)

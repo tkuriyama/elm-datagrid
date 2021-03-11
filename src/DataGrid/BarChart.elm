@@ -41,6 +41,7 @@ type alias BarChartConfig label =
     , fillColor : Maybe String
     , hoverColor : Maybe String
     , textColor : Maybe String
+    , typeface : Maybe String
     }
 
 type alias ChartEnv label =
@@ -174,6 +175,7 @@ genStyle cfg =
         fc = Maybe.withDefault defaultFillColor cfg.fillColor
         hc = Maybe.withDefault defaultHoverColor cfg.hoverColor
         tc = Maybe.withDefault defaultTextColor cfg.textColor
+        tf = Maybe.withDefault Defaults.defaultTypeface cfg.typeface
     in """
      .bar rect { fill: {{fc}}; }
      .bar:hover rect { fill: {{hc}}; }
@@ -181,6 +183,7 @@ genStyle cfg =
      .bar .tooltip_large { display: none; font-size: {{szL}}px; fill: {{tc}} }
      .bar:hover .tooltip { display: {{showTT}}; }
      .bar:hover .tooltip_large { display: {{showLargeTT}}; }
+     text { font-family: {{f}}, monospace, sans-serif; }
      """
          |> String.Format.namedValue "showTT" showTT
          |> String.Format.namedValue "sz" sz
@@ -189,6 +192,7 @@ genStyle cfg =
          |> String.Format.namedValue "fc" fc
          |> String.Format.namedValue "hc" hc
          |> String.Format.namedValue "tc" tc
+         |> String.Format.namedValue "tf" tf
 
 defaultFillColor : String
 defaultFillColor = Defaults.rgbaToString Defaults.defaultFillColor
