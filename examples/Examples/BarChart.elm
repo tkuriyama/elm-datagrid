@@ -26,22 +26,6 @@ tooltipsCfg =
     { defaultTooltips |
      showLargeTooltips = True
     }
--- cfg : BarChartConfig String
--- cfg = { w = 900
---       , h = 450q
---       , padding = 30
---       , dataAxisTicks = 5
---       , showLabels = False
---       , labelFormatter = identity
---       , tooltipSize = Just 12
---       , showLargeTooltip = True
---       , largeTooltipSize = Just 20
---       , fillColor = Nothing
---       , hoverColor = Nothing
---       , textColor = Nothing
---       , typeface = Nothing
---       }
-
 
 timeSeries : List (String, Float)
 timeSeries =

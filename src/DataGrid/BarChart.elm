@@ -29,12 +29,13 @@ import Internal.Utils as Utils
 type alias ChartEnv label =
     { w: Float
     , h : Float
-    , pad : Float
+    , pad : Cfg.Padding
     , dataScale : ContinuousScale Float
     , labelScale : BandScale label
     , labelShow : Bool
     , labelFmt : label -> String
     , dataTickCt : Int
+    , tooltips : Cfg.Tooltips
     , style : String
     }
 
@@ -42,12 +43,13 @@ genChartEnv : Cfg.StdChartCfg label -> List (label, Float) -> ChartEnv label
 genChartEnv cfg model =
     { w = cfg.w
     , h = cfg.h
-    , pad = cfg.pad.top
-    , dataScale = genDataScale cfg.h cfg.pad.top <| Utils.snds model
-    , labelScale = genLabelScale cfg.w cfg.pad.top <| Utils.fsts model
+    , pad = cfg.pad
+    , dataScale = genDataScale cfg.h cfg.pad.bottom <| Utils.snds model
+    , labelScale = genLabelScale cfg.w cfg.pad.left <| Utils.fsts model
     , labelShow = cfg.showLabels
     , labelFmt = cfg.labelFormatter
     , dataTickCt = min cfg.dataAxisTicks 10
+    , tooltips = cfg.tooltips
     , style = genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips
     }
 
@@ -62,14 +64,14 @@ render cfg model =
         [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
         , g [ class [ "labels" ]
-            ,  transform [ Translate (env.pad - 1) (env.h - env.pad) ]
+            ,  transform [ Translate (env.pad.left - 1) (env.h - env.pad.bottom) ]
             ]
             [ genLabelAxis env.labelFmt env.labelShow env.labelScale ]
         , g [ class ["dataticks"]
-            , transform [ Translate (env.pad - 1) env.pad ] ]
+            , transform [ Translate (env.pad.left - 1) env.pad.top ] ]
             [ genDataAxis env.dataTickCt env.dataScale ]
         , g [ class [ "series" ]
-            , transform [ Translate env.pad env.pad ] ] <|
+            , transform [ Translate env.pad.left env.pad.top ] ] <|
             List.map (barV env) model
         ]
 
@@ -80,7 +82,7 @@ barV env (lbl, val) =
         e = toFloat (String.length <| env.labelFmt lbl) / 2.0 * 8
         anchor =
             if textX - e < 0 then AnchorStart else
-            if textX + e > env.w - env.pad * 2 then AnchorEnd else
+            if textX + e > env.w - env.pad.left * 2 then AnchorEnd else
             AnchorMiddle
     in svg
         []
@@ -90,13 +92,14 @@ barV env (lbl, val) =
                 , y <| Scale.convert env.dataScale val
                 , width <| Scale.bandwidth env.labelScale
                 , height <| env.h -
-                    Scale.convert env.dataScale val - (2 * env.pad)
+                    Scale.convert env.dataScale val - (2 * env.pad.bottom)
                 ]
                 []
             , text_
                 [ class [ "tooltip" ]
                 , x <| textX
-                , y <| env.h - (env.pad * 2) + 12
+                , y <| env.h - (2 * env.pad.bottom) +
+                    (toFloat env.tooltips.tooltipSize)
                 , textAnchor <| anchor
                 ]
                 [ "{{lbl}}: {{val}}"
@@ -106,7 +109,7 @@ barV env (lbl, val) =
                 ]
           , text_
                 [ class [ "tooltip_large" ]
-                , x <| env.pad / 2
+                , x <| env.pad.left / 2
                 , y <| 5
                 , textAnchor AnchorStart
                 , alignmentBaseline AlignmentHanging
