@@ -13,11 +13,12 @@ import Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig
 import String.Format
 import Time
 import TypedSvg exposing (g, rect, style, svg, text_)
-import TypedSvg.Attributes exposing (class, rotate, textAnchor, transform, viewBox)
+import TypedSvg.Attributes exposing (class, textAnchor, transform, viewBox)
 import TypedSvg.Attributes.InPx exposing (height, width, x, y)
 import TypedSvg.Core exposing (Svg, text)
 import TypedSvg.Types exposing (AnchorAlignment(..), Transform(..))
 
+import Internal.Defaults as Defaults
 import Internal.Utils as Utils
 
 
@@ -29,11 +30,12 @@ type alias BarChartConfig label =
     , h : Float
     , padding : Float
     , showLabels : Bool
+    , showLargeTooltip : Bool
     , labelFormatter : label -> String
     , dataAxisTicks : Int
     , fillColor : Maybe String
     , hoverColor : Maybe String
-    , styleOverride : Maybe String
+    , textColor : Maybe String
     }
 
 type alias ChartEnv label =
@@ -58,8 +60,7 @@ genChartEnv cfg model =
     , labelShow = cfg.showLabels
     , labelFmt = cfg.labelFormatter
     , dataTickCt = min cfg.dataAxisTicks 10
-    , style = genStyle cfg.showLabels cfg.fillColor cfg.hoverColor
-              cfg.styleOverride
+    , style = genStyle cfg.showLabels cfg.fillColor cfg.hoverColor cfg.textColor
     }
 
 
@@ -115,6 +116,17 @@ barV env (lbl, val) =
                 |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
                 |> text
                 ]
+          , text_
+                [ class [ "tooltip_large" ]
+                , x <| env.pad / 2
+                , y <| 25
+                , textAnchor AnchorStart
+                ]
+                [ "{{lbl}}: {{val}}"
+                |> String.Format.namedValue "lbl" (env.labelFmt lbl)
+                |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+                |> text
+                ]
             ]
         ]
 
@@ -148,32 +160,33 @@ genLabelAxis fmt show lScale =
 -- Style
 
 genStyle : Bool -> Maybe String -> Maybe String -> Maybe String -> String
-genStyle showLabels mFillColor mHoverColor mStyleOverride =
-    case mStyleOverride of
-        (Just style) ->
-            style
-        Nothing ->
-            let fc = Maybe.withDefault defaultFillColor mFillColor
-                hc = Maybe.withDefault defaultHoverColor mHoverColor
-            in defaultStyle showLabels fc hc
+genStyle showLabels mFillColor mHoverColor mTextColor =
+    let fc = Maybe.withDefault defaultFillColor mFillColor
+        hc = Maybe.withDefault defaultHoverColor mHoverColor
+        tc = Maybe.withDefault defaultTextColor mTextColor
+    in defaultStyle showLabels fc hc tc
 
-defaultStyle : Bool -> String -> String -> String
-defaultStyle showLabels fillColor hoverColor =
+defaultStyle : Bool -> String -> String -> String -> String
+defaultStyle showLabels fillColor hoverColor textColor =
     let showTooltips = if showLabels then "none" else "inline"
     in """
      .bar rect { fill: {{fillColor}}; }
      .bar:hover rect { fill: {{hoverColor}}; }
-     .bar .tooltip { display: none; }
-     .bar .tooltip { font-size: 12px; }
+     .bar .tooltip { display: none; font-size: 12px; fill: {{textColor}}; }
+     .bar .tooltip_large { display: none; font-size: 20px; fill: {{textColor}} }
      .bar:hover .tooltip { display: {{showTooltips}}; }
-     .bar:hover .tooltip { fill: rgb(64, 64, 64); }
+     .bar:hover .tooltip_large { display: {{showTooltips}}; }
      """
-        |> String.Format.namedValue "fillColor" fillColor
+         |> String.Format.namedValue "fillColor" fillColor
          |> String.Format.namedValue "hoverColor" hoverColor
          |> String.Format.namedValue "showTooltips" showTooltips
+         |> String.Format.namedValue "textColor" textColor
 
 defaultFillColor : String
-defaultFillColor = "rgba(118, 214, 78, 0.8)"
+defaultFillColor = Defaults.rgbaToString Defaults.defaultFillColor
 
 defaultHoverColor : String
-defaultHoverColor = "darkgreen"
+defaultHoverColor = Defaults.rgbaToString Defaults.defaultHoverColor
+
+defaultTextColor : String
+defaultTextColor = Defaults.rgbToString Defaults.defaultTextColor

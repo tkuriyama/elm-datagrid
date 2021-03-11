@@ -17,11 +17,12 @@ cfg = { w = 900
       , h = 450
       , padding = 30
       , showLabels = False
+      , showLargeTooltip = True
       , labelFormatter = identity
       , dataAxisTicks = 5
       , fillColor = Nothing
       , hoverColor = Nothing
-      , styleOverride = Nothing
+      , textColor = Nothing 
       }
 
 timeSeries : List (String, Float)

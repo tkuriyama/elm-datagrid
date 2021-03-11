@@ -6,6 +6,7 @@ import String.Format
 --------------------------------------------------------------------------------
 
 type alias RGB = (Int, Int, Int)
+type alias RGBA = (RGB, Float)
 
 --------------------------------------------------------------------------------
 -- Colors
@@ -17,8 +18,8 @@ rgbToString (r, g, b) =
         |> String.Format.namedValue "g" (String.fromInt g)
         |> String.Format.namedValue "b" (String.fromInt b)
 
-rgbaToString : RGB -> Float -> String
-rgbaToString (r, g, b) a =
+rgbaToString : RGBA -> String
+rgbaToString ((r, g, b), a) =
     "rgb({{r}}, {{g}}, {{b}}, {{a}})"
         |> String.Format.namedValue "r" (String.fromInt r)
         |> String.Format.namedValue "g" (String.fromInt g)
@@ -30,3 +31,15 @@ rgbToElmUI (r, g, b) = Element.rgb255 r g b
 
 defaultTextColor : RGB
 defaultTextColor = (64, 64, 64)
+
+defaultFillColor : RGBA
+defaultFillColor = ((52, 166, 227), 0.8)
+
+defaultHoverColor : RGBA
+defaultHoverColor = ((29, 100, 156), 1.0)
+
+defaultFillColor2 : RGBA
+defaultFillColor2 = ((118, 214, 78), 0.8)
+
+defaultHoverColor2 : RGBA
+defaultHoverColor2 = ((60, 112, 37), 1.0)
