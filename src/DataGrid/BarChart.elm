@@ -9,14 +9,17 @@ axes is better handled by direct interaction with the elm-visualization API.
 
 import Axis
 import DateFormat
-import Scale exposing (BandConfig, BandScale, ContinuousScale, defaultBandConfig)
+import Scale exposing ( BandConfig, BandScale, ContinuousScale
+                      , defaultBandConfig )
 import String.Format
 import Time
-import TypedSvg exposing (g, rect, style, svg, text_)
-import TypedSvg.Attributes exposing (class, textAnchor, transform, viewBox)
-import TypedSvg.Attributes.InPx exposing (height, width, x, y)
+import TypedSvg exposing ( g, rect, style, svg, text_ )
+import TypedSvg.Attributes exposing ( alignmentBaseline, class, textAnchor
+                                    , transform, viewBox )
+import TypedSvg.Attributes.InPx exposing ( height, width, x, y )
 import TypedSvg.Core exposing (Svg, text)
-import TypedSvg.Types exposing (AnchorAlignment(..), Transform(..))
+import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
+                               , Transform(..) )
 
 import Internal.Defaults as Defaults
 import Internal.Utils as Utils
@@ -29,10 +32,12 @@ type alias BarChartConfig label =
     { w : Float
     , h : Float
     , padding : Float
-    , showLabels : Bool
-    , showLargeTooltip : Bool
-    , labelFormatter : label -> String
     , dataAxisTicks : Int
+    , showLabels : Bool
+    , labelFormatter : label -> String
+    , tooltipSize : Maybe Int
+    , showLargeTooltip : Bool
+    , largeTooltipSize : Maybe Int
     , fillColor : Maybe String
     , hoverColor : Maybe String
     , textColor : Maybe String
@@ -60,7 +65,7 @@ genChartEnv cfg model =
     , labelShow = cfg.showLabels
     , labelFmt = cfg.labelFormatter
     , dataTickCt = min cfg.dataAxisTicks 10
-    , style = genStyle cfg.showLabels cfg.fillColor cfg.hoverColor cfg.textColor
+    , style = genStyle cfg
     }
 
 
@@ -119,8 +124,9 @@ barV env (lbl, val) =
           , text_
                 [ class [ "tooltip_large" ]
                 , x <| env.pad / 2
-                , y <| 25
+                , y <| 5
                 , textAnchor AnchorStart
+                , alignmentBaseline AlignmentHanging
                 ]
                 [ "{{lbl}}: {{val}}"
                 |> String.Format.namedValue "lbl" (env.labelFmt lbl)
@@ -159,28 +165,30 @@ genLabelAxis fmt show lScale =
 --------------------------------------------------------------------------------
 -- Style
 
-genStyle : Bool -> Maybe String -> Maybe String -> Maybe String -> String
-genStyle showLabels mFillColor mHoverColor mTextColor =
-    let fc = Maybe.withDefault defaultFillColor mFillColor
-        hc = Maybe.withDefault defaultHoverColor mHoverColor
-        tc = Maybe.withDefault defaultTextColor mTextColor
-    in defaultStyle showLabels fc hc tc
-
-defaultStyle : Bool -> String -> String -> String -> String
-defaultStyle showLabels fillColor hoverColor textColor =
-    let showTooltips = if showLabels then "none" else "inline"
+genStyle : BarChartConfig label -> String
+genStyle cfg =
+    let showTT = if cfg.showLabels then "none" else "inline"
+        sz = Maybe.withDefault 14 cfg.tooltipSize |> String.fromInt
+        showLargeTT = if cfg.showLargeTooltip then "inline" else "none"
+        szL = Maybe.withDefault 20 cfg.largeTooltipSize |> String.fromInt
+        fc = Maybe.withDefault defaultFillColor cfg.fillColor
+        hc = Maybe.withDefault defaultHoverColor cfg.hoverColor
+        tc = Maybe.withDefault defaultTextColor cfg.textColor
     in """
-     .bar rect { fill: {{fillColor}}; }
-     .bar:hover rect { fill: {{hoverColor}}; }
-     .bar .tooltip { display: none; font-size: 12px; fill: {{textColor}}; }
-     .bar .tooltip_large { display: none; font-size: 20px; fill: {{textColor}} }
-     .bar:hover .tooltip { display: {{showTooltips}}; }
-     .bar:hover .tooltip_large { display: {{showTooltips}}; }
+     .bar rect { fill: {{fc}}; }
+     .bar:hover rect { fill: {{hc}}; }
+     .bar .tooltip { display: none; font-size: {{sz}}px; fill: {{tc}}; }
+     .bar .tooltip_large { display: none; font-size: {{szL}}px; fill: {{tc}} }
+     .bar:hover .tooltip { display: {{showTT}}; }
+     .bar:hover .tooltip_large { display: {{showLargeTT}}; }
      """
-         |> String.Format.namedValue "fillColor" fillColor
-         |> String.Format.namedValue "hoverColor" hoverColor
-         |> String.Format.namedValue "showTooltips" showTooltips
-         |> String.Format.namedValue "textColor" textColor
+         |> String.Format.namedValue "showTT" showTT
+         |> String.Format.namedValue "sz" sz
+         |> String.Format.namedValue "showLargeTT" showLargeTT
+         |> String.Format.namedValue "szL" szL
+         |> String.Format.namedValue "fc" fc
+         |> String.Format.namedValue "hc" hc
+         |> String.Format.namedValue "tc" tc
 
 defaultFillColor : String
 defaultFillColor = Defaults.rgbaToString Defaults.defaultFillColor

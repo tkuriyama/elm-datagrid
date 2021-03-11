@@ -1,8 +1,8 @@
 module Examples.BarChart exposing (main)
 
-import TypedSvg.Core exposing (Svg)
+import TypedSvg.Core exposing ( Svg )
 
-import DataGrid.BarChart exposing (BarChartConfig, render)
+import DataGrid.BarChart exposing ( BarChartConfig, render )
 import Internal.Utils as Utils
 
 
@@ -16,13 +16,15 @@ cfg : BarChartConfig String
 cfg = { w = 900
       , h = 450
       , padding = 30
-      , showLabels = False
-      , showLargeTooltip = True
-      , labelFormatter = identity
       , dataAxisTicks = 5
+      , showLabels = False
+      , labelFormatter = identity
+      , tooltipSize = Just 12
+      , showLargeTooltip = True
+      , largeTooltipSize = Just 20
       , fillColor = Nothing
       , hoverColor = Nothing
-      , textColor = Nothing 
+      , textColor = Nothing
       }
 
 timeSeries : List (String, Float)
