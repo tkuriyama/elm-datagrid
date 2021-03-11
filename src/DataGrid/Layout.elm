@@ -1,4 +1,4 @@
-module DataGrid.Layout exposing (Chart, LayoutConfig, chartGrid)
+module DataGrid.Layout exposing ( Chart, LayoutConfig, chartGrid )
 
 {-| Create grids using elm-ui.
 
@@ -7,8 +7,8 @@ where an element is an elm-ui `Element msg`.
 
 -}
 
-import Element exposing (Element, column, el, fill, paragraph, px, row,
-                         spacing, text, width)
+import Element exposing ( Element, centerX, column, el, fill, paragraph
+                        , px, row, spacing, text, width )
 import Element.Font as Font
 import Html exposing (Html)
 
@@ -57,9 +57,9 @@ chartGrid cfg xss =
         Element.layout
             [ Font.family [ Font.typeface tf, Font.sansSerif ]
             ]
-            (column
-                 [ width <| px cfg.w, spacing cfg.rowSpacing ]
-                 ([gridTitle, text "\n"] ++ rows))
+            ( column
+                 [ centerX, width <| px cfg.w, spacing cfg.rowSpacing ]
+                 ([gridTitle, text "\n"] ++ rows) )
 
 chartCell : LayoutConfig -> Chart msg -> Element msg
 chartCell cfg c =

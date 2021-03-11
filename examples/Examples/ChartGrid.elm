@@ -1,4 +1,4 @@
-module Examples.BarChartGrid exposing (main)
+module Examples.ChartGrid exposing (main)
 
 import Element
 import Html exposing (Html)
