@@ -2,10 +2,13 @@
 
 module Main exposing (main)
 
-import Examples.BarChart as BarChart
+import Html exposing (Html)
+
+-- import Examples.BarChart as BarChart
 import Examples.BarChartGrid as BarChartGrid
 
 
 --------------------------------------------------------------------------------
 
+main : Html msg
 main = BarChartGrid.main

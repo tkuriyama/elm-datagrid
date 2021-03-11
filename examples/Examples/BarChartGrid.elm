@@ -1,7 +1,6 @@
 module Examples.BarChartGrid exposing (main)
 
 import Element
-import Element.Font as Font
 import Html exposing (Html)
 
 import DataGrid.Layout as Layout
@@ -34,8 +33,8 @@ charts =
                  , [ 4, 5 ]
 --                 , [ 7, 8 ]
                  ]
-        f i = { title = Just <| "Chart " ++ (String.fromInt i)
-              , description = Just <| "descrption " ++ (String.fromInt i)
+        f i = { title = Just <| "Chart " ++ String.fromInt i
+              , description = Just <| "descrption " ++ String.fromInt i
               , chart = BC.main |> Element.html
               }
     in List.map (List.map f) labels

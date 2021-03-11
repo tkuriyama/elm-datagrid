@@ -3,7 +3,6 @@ module Examples.BarChart exposing (main)
 import TypedSvg.Core exposing ( Svg )
 
 import DataGrid.BarChart exposing ( BarChartConfig, render )
-import Internal.Utils as Utils
 
 
 --------------------------------------------------------------------------------

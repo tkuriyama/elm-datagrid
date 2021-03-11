@@ -7,11 +7,8 @@ where an element is an elm-ui `Element msg`.
 
 -}
 
-import Element exposing (Element, el, text, row, alignRight, fill, width, px,
-                             paragraph,
-                         rgb255, spacing, centerY, padding, wrappedRow, column)
-import Element.Background as Background
-import Element.Border as Border
+import Element exposing (Element, column, el, fill, paragraph, px, row,
+                         spacing, text, width)
 import Element.Font as Font
 import Html exposing (Html)
 
@@ -40,7 +37,10 @@ type alias Chart msg =
     }
 
 type alias HasTitleDesc a =
-    { a | title : Maybe String, description : Maybe String }
+    { a |
+      title : Maybe String
+    , description : Maybe String
+    }
 
 
 --------------------------------------------------------------------------------
@@ -63,9 +63,7 @@ chartGrid cfg xss =
 
 chartCell : LayoutConfig -> Chart msg -> Element msg
 chartCell cfg c =
-    let t = Maybe.withDefault "" c.title
-        d = Maybe.withDefault "" c.description
-    in column
+    column
         [ width fill ]
         [ title c cfg.textColor cfg.cellBaseFontSize
         , c.chart ]
@@ -80,7 +78,7 @@ title r mColor baseFont =
         d = Maybe.withDefault "" r.description
         fc = Maybe.withDefault (Defaults.rgbToElmUI Defaults.defaultTextColor)
              mColor
-        smallFont = round <| (toFloat baseFont) * 0.8
+        smallFont = round <| toFloat baseFont * 0.8
     in paragraph
         [ Font.color fc ]
         [ el [ Font.bold, Font.size baseFont ] (text t)

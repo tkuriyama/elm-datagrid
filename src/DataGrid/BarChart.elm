@@ -8,11 +8,8 @@ axes is better handled by direct interaction with the elm-visualization API.
 -}
 
 import Axis
-import DateFormat
-import Scale exposing ( BandConfig, BandScale, ContinuousScale
-                      , defaultBandConfig )
+import Scale exposing ( BandScale, ContinuousScale, defaultBandConfig )
 import String.Format
-import Time
 import TypedSvg exposing ( g, rect, style, svg, text_ )
 import TypedSvg.Attributes exposing ( alignmentBaseline, class, textAnchor
                                     , transform, viewBox )
@@ -95,10 +92,10 @@ barV : ChartEnv label -> (label, Float) -> Svg msg
 barV env (lbl, val) =
     let textX = Scale.convert (Scale.toRenderable env.labelFmt env.labelScale)
                 lbl
-        e = (toFloat (String.length <| env.labelFmt lbl)) / 2.0 * 8
+        e = toFloat (String.length <| env.labelFmt lbl) / 2.0 * 8
         anchor =
             if textX - e < 0 then AnchorStart else
-            if textX + e > (env.w - env.pad * 2) then AnchorEnd else
+            if textX + e > env.w - env.pad * 2 then AnchorEnd else
             AnchorMiddle
     in svg
         []
@@ -149,7 +146,7 @@ genDataScale end padding xs =
 
 genDataAxis : Int -> ContinuousScale Float -> Svg msg
 genDataAxis tickCt dScale =
-    Axis.left [ Axis.tickCount 5 ] dScale
+    Axis.left [ Axis.tickCount tickCt ] dScale
 
 genLabelScale : Float -> Float -> List label -> BandScale label
 genLabelScale end padding labels =
@@ -158,9 +155,8 @@ genLabelScale end padding labels =
 
 genLabelAxis : (label -> String) -> Bool -> BandScale label -> Svg msg
 genLabelAxis fmt show lScale =
-    case show of
-        True -> Axis.bottom [] (Scale.toRenderable fmt lScale)
-        False -> svg [] []
+    if show then Axis.bottom [] (Scale.toRenderable fmt lScale)
+    else svg [] []
 
 
 --------------------------------------------------------------------------------
