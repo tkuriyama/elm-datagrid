@@ -2,7 +2,8 @@ module Examples.BarChart exposing (main)
 
 import TypedSvg.Core exposing ( Svg )
 
-import DataGrid.BarChart exposing ( BarChartConfig, render )
+import DataGrid.BarChart exposing ( render )
+import DataGrid.Config as Cfg exposing ( defaultStdChartCfg, defaultTooltips )
 
 
 --------------------------------------------------------------------------------
@@ -11,21 +12,36 @@ main : Svg msg
 main =
     render cfg timeSeries
 
-cfg : BarChartConfig String
-cfg = { w = 900
-      , h = 450
-      , padding = 30
-      , dataAxisTicks = 5
-      , showLabels = False
-      , labelFormatter = identity
-      , tooltipSize = Just 12
-      , showLargeTooltip = True
-      , largeTooltipSize = Just 20
-      , fillColor = Nothing
-      , hoverColor = Nothing
-      , textColor = Nothing
-      , typeface = Nothing
-      }
+cfg : Cfg.StdChartCfg String
+cfg =
+    { defaultStdChartCfg |
+      chartSpec = Cfg.defaultBarChartSpec
+    , showLabels = False
+    , labelFormatter = identity
+    , tooltips = tooltipsCfg
+    }
+
+tooltipsCfg : Cfg.Tooltips
+tooltipsCfg =
+    { defaultTooltips |
+     showLargeTooltips = True
+    }
+-- cfg : BarChartConfig String
+-- cfg = { w = 900
+--       , h = 450q
+--       , padding = 30
+--       , dataAxisTicks = 5
+--       , showLabels = False
+--       , labelFormatter = identity
+--       , tooltipSize = Just 12
+--       , showLargeTooltip = True
+--       , largeTooltipSize = Just 20
+--       , fillColor = Nothing
+--       , hoverColor = Nothing
+--       , textColor = Nothing
+--       , typeface = Nothing
+--       }
+
 
 timeSeries : List (String, Float)
 timeSeries =

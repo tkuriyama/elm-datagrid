@@ -1,4 +1,4 @@
-module DataGrid.BarChart exposing (BarChartConfig, render)
+module DataGrid.BarChart exposing ( render )
 
 {-| Render a a single Barchart with some limited config options.
 
@@ -18,28 +18,13 @@ import TypedSvg.Core exposing (Svg, text)
 import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
                                , Transform(..) )
 
+import DataGrid.Config as Cfg
 import Internal.Defaults as Defaults
 import Internal.Utils as Utils
 
 
 --------------------------------------------------------------------------------
--- BarChartConfig is converted to ChartEnv for internal use
-
-type alias BarChartConfig label =
-    { w : Float
-    , h : Float
-    , padding : Float
-    , dataAxisTicks : Int
-    , showLabels : Bool
-    , labelFormatter : label -> String
-    , tooltipSize : Maybe Int
-    , showLargeTooltip : Bool
-    , largeTooltipSize : Maybe Int
-    , fillColor : Maybe String
-    , hoverColor : Maybe String
-    , textColor : Maybe String
-    , typeface : Maybe String
-    }
+-- StdChartfg is converted to ChartEnv for internal use
 
 type alias ChartEnv label =
     { w: Float
@@ -53,24 +38,24 @@ type alias ChartEnv label =
     , style : String
     }
 
-genChartEnv : BarChartConfig label -> List (label, Float) -> ChartEnv label
+genChartEnv : Cfg.StdChartCfg label -> List (label, Float) -> ChartEnv label
 genChartEnv cfg model =
     { w = cfg.w
     , h = cfg.h
-    , pad = cfg.padding
-    , dataScale = genDataScale cfg.h cfg.padding <| Utils.snds model
-    , labelScale = genLabelScale cfg.w cfg.padding <| Utils.fsts model
+    , pad = cfg.pad.top
+    , dataScale = genDataScale cfg.h cfg.pad.top <| Utils.snds model
+    , labelScale = genLabelScale cfg.w cfg.pad.top <| Utils.fsts model
     , labelShow = cfg.showLabels
     , labelFmt = cfg.labelFormatter
     , dataTickCt = min cfg.dataAxisTicks 10
-    , style = genStyle cfg
+    , style = genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips
     }
 
 
 --------------------------------------------------------------------------------
 -- Render
 
-render : BarChartConfig label -> List (label, Float) -> Svg msg
+render : Cfg.StdChartCfg label -> List (label, Float) -> Svg msg
 render cfg model =
     let env = genChartEnv cfg model
     in svg
@@ -162,39 +147,36 @@ genLabelAxis fmt show lScale =
 --------------------------------------------------------------------------------
 -- Style
 
-genStyle : BarChartConfig label -> String
-genStyle cfg =
-    let showTT = if cfg.showLabels then "none" else "inline"
-        sz = Maybe.withDefault 14 cfg.tooltipSize |> String.fromInt
-        showLargeTT = if cfg.showLargeTooltip then "inline" else "none"
-        szL = Maybe.withDefault 20 cfg.largeTooltipSize |> String.fromInt
-        fc = Maybe.withDefault defaultFillColor cfg.fillColor
-        hc = Maybe.withDefault defaultHoverColor cfg.hoverColor
-        tc = Maybe.withDefault defaultTextColor cfg.textColor
-        tf = Maybe.withDefault Defaults.defaultTypeface cfg.typeface
+genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> String
+genStyle fCfg cCfg tCfg =
+    let display b = if b then "inline" else "none"
+        (fillColor, hoverColor) =
+            case cCfg of
+                Cfg.BarChartSpec spec -> (spec.fillColor, spec.hoverColor)
+                _ -> (defaultFillColor, defaultHoverColor)
     in """
-     .bar rect { fill: {{fc}}; }
-     .bar:hover rect { fill: {{hc}}; }
-     .bar .tooltip { display: none; font-size: {{sz}}px; fill: {{tc}}; }
-     .bar .tooltip_large { display: none; font-size: {{szL}}px; fill: {{tc}} }
+     .bar rect { fill: {{fillColor}}; }
+     .bar:hover rect { fill: {{hoverColor}}; }
+     .bar .tooltip { display: none; font-size: {{sz}}px; fill: {{textColor}}; }
+     .bar .tooltip_large { display: none; font-size: {{szL}}px; 
+                           fill: {{textColor}} }
      .bar:hover .tooltip { display: {{showTT}}; }
      .bar:hover .tooltip_large { display: {{showLargeTT}}; }
-     text { font-family: {{f}}, monospace, sans-serif; }
+     text { font-family: {{typeface}}, monospace, sans-serif; }
      """
-         |> String.Format.namedValue "showTT" showTT
-         |> String.Format.namedValue "sz" sz
-         |> String.Format.namedValue "showLargeTT" showLargeTT
-         |> String.Format.namedValue "szL" szL
-         |> String.Format.namedValue "fc" fc
-         |> String.Format.namedValue "hc" hc
-         |> String.Format.namedValue "tc" tc
-         |> String.Format.namedValue "tf" tf
+         |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
+         |> String.Format.namedValue "sz" (String.fromInt tCfg.tooltipSize)
+         |> String.Format.namedValue "showLargeTT"
+            (display tCfg.showLargeTooltips)
+         |> String.Format.namedValue "szL"
+            (String.fromInt tCfg.largeTooltipSize)
+         |> String.Format.namedValue "fillColor" fillColor
+         |> String.Format.namedValue "hoverColor" hoverColor
+         |> String.Format.namedValue "textColor" fCfg.textColor
+         |> String.Format.namedValue "typeface" fCfg.typeface
 
 defaultFillColor : String
 defaultFillColor = Defaults.rgbaToString Defaults.defaultFillColor
 
 defaultHoverColor : String
 defaultHoverColor = Defaults.rgbaToString Defaults.defaultHoverColor
-
-defaultTextColor : String
-defaultTextColor = Defaults.rgbToString Defaults.defaultTextColor
