@@ -27,8 +27,8 @@ type alias LayoutConfig =
     , padding : Int
     , title : Maybe String
     , description : Maybe String
-    , fontColor : Maybe Element.Color
-    , fontFamily : Maybe Font.Font
+    , textColor : Maybe Element.Color
+    , typeface : Maybe String
     , gridBaseFontSize : Int
     , cellBaseFontSize : Int
     }
@@ -51,10 +51,12 @@ chartGrid cfg xss =
     let rows = List.map genRow xss
         genRow xs = row [ width fill, spacing cfg.colSpacing ]
                         (List.map (chartCell cfg) xs)
-        gridTitle = title cfg cfg.fontColor cfg.gridBaseFontSize
+        gridTitle = title cfg cfg.textColor cfg.gridBaseFontSize
+        tf = Maybe.withDefault Defaults.defaultTypeface cfg.typeface
     in
         Element.layout
-            []
+            [ Font.family [ Font.typeface tf, Font.sansSerif ]
+            ]
             (column
                  [ width <| px cfg.w, spacing cfg.rowSpacing ]
                  ([gridTitle, text "\n"] ++ rows))
@@ -65,7 +67,7 @@ chartCell cfg c =
         d = Maybe.withDefault "" c.description
     in column
         [ width fill ]
-        [ title c cfg.fontColor cfg.cellBaseFontSize
+        [ title c cfg.textColor cfg.cellBaseFontSize
         , c.chart ]
 
 

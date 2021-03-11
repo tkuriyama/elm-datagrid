@@ -47,3 +47,10 @@ defaultFillColor2 = ((118, 214, 78), 0.8)
 
 defaultHoverColor2 : RGBA
 defaultHoverColor2 = ((60, 112, 37), 1.0)
+
+
+--------------------------------------------------------------------------------
+-- Fonts
+
+defaultTypeface : String
+defaultTypeface = "Consolas"

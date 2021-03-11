@@ -1,6 +1,7 @@
 module Examples.BarChartGrid exposing (main)
 
 import Element
+import Element.Font as Font
 import Html exposing (Html)
 
 import DataGrid.Layout as Layout
@@ -21,8 +22,8 @@ cfg =
     , padding = 0
     , title = Just "Demo Chart Grid"
     , description = Just "Demo chart grid description here."
-    , fontColor = Nothing
-    , fontFamily = Nothing
+    , textColor = Nothing
+    , typeface = Just "Consolas"
     , gridBaseFontSize = 24
     , cellBaseFontSize = 18
     }
