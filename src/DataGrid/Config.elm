@@ -20,13 +20,20 @@ type alias StdChartCfg label =
     , labelFormatter : label -> String
     , tooltips : Tooltips
     , fontSpec : FontSpec
+    , legend : Legend
     }
 
 type ChartSpec
     = BarChartSpec { fillColor : String
                    , hoverColor : String
                    }
-    | LineShareChartSpec
+    | LineChartSpec { showLineName : Bool
+                    , lineNameSize : Int
+                    }
+    | LineShareChartSpec { toggleSeris : Bool
+                         , toggleRelative : Bool
+                         , toggleFirstDeriv : Bool
+                         }
     | DefaultSpec
 
 
@@ -52,6 +59,10 @@ type alias FontSpec =
     , typeface : String
     }
 
+type alias Legend =
+    { show : Bool
+    }
+
 
 --------------------------------------------------------------------------------
 -- StdChartCfg Defaults
@@ -67,6 +78,7 @@ defaultStdChartCfg =
     , labelFormatter = \_ -> ""
     , tooltips = defaultTooltips
     , fontSpec = defaultFontSpec
+    , legend = defaultLegend
     }
 
 defaultBarChartSpec : ChartSpec
@@ -74,6 +86,21 @@ defaultBarChartSpec =
     BarChartSpec
     { fillColor = Defaults.rgbaToString Defaults.defaultFillColor
     , hoverColor = Defaults.rgbaToString Defaults.defaultHoverColor
+    }
+
+defaultLineChartSpec : ChartSpec
+defaultLineChartSpec =
+    LineChartSpec
+    { showLineName = True
+    , lineNameSize = 12
+    }
+
+defaultLineShareChartSpec : ChartSpec
+defaultLineShareChartSpec =
+    LineShareChartSpec
+    { toggleSeris = True
+    , toggleRelative = True
+    , toggleFirstDeriv = True
     }
 
 defaultPadding : Padding
@@ -96,4 +123,9 @@ defaultFontSpec : FontSpec
 defaultFontSpec =
     { textColor = Defaults.rgbToString Defaults.defaultTextColor
     , typeface = "Consolas"
+    }
+
+defaultLegend : Legend
+defaultLegend =
+    { show = False
     }
