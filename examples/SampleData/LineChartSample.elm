@@ -1,4 +1,4 @@
-module SampleData.LineChartSample exposing (data)
+module SampleData.LineChartSample exposing ( data )
 
 {-| Sample data for use in Line Chart examples.
 Source: https://www.cboe.com/us/equities/market_share/

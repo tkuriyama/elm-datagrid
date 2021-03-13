@@ -8,15 +8,18 @@ axes is better handled by direct interaction with the elm-visualization API.
 -}
 
 import Axis
-import Scale exposing ( BandScale, ContinuousScale, defaultBandConfig )
+import Color exposing ( Color )
+import Scale exposing ( BandScale, ContinuousScale, OrdinalScale
+                      , defaultBandConfig )
+import Scale.Color
 import String.Format
-import TypedSvg exposing ( g, rect, style, svg, text_ )
-import TypedSvg.Attributes exposing ( alignmentBaseline, class, textAnchor
+import TypedSvg exposing ( g, circle, style, svg, text_ )
+import TypedSvg.Attributes exposing ( alignmentBaseline, class, fill, textAnchor
                                     , transform, viewBox )
-import TypedSvg.Attributes.InPx exposing ( height, width, x, y )
+import TypedSvg.Attributes.InPx exposing ( cx, cy, height, r, width, x, y )
 import TypedSvg.Core exposing (Svg, text)
 import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
-                               , Transform(..) )
+                               , Paint(..), Transform(..) )
 
 import DataGrid.Config as Cfg
 import Internal.Defaults as Defaults
@@ -26,12 +29,16 @@ import Internal.Utils as Utils
 --------------------------------------------------------------------------------
 -- StdChartfg is converted to ChartEnv for internal use
 
+type alias SeriesPair label =
+    (String, List (label, Float))
+
 type alias ChartEnv label =
     { w: Float
     , h : Float
     , pad : Cfg.Padding
     , dataScale : ContinuousScale Float
     , labelScale : BandScale label
+    , colorScale : OrdinalScale String Color
     , labelShow : Bool
     , labelFmt : label -> String
     , dataTickCt : Int
@@ -39,25 +46,30 @@ type alias ChartEnv label =
     , style : String
     }
 
-genChartEnv : Cfg.StdChartCfg label -> List (label, Float) -> ChartEnv label
+genChartEnv : Cfg.StdChartCfg label -> List(SeriesPair label) -> ChartEnv label
 genChartEnv cfg model =
-    { w = cfg.w
-    , h = cfg.h
-    , pad = cfg.pad
-    , dataScale = genDataScale cfg.h cfg.pad.bottom <| Utils.snds model
-    , labelScale = genLabelScale cfg.w cfg.pad.left <| Utils.fsts model
-    , labelShow = cfg.showLabels
-    , labelFmt = cfg.labelFormatter
-    , dataTickCt = min cfg.dataAxisTicks 10
-    , tooltips = cfg.tooltips
-    , style = genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips
+    let names = List.map Utils.fst model
+        xs = List.concatMap (Utils.snd >> Utils.snds) model
+        ys = List.map (Utils.snd >> Utils.fsts) model
+           |> List.head |> Maybe.withDefault []
+    in { w = cfg.w
+       , h = cfg.h
+       , pad = cfg.pad
+       , dataScale = genDataScale cfg.h cfg.pad.bottom xs
+       , labelScale = genLabelScale cfg.w cfg.pad.left ys
+       , colorScale = genColorScale names 
+       , labelShow = cfg.showLabels
+       , labelFmt = cfg.labelFormatter
+       , dataTickCt = min cfg.dataAxisTicks 10
+       , tooltips = cfg.tooltips
+       , style = genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips
     }
 
 
 --------------------------------------------------------------------------------
 -- Render
 
-render : Cfg.StdChartCfg label -> List (label, Float) -> Svg msg
+render : Cfg.StdChartCfg label -> List(SeriesPair label) -> Svg msg
 render cfg model =
     let env = genChartEnv cfg model
     in svg
@@ -70,14 +82,23 @@ render cfg model =
         , g [ class ["dataticks"]
             , transform [ Translate (env.pad.left - 1) env.pad.top ] ]
             [ genDataAxis env.dataTickCt env.dataScale ]
-        , g [ class [ "series" ]
+        , g [ class [ "lines" ]
             , transform [ Translate env.pad.left env.pad.top ] ] <|
-            List.map (barV env) model
+            List.map (renderPoints env) model
+        , g [ class [ "points" ]
+            , transform [ Translate env.pad.left env.pad.top ] ] <|
+            List.map (renderLine env) model
         ]
 
-barV : ChartEnv label -> (label, Float) -> Svg msg
-barV env (lbl, val) =
-    let textX = Scale.convert (Scale.toRenderable env.labelFmt env.labelScale)
+renderPoints : ChartEnv label -> SeriesPair label -> Svg msg
+renderPoints env (name, points) =
+    let n = List.length points |> toFloat
+    in svg [] (List.map (renderPoint env name n) points)
+
+renderPoint : ChartEnv label -> String -> Float -> (label, Float) -> Svg msg
+renderPoint env name ct (lbl, val) =
+    let rSize = max 3.0 (env.w / ct / 3)
+        textX = Scale.convert (Scale.toRenderable env.labelFmt env.labelScale)
                 lbl
         e = toFloat (String.length <| env.labelFmt lbl) / 2.0 * 8
         anchor =
@@ -87,12 +108,11 @@ barV env (lbl, val) =
     in svg
         []
         [ g [ class [ "bar" ] ]
-          [ rect
-                [ x <| Scale.convert env.labelScale lbl
-                , y <| Scale.convert env.dataScale val
-                , width <| Scale.bandwidth env.labelScale
-                , height <| env.h -
-                    Scale.convert env.dataScale val - (2 * env.pad.bottom)
+          [ circle
+                [ cx <| Scale.convert env.labelScale lbl
+                , cy <| Scale.convert env.dataScale val
+                , r rSize
+                , fill <| Paint <| getColor env.colorScale name
                 ]
                 []
             , text_
@@ -102,7 +122,8 @@ barV env (lbl, val) =
                     (toFloat env.tooltips.tooltipSize)
                 , textAnchor <| anchor
                 ]
-                [ "{{lbl}}: {{val}}"
+                [ "{{name}} {{lbl}}: {{val}}"
+                |> String.Format.namedValue "name" name
                 |> String.Format.namedValue "lbl" (env.labelFmt lbl)
                 |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
                 |> text
@@ -114,13 +135,17 @@ barV env (lbl, val) =
                 , textAnchor AnchorStart
                 , alignmentBaseline AlignmentHanging
                 ]
-                [ "{{lbl}}: {{val}}"
+                [ "{{name}} {{lbl}}: {{val}}"
+                |> String.Format.namedValue "name" name
                 |> String.Format.namedValue "lbl" (env.labelFmt lbl)
                 |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
                 |> text
                 ]
             ]
-        ]
+         ]
+
+renderLine : ChartEnv label -> SeriesPair label -> Svg msg
+renderLine env model = svg [] []
 
 
 --------------------------------------------------------------------------------
@@ -146,6 +171,14 @@ genLabelAxis fmt show lScale =
     if show then Axis.bottom [] (Scale.toRenderable fmt lScale)
     else svg [] []
 
+genColorScale : List String -> OrdinalScale String Color
+genColorScale names =
+    Scale.ordinal Scale.Color.category10 names
+
+getColor : OrdinalScale String Color -> String -> Color
+getColor cScale =
+    Scale.convert cScale >> Maybe.withDefault Color.black
+
 
 --------------------------------------------------------------------------------
 -- Style
@@ -153,13 +186,7 @@ genLabelAxis fmt show lScale =
 genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> String
 genStyle fCfg cCfg tCfg =
     let display b = if b then "inline" else "none"
-        (fillColor, hoverColor) =
-            case cCfg of
-                Cfg.BarChartSpec spec -> (spec.fillColor, spec.hoverColor)
-                _ -> (defaultFillColor, defaultHoverColor)
     in """
-     .bar rect { fill: {{fillColor}}; }
-     .bar:hover rect { fill: {{hoverColor}}; }
      .bar .tooltip { display: none; font-size: {{sz}}px; fill: {{textColor}}; }
      .bar .tooltip_large { display: none; font-size: {{szL}}px; 
                            fill: {{textColor}} }
@@ -173,13 +200,5 @@ genStyle fCfg cCfg tCfg =
             (display tCfg.showLargeTooltips)
          |> String.Format.namedValue "szL"
             (String.fromInt tCfg.largeTooltipSize)
-         |> String.Format.namedValue "fillColor" fillColor
-         |> String.Format.namedValue "hoverColor" hoverColor
          |> String.Format.namedValue "textColor" fCfg.textColor
          |> String.Format.namedValue "typeface" fCfg.typeface
-
-defaultFillColor : String
-defaultFillColor = Defaults.rgbaToString Defaults.defaultFillColor
-
-defaultHoverColor : String
-defaultHoverColor = Defaults.rgbaToString Defaults.defaultHoverColor

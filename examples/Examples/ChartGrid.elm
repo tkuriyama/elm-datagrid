@@ -5,7 +5,7 @@ import Html exposing (Html)
 
 import DataGrid.Layout as Layout
 import Examples.BarChart as BC
-
+import Examples.LineChart as LC
 
 --------------------------------------------------------------------------------
 
@@ -35,6 +35,6 @@ charts =
                  ]
         f i = { title = Just <| "Chart " ++ String.fromInt i
               , description = Just <| "descrption " ++ String.fromInt i
-              , chart = BC.main |> Element.html
+              , chart = (if i == 5 then LC.main else BC.main) |> Element.html
               }
     in List.map (List.map f) labels

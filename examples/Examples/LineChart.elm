@@ -2,9 +2,9 @@ module Examples.LineChart exposing (main)
 
 import TypedSvg.Core exposing ( Svg )
 
-import DataGrid.BarChart exposing ( render )
+import DataGrid.LineChart exposing ( render )
 import DataGrid.Config as Cfg exposing ( defaultStdChartCfg, defaultTooltips )
-import SampleData.LineChartSample
+import SampleData.LineChartSample as LineChartSample
 
 
 --------------------------------------------------------------------------------
@@ -16,7 +16,8 @@ main =
 cfg : Cfg.StdChartCfg String
 cfg =
     { defaultStdChartCfg |
-      chartSpec = Cfg.defaultBarChartSpec
+      chartSpec = Cfg.defaultLineChartSpec
+    , dataAxisTicks = 10
     , showLabels = False
     , labelFormatter = identity
     , tooltips = tooltipsCfg
@@ -31,4 +32,7 @@ tooltipsCfg =
 --------------------------------------------------------------------------------
 
 data : List (String, List (String, Float))
-data = LineChartSample.data
+data =
+    let x100 n = n * 100
+        f (name, pairs) = (name, List.map (Tuple.mapSecond x100) pairs)
+    in LineChartSample.data |> List.map f
