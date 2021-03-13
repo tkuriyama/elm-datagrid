@@ -3,7 +3,8 @@ module Examples.LineChart exposing (main)
 import TypedSvg.Core exposing ( Svg )
 
 import DataGrid.LineChart exposing ( render )
-import DataGrid.Config as Cfg exposing ( defaultStdChartCfg, defaultTooltips )
+import DataGrid.Config as Cfg exposing ( defaultStdChartCfg
+                                       , defaultPadding, defaultTooltips )
 import SampleData.LineChartSample as LineChartSample
 
 
@@ -16,24 +17,32 @@ main =
 cfg : Cfg.StdChartCfg String
 cfg =
     { defaultStdChartCfg |
-      chartSpec = Cfg.defaultLineChartSpec
+      pad = paddingCfg
+    , chartSpec = lineChartSpec
     , dataAxisTicks = 10
     , showLabels = False
     , labelFormatter = identity
     , tooltips = tooltipsCfg
     }
 
+paddingCfg : Cfg.Padding
+paddingCfg =
+    { defaultPadding |
+      right = 80
+    }
+
 tooltipsCfg : Cfg.Tooltips
 tooltipsCfg =
     { defaultTooltips |
-     showLargeTooltips = True
+      showLargeTooltips = False
+    , showHoverTooltips = True
     }
 
 lineChartSpec : Cfg.ChartSpec
 lineChartSpec =
     Cfg.LineChartSpec
         { showLineName = True
-        , lineNameSize = 12
+        , lineNameSize = 14
         , showVBar = True
         }
 

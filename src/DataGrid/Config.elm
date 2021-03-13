@@ -53,6 +53,8 @@ type alias Tooltips =
     , tooltipSize : Int
     , showLargeTooltips : Bool
     , largeTooltipSize : Int
+    , showHoverTooltips : Bool
+    , hoverTooltipSize : Int
     }
 
 type alias FontSpec =
@@ -125,6 +127,8 @@ defaultTooltips =
     , tooltipSize = 12
     , showLargeTooltips = False
     , largeTooltipSize = 20
+    , showHoverTooltips = False
+    , hoverTooltipSize = 16
     }
 
 defaultFontSpec : FontSpec

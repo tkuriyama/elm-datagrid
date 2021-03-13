@@ -8,6 +8,7 @@ axes is better handled by direct interaction with the elm-visualization API.
 -}
 
 import Color exposing ( Color )
+import List.Extra exposing ( last )
 import Path exposing ( Path )
 import Scale exposing ( BandScale, ContinuousScale, OrdinalScale )
 import Shape
@@ -29,8 +30,8 @@ import Internal.Utils as Utils
 --------------------------------------------------------------------------------
 -- StdChartfg is converted to ChartEnv for internal use
 
-type alias SeriesPair label =
-    (String, List (label, Float))
+type alias SeriesPair name label =
+    (name, List (label, Float))
 
 type alias ChartEnv label =
     { w: Float
@@ -47,12 +48,14 @@ type alias ChartEnv label =
     , style : String
     }
 
-genChartEnv : Cfg.StdChartCfg label -> List(SeriesPair label) -> ChartEnv label
+genChartEnv : Cfg.StdChartCfg label ->
+              List(SeriesPair String label) ->
+              ChartEnv label
 genChartEnv cfg model =
     let names = List.map Utils.fst model
         xs = List.concatMap (Utils.snd >> Utils.snds) model
         ys = List.map (Utils.snd >> Utils.fsts) model
-           |> List.head |> Maybe.withDefault []
+             |> List.head |> Maybe.withDefault []
     in { w = cfg.w
        , h = cfg.h
        , pad = cfg.pad
@@ -77,10 +80,10 @@ parseChartSpec spec =
 --------------------------------------------------------------------------------
 -- Render
 
-render : Cfg.StdChartCfg label -> List(SeriesPair label) -> Svg msg
+render : Cfg.StdChartCfg label -> List(SeriesPair String label) -> Svg msg
 render cfg model =
     let env = genChartEnv cfg model
-        model_ = reshape model
+        model_ = Utils.reshapeSeriesPairs model
     in svg
         [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
@@ -102,11 +105,13 @@ render cfg model =
                 List.map (renderVBar env) model_
         ]
 
-renderLine : ChartEnv label -> SeriesPair label -> Svg msg
+renderLine : ChartEnv label -> SeriesPair String label -> Svg msg
 renderLine env (name, points) =
     let f (x, y) = Just ( Scale.convert env.labelScale x
                         , Scale.convert env.dataScale y )
         path = Shape.line Shape.monotoneInXCurve <| List.map f points
+        lastY = Utils.snds points |> last |> Maybe.withDefault 0.0
+                |> Scale.convert env.dataScale
     in svg
         []
         [ g [ class [ "line" ] ]
@@ -116,17 +121,28 @@ renderLine env (name, points) =
                   , strokeWidth 1
                   , fill PaintNone
                   ]
+            , text_
+                  [ class [ "name" ]
+                  , x <| env.w - env.pad.left - env.pad.right
+                  , y <| lastY
+                  , textAnchor <| AnchorStart
+                  , fill <| Paint <| StdChart.getColor env.colorScale name
+                  ]
+                  [ "{{name}}"
+                    |> String.Format.namedValue "name" name
+                    |> text
+                  ]
             ]
         ]
 
-renderPoints : ChartEnv label -> SeriesPair label -> Svg msg
+renderPoints : ChartEnv label -> SeriesPair String label -> Svg msg
 renderPoints env (name, points) =
     let n = List.length points |> toFloat
     in svg [] (List.map (renderPoint env name n) points)
 
 renderPoint : ChartEnv label -> String -> Float -> (label, Float) -> Svg msg
 renderPoint env name ct (lbl, val) =
-    let rSize = max 3.0 (env.w / ct / 3)
+    let rSize = min 3.0 (env.w / ct / 4)
         textX = Scale.convert (Scale.toRenderable env.labelFmt env.labelScale)
                 lbl
         e = toFloat (String.length <| env.labelFmt lbl) / 2.0 * 8
@@ -137,43 +153,43 @@ renderPoint env name ct (lbl, val) =
     in svg
         []
         [ g [ class [ "point" ] ]
-          [ circle
-                [ cx <| Scale.convert env.labelScale lbl
-                , cy <| Scale.convert env.dataScale val
-                , r rSize
-                , fill <| Paint <| StdChart.getColor env.colorScale name
-                ]
-                []
+            [ circle
+                  [ cx <| Scale.convert env.labelScale lbl
+                  , cy <| Scale.convert env.dataScale val
+                  , r rSize
+                  , fill <| Paint <| StdChart.getColor env.colorScale name
+                  ]
+                  []
             , text_
-                [ class [ "tooltip" ]
-                , x <| textX
-                , y <| env.h - (2 * env.pad.bottom) +
-                    (toFloat env.tooltips.tooltipSize)
-                , textAnchor <| anchor
-                ]
-                [ "{{name}} {{lbl}}: {{val}}"
-                |> String.Format.namedValue "name" name
-                |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-                |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
-                |> text
-                ]
-          , text_
-                [ class [ "tooltip_large" ]
-                , x <| env.pad.left / 2
-                , y <| 5
-                , textAnchor AnchorStart
-                , alignmentBaseline AlignmentHanging
-                ]
-                [ "{{name}} {{lbl}}: {{val}}"
-                |> String.Format.namedValue "name" name
-                |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-                |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
-                |> text
-                ]
+                  [ class [ "tooltip" ]
+                  , x <| textX
+                  , y <| env.h - (2 * env.pad.bottom) +
+                      (toFloat env.tooltips.tooltipSize)
+                  , textAnchor <| anchor
+                  ]
+                  [ "{{name}} {{lbl}}: {{val}}"
+                    |> String.Format.namedValue "name" name
+                    |> String.Format.namedValue "lbl" (env.labelFmt lbl)
+                    |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+                    |> text
+                  ]
+            , text_
+                  [ class [ "tooltip_large" ]
+                  , x <| env.pad.left / 2
+                  , y <| 5
+                  , textAnchor AnchorStart
+                  , alignmentBaseline AlignmentHanging
+                  ]
+                  [ "{{name}} {{lbl}}: {{val}}"
+                    |> String.Format.namedValue "name" name
+                    |> String.Format.namedValue "lbl" (env.labelFmt lbl)
+                    |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+                    |> text
+                  ]
             ]
-         ]
+        ]
 
-renderVBar : ChartEnv label -> (label, List Float) -> Svg msg
+renderVBar : ChartEnv label -> (label, List(String, Float)) -> Svg msg
 renderVBar env (label, points) = svg [] []
 
 
@@ -183,6 +199,13 @@ renderVBar env (label, points) = svg [] []
 genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> String
 genStyle fCfg cCfg tCfg =
     let display b = if b then "inline" else "none"
+        (showName, nameSize) =
+            case cCfg of
+                Cfg.LineChartSpec r ->
+                    ( if r.showLineName then "inline" else "none"
+                    , r.lineNameSize |> String.fromInt )
+                _ ->
+                    ("none", "0px")
     in """
      .point .tooltip { display: none; font-size: {{sz}}px; fill: {{textColor}}; }
      .point .tooltip_large { display: none; font-size: {{szL}}px;
@@ -190,8 +213,11 @@ genStyle fCfg cCfg tCfg =
      .point:hover .tooltip { display: {{showTT}}; }
      .point:hover .tooltip_large { display: {{showLargeTT}}; }
      .line:hover path { stroke-width: 4px; }
-     path { pointer-events: stroke; }
+     .line:hover text { font-weight: bold; }
+     .name { display: {{showName}}; font-size: {{nameSize}}px; }
+     .name:hover { font-weight: bold; }
      text { font-family: {{typeface}}, monospace, sans-serif; }
+     path { pointer-events: stroke; }
      """
          |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
          |> String.Format.namedValue "sz" (String.fromInt tCfg.tooltipSize)
@@ -200,11 +226,7 @@ genStyle fCfg cCfg tCfg =
          |> String.Format.namedValue "szL"
             (String.fromInt tCfg.largeTooltipSize)
          |> String.Format.namedValue "textColor" fCfg.textColor
+         |> String.Format.namedValue "showName" showName
+         |> String.Format.namedValue "nameSize" nameSize
          |> String.Format.namedValue "typeface" fCfg.typeface
 
-
---------------------------------------------------------------------------------
--- Helpers
-
-reshape : List(SeriesPair label) -> List(label, List Float)
-reshape model = []
