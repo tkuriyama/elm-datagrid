@@ -9,14 +9,16 @@ axes is better handled by direct interaction with the elm-visualization API.
 
 import Axis
 import Color exposing ( Color )
+import Path exposing ( Path )
 import Scale exposing ( BandScale, ContinuousScale, OrdinalScale
                       , defaultBandConfig )
 import Scale.Color
+import Shape
 import String.Format
 import TypedSvg exposing ( g, circle, style, svg, text_ )
-import TypedSvg.Attributes exposing ( alignmentBaseline, class, fill, textAnchor
+import TypedSvg.Attributes exposing ( alignmentBaseline, class, fill, stroke, textAnchor
                                     , transform, viewBox )
-import TypedSvg.Attributes.InPx exposing ( cx, cy, height, r, width, x, y )
+import TypedSvg.Attributes.InPx exposing ( cx, cy, height, r, strokeWidth, width, x, y )
 import TypedSvg.Core exposing (Svg, text)
 import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
                                , Paint(..), Transform(..) )
@@ -43,6 +45,7 @@ type alias ChartEnv label =
     , labelFmt : label -> String
     , dataTickCt : Int
     , tooltips : Cfg.Tooltips
+    , showVBar : Bool
     , style : String
     }
 
@@ -57,13 +60,20 @@ genChartEnv cfg model =
        , pad = cfg.pad
        , dataScale = genDataScale cfg.h cfg.pad.bottom xs
        , labelScale = genLabelScale cfg.w cfg.pad.left ys
-       , colorScale = genColorScale names 
+       , colorScale = genColorScale names
        , labelShow = cfg.showLabels
        , labelFmt = cfg.labelFormatter
        , dataTickCt = min cfg.dataAxisTicks 10
        , tooltips = cfg.tooltips
+       , showVBar = parseChartSpec cfg.chartSpec
        , style = genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips
     }
+
+parseChartSpec : Cfg.ChartSpec -> Bool
+parseChartSpec spec =
+    case spec of
+        Cfg.LineChartSpec r -> r.showVBar
+        _ -> False
 
 
 --------------------------------------------------------------------------------
@@ -72,12 +82,12 @@ genChartEnv cfg model =
 render : Cfg.StdChartCfg label -> List(SeriesPair label) -> Svg msg
 render cfg model =
     let env = genChartEnv cfg model
+        model_ = reshape model
     in svg
         [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
         , g [ class [ "labels" ]
-            ,  transform [ Translate (env.pad.left - 1) (env.h - env.pad.bottom) ]
-            ]
+            ,  transform [ Translate (env.pad.left - 1) (env.h - env.pad.bottom) ] ]
             [ genLabelAxis env.labelFmt env.labelShow env.labelScale ]
         , g [ class ["dataticks"]
             , transform [ Translate (env.pad.left - 1) env.pad.top ] ]
@@ -88,6 +98,27 @@ render cfg model =
         , g [ class [ "points" ]
             , transform [ Translate env.pad.left env.pad.top ] ] <|
             List.map (renderLine env) model
+        , if not env.showVBar then g [] [] else
+              g [ class [ "vbars" ]
+                , transform [ Translate env.pad.left env.pad.top ] ] <|
+                List.map (renderVBar env) model_
+        ]
+
+renderLine : ChartEnv label -> SeriesPair label -> Svg msg
+renderLine env (name, points) =
+    let f (x, y) = Just ( Scale.convert env.labelScale x
+                        , Scale.convert env.dataScale y )
+        path = Shape.line Shape.monotoneInXCurve <| List.map f points
+    in svg
+        []
+        [ g [ class [ "line" ] ]
+            [ Path.element
+                  path
+                  [ stroke <| Paint <| getColor env.colorScale name
+                  , strokeWidth 1
+                  , fill PaintNone
+                  ]
+            ]
         ]
 
 renderPoints : ChartEnv label -> SeriesPair label -> Svg msg
@@ -107,7 +138,7 @@ renderPoint env name ct (lbl, val) =
             AnchorMiddle
     in svg
         []
-        [ g [ class [ "bar" ] ]
+        [ g [ class [ "point" ] ]
           [ circle
                 [ cx <| Scale.convert env.labelScale lbl
                 , cy <| Scale.convert env.dataScale val
@@ -144,8 +175,8 @@ renderPoint env name ct (lbl, val) =
             ]
          ]
 
-renderLine : ChartEnv label -> SeriesPair label -> Svg msg
-renderLine env model = svg [] []
+renderVBar : ChartEnv label -> (label, List Float) -> Svg msg
+renderVBar env (label, points) = svg [] []
 
 
 --------------------------------------------------------------------------------
@@ -187,11 +218,13 @@ genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> String
 genStyle fCfg cCfg tCfg =
     let display b = if b then "inline" else "none"
     in """
-     .bar .tooltip { display: none; font-size: {{sz}}px; fill: {{textColor}}; }
-     .bar .tooltip_large { display: none; font-size: {{szL}}px; 
+     .point .tooltip { display: none; font-size: {{sz}}px; fill: {{textColor}}; }
+     .point .tooltip_large { display: none; font-size: {{szL}}px;
                            fill: {{textColor}} }
-     .bar:hover .tooltip { display: {{showTT}}; }
-     .bar:hover .tooltip_large { display: {{showLargeTT}}; }
+     .point:hover .tooltip { display: {{showTT}}; }
+     .point:hover .tooltip_large { display: {{showLargeTT}}; }
+     .line:hover path { stroke-width: 4px; }
+     path { pointer-events: stroke; }
      text { font-family: {{typeface}}, monospace, sans-serif; }
      """
          |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
@@ -202,3 +235,10 @@ genStyle fCfg cCfg tCfg =
             (String.fromInt tCfg.largeTooltipSize)
          |> String.Format.namedValue "textColor" fCfg.textColor
          |> String.Format.namedValue "typeface" fCfg.typeface
+
+
+--------------------------------------------------------------------------------
+-- Helpers
+
+reshape : List(SeriesPair label) -> List(label, List Float)
+reshape model = []

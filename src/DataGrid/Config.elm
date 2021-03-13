@@ -29,6 +29,7 @@ type ChartSpec
                    }
     | LineChartSpec { showLineName : Bool
                     , lineNameSize : Int
+                    , showVBar : Bool
                     }
     | LineShareChartSpec { toggleSeris : Bool
                          , toggleRelative : Bool
@@ -61,9 +62,15 @@ type alias FontSpec =
 
 type alias Legend =
     { show : Bool
+    , location : Position
     }
 
-
+type Position
+    = Top
+    | Right
+    | Left
+    | Bottom
+    | Inline
 --------------------------------------------------------------------------------
 -- StdChartCfg Defaults
 
@@ -93,6 +100,7 @@ defaultLineChartSpec =
     LineChartSpec
     { showLineName = True
     , lineNameSize = 12
+    , showVBar = False
     }
 
 defaultLineShareChartSpec : ChartSpec
@@ -128,4 +136,5 @@ defaultFontSpec =
 defaultLegend : Legend
 defaultLegend =
     { show = False
+    , location = Top
     }

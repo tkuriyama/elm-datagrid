@@ -29,6 +29,15 @@ tooltipsCfg =
      showLargeTooltips = True
     }
 
+lineChartSpec : Cfg.ChartSpec
+lineChartSpec =
+    Cfg.LineChartSpec
+        { showLineName = True
+        , lineNameSize = 12
+        , showVBar = True
+        }
+
+
 --------------------------------------------------------------------------------
 
 data : List (String, List (String, Float))
