@@ -86,3 +86,20 @@ testReshapeSeriesPairs =
             test "reshape sample with more than one name" <|
                 \_ -> reshapeSeriesPairs sp3 |> Expect.equal sp4
         ]
+
+testToMatrix : Test
+testToMatrix =
+    let sp3 = [ ("Name1", [ ("Label1", 1.0)
+                          , ("Label2", 2.0)
+                          ]
+                )
+              , ("Name2", [ ("Label1", 11.0)
+                          , ("Label2", 12.0)
+                          ]
+                )
+              ]
+    in describe "Test toMatrix"
+        [ test "toMatrix sample" <|
+              \_ -> toMatrix sp3 |>
+              Expect.equal [[1.0, 2.0], [11.0, 12.0]]
+        ]
