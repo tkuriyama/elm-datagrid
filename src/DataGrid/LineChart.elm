@@ -7,23 +7,21 @@ axes is better handled by direct interaction with the elm-visualization API.
 
 -}
 
-import Axis
 import Color exposing ( Color )
 import Path exposing ( Path )
-import Scale exposing ( BandScale, ContinuousScale, OrdinalScale
-                      , defaultBandConfig )
-import Scale.Color
+import Scale exposing ( BandScale, ContinuousScale, OrdinalScale )
 import Shape
 import String.Format
 import TypedSvg exposing ( g, circle, style, svg, text_ )
 import TypedSvg.Attributes exposing ( alignmentBaseline, class, fill, stroke, textAnchor
                                     , transform, viewBox )
 import TypedSvg.Attributes.InPx exposing ( cx, cy, height, r, strokeWidth, width, x, y )
-import TypedSvg.Core exposing (Svg, text)
+import TypedSvg.Core exposing ( Svg, text )
 import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
                                , Paint(..), Transform(..) )
 
 import DataGrid.Config as Cfg
+import DataGrid.StdChart as StdChart
 import Internal.Defaults as Defaults
 import Internal.Utils as Utils
 
@@ -58,9 +56,9 @@ genChartEnv cfg model =
     in { w = cfg.w
        , h = cfg.h
        , pad = cfg.pad
-       , dataScale = genDataScale cfg.h cfg.pad.bottom xs
-       , labelScale = genLabelScale cfg.w cfg.pad.left ys
-       , colorScale = genColorScale names
+       , dataScale = StdChart.genYScale cfg.h (cfg.pad.top + cfg.pad.bottom) xs
+       , labelScale = StdChart.genXScale cfg.w (cfg.pad.right + cfg.pad.left) ys
+       , colorScale = StdChart.genColorScale names
        , labelShow = cfg.showLabels
        , labelFmt = cfg.labelFormatter
        , dataTickCt = min cfg.dataAxisTicks 10
@@ -88,10 +86,10 @@ render cfg model =
         [ style [] [ text <| env.style ]
         , g [ class [ "labels" ]
             ,  transform [ Translate (env.pad.left - 1) (env.h - env.pad.bottom) ] ]
-            [ genLabelAxis env.labelFmt env.labelShow env.labelScale ]
+            [ StdChart.genXAxis env.labelFmt env.labelShow env.labelScale ]
         , g [ class ["dataticks"]
             , transform [ Translate (env.pad.left - 1) env.pad.top ] ]
-            [ genDataAxis env.dataTickCt env.dataScale ]
+            [ StdChart.genYAxis env.dataTickCt env.dataScale ]
         , g [ class [ "lines" ]
             , transform [ Translate env.pad.left env.pad.top ] ] <|
             List.map (renderPoints env) model
@@ -114,7 +112,7 @@ renderLine env (name, points) =
         [ g [ class [ "line" ] ]
             [ Path.element
                   path
-                  [ stroke <| Paint <| getColor env.colorScale name
+                  [ stroke <| Paint <| StdChart.getColor env.colorScale name
                   , strokeWidth 1
                   , fill PaintNone
                   ]
@@ -143,7 +141,7 @@ renderPoint env name ct (lbl, val) =
                 [ cx <| Scale.convert env.labelScale lbl
                 , cy <| Scale.convert env.dataScale val
                 , r rSize
-                , fill <| Paint <| getColor env.colorScale name
+                , fill <| Paint <| StdChart.getColor env.colorScale name
                 ]
                 []
             , text_
@@ -177,38 +175,6 @@ renderPoint env name ct (lbl, val) =
 
 renderVBar : ChartEnv label -> (label, List Float) -> Svg msg
 renderVBar env (label, points) = svg [] []
-
-
---------------------------------------------------------------------------------
--- Scales and Axes
-
-genDataScale : Float -> Float -> List Float -> ContinuousScale Float
-genDataScale end padding xs =
-    let dataMin = min 0 (Maybe.withDefault 0 <| List.minimum xs)
-        dataMax = Maybe.withDefault 0 <| List.maximum xs
-    in Scale.linear (end - 2 * padding, 0) (dataMin, dataMax)
-
-genDataAxis : Int -> ContinuousScale Float -> Svg msg
-genDataAxis tickCt dScale =
-    Axis.left [ Axis.tickCount tickCt ] dScale
-
-genLabelScale : Float -> Float -> List label -> BandScale label
-genLabelScale end padding labels =
-    let cfg = { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
-    in Scale.band cfg (0, end - 2 * padding) labels
-
-genLabelAxis : (label -> String) -> Bool -> BandScale label -> Svg msg
-genLabelAxis fmt show lScale =
-    if show then Axis.bottom [] (Scale.toRenderable fmt lScale)
-    else svg [] []
-
-genColorScale : List String -> OrdinalScale String Color
-genColorScale names =
-    Scale.ordinal Scale.Color.category10 names
-
-getColor : OrdinalScale String Color -> String -> Color
-getColor cScale =
-    Scale.convert cScale >> Maybe.withDefault Color.black
 
 
 --------------------------------------------------------------------------------

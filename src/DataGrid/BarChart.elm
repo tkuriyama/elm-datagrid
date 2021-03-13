@@ -7,8 +7,7 @@ axes is better handled by direct interaction with the elm-visualization API.
 
 -}
 
-import Axis
-import Scale exposing ( BandScale, ContinuousScale, defaultBandConfig )
+import Scale exposing ( BandScale, ContinuousScale ) 
 import String.Format
 import TypedSvg exposing ( g, rect, style, svg, text_ )
 import TypedSvg.Attributes exposing ( alignmentBaseline, class, textAnchor
@@ -19,6 +18,7 @@ import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
                                , Transform(..) )
 
 import DataGrid.Config as Cfg
+import DataGrid.StdChart as StdChart
 import Internal.Defaults as Defaults
 import Internal.Utils as Utils
 
@@ -44,8 +44,10 @@ genChartEnv cfg model =
     { w = cfg.w
     , h = cfg.h
     , pad = cfg.pad
-    , dataScale = genDataScale cfg.h cfg.pad.bottom <| Utils.snds model
-    , labelScale = genLabelScale cfg.w cfg.pad.left <| Utils.fsts model
+    , dataScale = StdChart.genYScale cfg.h (cfg.pad.top + cfg.pad.bottom) <|
+                  Utils.snds model
+    , labelScale = StdChart.genXScale cfg.w (cfg.pad.right + cfg.pad.left) <|
+                   Utils.fsts model
     , labelShow = cfg.showLabels
     , labelFmt = cfg.labelFormatter
     , dataTickCt = min cfg.dataAxisTicks 10
@@ -66,10 +68,10 @@ render cfg model =
         , g [ class [ "labels" ]
             ,  transform [ Translate (env.pad.left - 1) (env.h - env.pad.bottom) ]
             ]
-            [ genLabelAxis env.labelFmt env.labelShow env.labelScale ]
+            [ StdChart.genXAxis env.labelFmt env.labelShow env.labelScale ]
         , g [ class ["dataticks"]
             , transform [ Translate (env.pad.left - 1) env.pad.top ] ]
-            [ genDataAxis env.dataTickCt env.dataScale ]
+            [ StdChart.genYAxis env.dataTickCt env.dataScale ]
         , g [ class [ "series" ]
             , transform [ Translate env.pad.left env.pad.top ] ] <|
             List.map (barV env) model
@@ -121,30 +123,6 @@ barV env (lbl, val) =
                 ]
             ]
         ]
-
-
---------------------------------------------------------------------------------
--- Scales and Axes
-
-genDataScale : Float -> Float -> List Float -> ContinuousScale Float
-genDataScale end padding xs =
-    let dataMin = min 0 (Maybe.withDefault 0 <| List.minimum xs)
-        dataMax = Maybe.withDefault 0 <| List.maximum xs
-    in Scale.linear (end - 2 * padding, 0) (dataMin, dataMax)
-
-genDataAxis : Int -> ContinuousScale Float -> Svg msg
-genDataAxis tickCt dScale =
-    Axis.left [ Axis.tickCount tickCt ] dScale
-
-genLabelScale : Float -> Float -> List label -> BandScale label
-genLabelScale end padding labels =
-    let cfg = { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
-    in Scale.band cfg (0, end - 2 * padding) labels
-
-genLabelAxis : (label -> String) -> Bool -> BandScale label -> Svg msg
-genLabelAxis fmt show lScale =
-    if show then Axis.bottom [] (Scale.toRenderable fmt lScale)
-    else svg [] []
 
 
 --------------------------------------------------------------------------------
