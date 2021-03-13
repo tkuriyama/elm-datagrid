@@ -72,21 +72,14 @@ render cfg model =
         , g [ class ["dataticks"]
             , transform [ Translate (env.pad.left - 1) env.pad.top ] ]
             [ StdChart.genYAxis env.dataTickCt env.dataScale ]
-        , g [ class [ "series" ]
+        , g [ class [ "bars" ]
             , transform [ Translate env.pad.left env.pad.top ] ] <|
-            List.map (barV env) model
+            List.map (renderBar env) model
         ]
 
-barV : ChartEnv label -> (label, Float) -> Svg msg
-barV env (lbl, val) =
-    let textX = Scale.convert (Scale.toRenderable env.labelFmt env.labelScale)
-                lbl
-        e = toFloat (String.length <| env.labelFmt lbl) / 2.0 * 8
-        anchor =
-            if textX - e < 0 then AnchorStart else
-            if textX + e > env.w - env.pad.left * 2 then AnchorEnd else
-            AnchorMiddle
-    in svg
+renderBar : ChartEnv label -> (label, Float) -> Svg msg
+renderBar env (lbl, val) =
+    svg
         []
         [ g [ class [ "bar" ] ]
           [ rect
@@ -97,31 +90,15 @@ barV env (lbl, val) =
                     Scale.convert env.dataScale val - (2 * env.pad.bottom)
                 ]
                 []
-            , text_
-                [ class [ "tooltip" ]
-                , x <| textX
-                , y <| env.h - (2 * env.pad.bottom) +
-                    (toFloat env.tooltips.tooltipSize)
-                , textAnchor <| anchor
-                ]
-                [ "{{lbl}}: {{val}}"
-                |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-                |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
-                |> text
-                ]
-          , text_
-                [ class [ "tooltip_large" ]
-                , x <| env.pad.left / 2
-                , y <| 5
-                , textAnchor AnchorStart
-                , alignmentBaseline AlignmentHanging
-                ]
-                [ "{{lbl}}: {{val}}"
-                |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-                |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
-                |> text
-                ]
-            ]
+          , "{{lbl}}: {{val}}"
+            |> String.Format.namedValue "lbl" (env.labelFmt lbl)
+            |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+            |> StdChart.genTooltip env lbl
+          , "{{lbl}}: {{val}}"
+            |> String.Format.namedValue "lbl" (env.labelFmt lbl)
+            |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+            |> StdChart.genLargeTooltip env
+          ]
         ]
 
 

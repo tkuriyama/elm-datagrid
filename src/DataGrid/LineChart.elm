@@ -14,9 +14,10 @@ import Scale exposing ( BandScale, ContinuousScale, OrdinalScale )
 import Shape
 import String.Format
 import TypedSvg exposing ( g, circle, style, svg, text_ )
-import TypedSvg.Attributes exposing ( alignmentBaseline, class, fill, stroke, textAnchor
-                                    , transform, viewBox )
-import TypedSvg.Attributes.InPx exposing ( cx, cy, height, r, strokeWidth, width, x, y )
+import TypedSvg.Attributes exposing ( alignmentBaseline, class, fill, stroke
+                                    , textAnchor, transform, viewBox )
+import TypedSvg.Attributes.InPx exposing ( cx, cy, height, r, strokeWidth, width
+                                         , x, y )
 import TypedSvg.Core exposing ( Svg, text )
 import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
                                , Paint(..), Transform(..) )
@@ -143,13 +144,6 @@ renderPoints env (name, points) =
 renderPoint : ChartEnv label -> String -> Float -> (label, Float) -> Svg msg
 renderPoint env name ct (lbl, val) =
     let rSize = min 3.0 (env.w / ct / 4)
-        textX = Scale.convert (Scale.toRenderable env.labelFmt env.labelScale)
-                lbl
-        e = toFloat (String.length <| env.labelFmt lbl) / 2.0 * 8
-        anchor =
-            if textX - e < 0 then AnchorStart else
-            if textX + e > env.w - env.pad.left * 2 then AnchorEnd else
-            AnchorMiddle
     in svg
         []
         [ g [ class [ "point" ] ]
@@ -160,32 +154,16 @@ renderPoint env name ct (lbl, val) =
                   , fill <| Paint <| StdChart.getColor env.colorScale name
                   ]
                   []
-            , text_
-                  [ class [ "tooltip" ]
-                  , x <| textX
-                  , y <| env.h - (2 * env.pad.bottom) +
-                      (toFloat env.tooltips.tooltipSize)
-                  , textAnchor <| anchor
-                  ]
-                  [ "{{name}} {{lbl}}: {{val}}"
-                    |> String.Format.namedValue "name" name
-                    |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-                    |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
-                    |> text
-                  ]
-            , text_
-                  [ class [ "tooltip_large" ]
-                  , x <| env.pad.left / 2
-                  , y <| 5
-                  , textAnchor AnchorStart
-                  , alignmentBaseline AlignmentHanging
-                  ]
-                  [ "{{name}} {{lbl}}: {{val}}"
-                    |> String.Format.namedValue "name" name
-                    |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-                    |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
-                    |> text
-                  ]
+            , "{{name}} {{lbl}}: {{val}}"
+              |> String.Format.namedValue "name" name
+              |> String.Format.namedValue "lbl" (env.labelFmt lbl)
+              |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+              |> StdChart.genTooltip env lbl
+            , "{{name}} {{lbl}}: {{val}}"
+              |> String.Format.namedValue "name" name
+              |> String.Format.namedValue "lbl" (env.labelFmt lbl)
+              |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+              |> StdChart.genLargeTooltip env
             ]
         ]
 
