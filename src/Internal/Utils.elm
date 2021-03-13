@@ -19,10 +19,6 @@ snd (_, b) = b
 snds : List (a, b) -> List b
 snds = List.map snd
 
-
-splitPairs : List (a, b) -> (List a, List b)
-splitPairs pairs = (fsts pairs, snds pairs)
-
 mapFst : (a -> c) -> List (a, b) -> List (c, b)
 mapFst f =
     List.map (\(a, b) -> (f a, b))
@@ -44,5 +40,6 @@ fmtFloat dp f =
 --------------------------------------------------------------------------------
 -- Reshaping
 
+-- Essentially a matrix transpose of a x b -> b x a
 reshapeSeriesPairs : List(a, List(b, c)) -> List(b, List(a, c))
 reshapeSeriesPairs pairs = []

@@ -27,13 +27,6 @@ testFstsSnds =
               \_ -> snds [(1, 2), (3, 4)] |> Expect.equal [2, 4]
         ]
 
-testSplitPairs : Test
-testSplitPairs =
-    describe "Test splitPairs"
-        [ test "splitPairs" <|
-              \_ -> splitPairs [(1, 2), (3, 4)] |> Expect.equal ([1, 3], [2, 4])
-        ]
-
 testMapFstSnd : Test
 testMapFstSnd =
     let f n = n * 2
