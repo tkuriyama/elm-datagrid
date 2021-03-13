@@ -59,7 +59,7 @@ testReshapeSeriesPairs =
     let sp1 = [ ("Name1", [("Label1", 1.0), ("Label2", 2.0)])
               ]
         sp2 = [ ("Label1", [ ("Name1", 1.0) ])
-              , ("Label2", [ ("Name2", 2.0) ])
+              , ("Label2", [ ("Name1", 2.0) ])
               ]
         sp3 = [ ("Name1", [ ("Label1", 1.0)
                           , ("Label2", 2.0)
@@ -71,7 +71,7 @@ testReshapeSeriesPairs =
                 )
               ]
         sp4 = [ ("Label1", [ ("Name1", 1.0)
-                           ,  ("Name1", 2.0)
+                           ,  ("Name2", 11.0)
                            ]
                 )
               , ("Label2", [ ("Name1", 2.0)

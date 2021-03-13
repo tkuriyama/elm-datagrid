@@ -2,6 +2,8 @@ module Internal.Utils exposing (..)
 
 import FormatNumber
 import FormatNumber.Locales exposing (Decimals(..), usLocale)
+import List.Extra as LE
+
 
 --------------------------------------------------------------------------------
 -- Tuples
@@ -41,5 +43,17 @@ fmtFloat dp f =
 -- Reshaping
 
 -- Essentially a matrix transpose of a x b -> b x a
-reshapeSeriesPairs : List(a, List(b, c)) -> List(b, List(a, c))
-reshapeSeriesPairs pairs = []
+reshapeSeriesPairs : List (a, List (b, c)) -> List (b, List (a, c))
+reshapeSeriesPairs pairs =
+    let names = fsts pairs
+        m = toMatrix pairs |> LE.transpose
+        labels = snds pairs |> List.head |> Maybe.withDefault [] |> fsts
+        f x ys = (x, List.map2 Tuple.pair names ys)
+    in List.map2 f labels m
+
+
+toMatrix : List (a, List (b, c)) -> List (List c)
+toMatrix pairs =
+    snds pairs                    -- List (List (b, c))
+        |> List.map List.unzip    -- List (List b, List c)
+        |> snds                   -- List (List c)
