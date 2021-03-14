@@ -198,30 +198,22 @@ genStyle fCfg cCfg tCfg vbar =
                     , r.lineNameSize |> String.fromInt )
                 _ ->
                     ("none", "0px")
-    in """
-     .point .tooltip { display: none; font-size: {{sz}}px; fill: {{textColor}}; }
-     .point .tooltip_large { display: none; font-size: {{szL}}px;
-                           fill: {{textColor}} }
-     .point:hover .tooltip { display: {{showTT}}; }
-     .point:hover .tooltip_large { display: {{showLargeTT}}; }
-     .line:hover path { stroke-width: 4px; }
-     .line:hover text { font-weight: bold; }
-     .name { display: {{showName}}; font-size: {{nameSize}}px; }
-     .name:hover { font-weight: bold; }
-     text { font-family: {{typeface}}, monospace, sans-serif; }
-     path { pointer-events: stroke; }
-     .vbar line { display: inline; opacity: 0; }
-      .vbar:hover line { opacity: {{showVBar}}; }
+    in StdChart.genBaseStyle fCfg tCfg ++
+        """
+         .point:hover .tooltip { display: {{showTT}}; }
+         .point:hover .tooltip_large { display: {{showLargeTT}}; }
+         .line:hover path { stroke-width: 4px; }
+         .line:hover text { font-weight: bold; }
+         .name { display: {{showName}}; font-size: {{nameSize}}px; }
+         .name:hover { font-weight: bold; }
+         path { pointer-events: stroke; }
+         .vbar line { display: inline; opacity: 0; }
+         .vbar:hover line { opacity: {{showVBar}}; }
      """
          |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
-         |> String.Format.namedValue "sz" (String.fromInt tCfg.tooltipSize)
          |> String.Format.namedValue "showLargeTT"
             (display tCfg.showLargeTooltips)
-         |> String.Format.namedValue "szL"
-            (String.fromInt tCfg.largeTooltipSize)
-         |> String.Format.namedValue "textColor" fCfg.textColor
          |> String.Format.namedValue "showName" showName
          |> String.Format.namedValue "nameSize" nameSize
-         |> String.Format.namedValue "typeface" fCfg.typeface
          |> String.Format.namedValue "showVBar" (reveal vbar 0.8)
 

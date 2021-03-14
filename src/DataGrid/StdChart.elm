@@ -9,8 +9,10 @@ import Color exposing ( Color )
 import Scale exposing ( BandScale, ContinuousScale, OrdinalScale
                       , defaultBandConfig )
 import Scale.Color
+import String.Format
 import TypedSvg exposing ( svg, text_ )
-import TypedSvg.Attributes exposing ( alignmentBaseline, class, textAnchor)
+import TypedSvg.Attributes exposing ( alignmentBaseline, class, style
+                                    , textAnchor)
 import TypedSvg.Attributes.InPx exposing ( x, y )
 import TypedSvg.Core exposing ( Svg, text )
 import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..) )
@@ -101,3 +103,22 @@ genLargeTooltip env t =
         ]
         [ text t
         ]
+
+
+--------------------------------------------------------------------------------
+-- Style
+
+
+genBaseStyle : Cfg.FontSpec -> Cfg.Tooltips -> String
+genBaseStyle fCfg tCfg =
+    let display b = if b then "inline" else "none"
+    in """
+        .tooltip { display: none; font-size: {{sz}}px; }
+        .tooltip_large { display: none; font-size: {{szL}}px;  }
+        text { font-family: {{typeface}}, monospace, sans-serif; 
+              fill: {{textColor}}; }
+        """
+       |> String.Format.namedValue "sz" (String.fromInt tCfg.tooltipSize)
+       |> String.Format.namedValue "szL" (String.fromInt tCfg.largeTooltipSize)
+       |> String.Format.namedValue "textColor" fCfg.textColor
+       |> String.Format.namedValue "typeface" fCfg.typeface

@@ -112,29 +112,22 @@ genStyle fCfg cCfg tCfg =
             case cCfg of
                 Cfg.BarChartSpec spec -> (spec.fillColor, spec.hoverColor)
                 _ -> (defaultFillColor, defaultHoverColor)
-    in """
-     .bar rect { fill: {{fillColor}}; }
-     .bar:hover rect { fill: {{hoverColor}}; }
-     .bar .tooltip { display: none; font-size: {{sz}}px; fill: {{textColor}}; }
-     .bar .tooltip_large { display: none; font-size: {{szL}}px; 
-                           fill: {{textColor}} }
-     .bar:hover .tooltip { display: {{showTT}}; }
-     .bar:hover .tooltip_large { display: {{showLargeTT}}; }
-     text { font-family: {{typeface}}, monospace, sans-serif; }
-     """
+    in StdChart.genBaseStyle fCfg tCfg ++
+        """
+         .bar rect { fill: {{fillColor}}; }
+         .bar:hover rect { fill: {{hoverColor}}; }
+         .bar:hover .tooltip { display: {{showTT}}; }
+         .bar:hover .tooltip_large { display: {{showLargeTT}}; }
+         """
          |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
-         |> String.Format.namedValue "sz" (String.fromInt tCfg.tooltipSize)
          |> String.Format.namedValue "showLargeTT"
             (display tCfg.showLargeTooltips)
-         |> String.Format.namedValue "szL"
-            (String.fromInt tCfg.largeTooltipSize)
          |> String.Format.namedValue "fillColor" fillColor
          |> String.Format.namedValue "hoverColor" hoverColor
-         |> String.Format.namedValue "textColor" fCfg.textColor
-         |> String.Format.namedValue "typeface" fCfg.typeface
 
 defaultFillColor : String
 defaultFillColor = Defaults.rgbaToString Defaults.defaultFillColor
 
 defaultHoverColor : String
 defaultHoverColor = Defaults.rgbaToString Defaults.defaultHoverColor
+
