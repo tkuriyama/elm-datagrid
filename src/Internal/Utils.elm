@@ -51,7 +51,6 @@ reshapeSeriesPairs pairs =
         f x ys = (x, List.map2 Tuple.pair names ys)
     in List.map2 f labels m
 
-
 toMatrix : List (a, List (b, c)) -> List (List c)
 toMatrix pairs =
     snds pairs                    -- List (List (b, c))

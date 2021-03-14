@@ -13,11 +13,11 @@ import Path exposing ( Path )
 import Scale exposing ( BandScale, ContinuousScale, OrdinalScale )
 import Shape
 import String.Format
-import TypedSvg exposing ( g, circle, style, svg, text_ )
+import TypedSvg exposing ( g, circle, line, style, svg, text_ )
 import TypedSvg.Attributes exposing ( alignmentBaseline, class, fill, stroke
                                     , textAnchor, transform, viewBox )
 import TypedSvg.Attributes.InPx exposing ( cx, cy, height, r, strokeWidth, width
-                                         , x, y )
+                                         , x, x1, x2, y, y1, y2 )
 import TypedSvg.Core exposing ( Svg, text )
 import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
                                , Paint(..), Transform(..) )
@@ -45,7 +45,6 @@ type alias ChartEnv label =
     , labelFmt : label -> String
     , dataTickCt : Int
     , tooltips : Cfg.Tooltips
-    , showVBar : Bool
     , style : String
     }
 
@@ -67,8 +66,8 @@ genChartEnv cfg model =
        , labelFmt = cfg.labelFormatter
        , dataTickCt = min cfg.dataAxisTicks 10
        , tooltips = cfg.tooltips
-       , showVBar = parseChartSpec cfg.chartSpec
-       , style = genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips
+       , style = genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips <|
+                 parseChartSpec cfg.chartSpec
     }
 
 parseChartSpec : Cfg.ChartSpec -> Bool
@@ -100,10 +99,9 @@ render cfg model =
         , g [ class [ "points" ]
             , transform [ Translate env.pad.left env.pad.top ] ] <|
             List.map (renderLine env) model
-        , if not env.showVBar then g [] [] else
-              g [ class [ "vbars" ]
-                , transform [ Translate env.pad.left env.pad.top ] ] <|
-                List.map (renderVBar env) model_
+        , g [ class [ "vbars" ]
+            , transform [ Translate env.pad.left env.pad.top ] ] <|
+            List.map (renderVBar env) model_
         ]
 
 renderLine : ChartEnv label -> SeriesPair String label -> Svg msg
@@ -167,16 +165,32 @@ renderPoint env name ct (lbl, val) =
             ]
         ]
 
-renderVBar : ChartEnv label -> (label, List(String, Float)) -> Svg msg
-renderVBar env (label, points) = svg [] []
+renderVBar : ChartEnv label -> (label, List (String, Float)) -> Svg msg
+renderVBar env (lbl, points) =
+    let lineX = Scale.convert env.labelScale lbl
+    in svg
+        []
+        [ g [ class [ "vbar" ] ]
+            [ line
+                  [ x1 <| lineX
+                  , x2 <| lineX
+                  , y1 <| 0
+                  , y2 <| env.h - env.pad.top - env.pad.bottom
+                  , strokeWidth 2
+                  , stroke <| Paint <| Color.rgb 0.5 0.5 0.5
+                  ]
+                  []
+            ]
+        ]
 
 
 --------------------------------------------------------------------------------
 -- Style
 
-genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> String
-genStyle fCfg cCfg tCfg =
+genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> Bool -> String
+genStyle fCfg cCfg tCfg vbar =
     let display b = if b then "inline" else "none"
+        reveal b n = if b then String.fromFloat n else "0.0"
         (showName, nameSize) =
             case cCfg of
                 Cfg.LineChartSpec r ->
@@ -196,6 +210,8 @@ genStyle fCfg cCfg tCfg =
      .name:hover { font-weight: bold; }
      text { font-family: {{typeface}}, monospace, sans-serif; }
      path { pointer-events: stroke; }
+     .vbar line { display: inline; opacity: 0; }
+      .vbar:hover line { opacity: {{showVBar}}; }
      """
          |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
          |> String.Format.namedValue "sz" (String.fromInt tCfg.tooltipSize)
@@ -207,4 +223,5 @@ genStyle fCfg cCfg tCfg =
          |> String.Format.namedValue "showName" showName
          |> String.Format.namedValue "nameSize" nameSize
          |> String.Format.namedValue "typeface" fCfg.typeface
+         |> String.Format.namedValue "showVBar" (reveal vbar 0.8)
 
