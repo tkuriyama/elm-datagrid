@@ -125,7 +125,8 @@ genHoverTooltip env colorScale lbl points =
     let hEnv = genHoverEnv env colorScale lbl points
         pad = 5
     in g [ class [ "tooltip_hover" ] ]
-         ([ rect [ x hEnv.x
+         ([ rect [ class [ "invert" ]
+                 , x hEnv.x
                  , y hEnv.y
                  , height hEnv.h
                  , width hEnv.w
@@ -143,7 +144,7 @@ renderHoverText : Float -> String -> (Float, Float, Color) -> Svg msg
 renderHoverText pad t (hx, hy, c) =
     text_ [ x <| hx + pad
           , y <| hy + pad
-          , fill <| Paint c
+          -- , fill <| Paint c
           ]
           [ text t ]
 
@@ -154,6 +155,7 @@ genHoverEnv : HasTooltipEnv a label ->
               HoverEnv
 genHoverEnv env colorScale lbl pairs =
     let
+        xOffset = 5
         sz = env.tooltips.hoverTooltipSize |> toFloat
         hh = (List.length pairs + 2 |> toFloat) * sz * 1.03
         hw = Utils.fsts pairs
@@ -161,9 +163,9 @@ genHoverEnv env colorScale lbl pairs =
              |> List.maximum |> Maybe.withDefault 20
              |> \n -> (n + 6) * (sz * 0.7)
         hx = Scale.convert env.labelScale lbl
-        hx_ = if hx > (env.w - env.pad.right) / 2 then hx - hw - 10
-              else hx + 10
-        hy = max 0 (env.h / 2 - hh / 2)
+        hx_ = if hx > (env.w - env.pad.right) / 2 then hx - hw - xOffset
+              else hx + xOffset
+        hy = max 0 (env.h / 2 - hh)
         (ls, ps) = genHoverText env colorScale pairs (hx_, hy)
     in { x = hx_
        , y = hy
@@ -201,14 +203,17 @@ genBaseStyle : Cfg.FontSpec -> Cfg.Tooltips -> String
 genBaseStyle fCfg tCfg =
     let display b = if b then "inline" else "none"
     in """
-        .tooltip { display: none; font-size: {{sz}}px; }
-        .tooltip_large { display: none; font-size: {{szL}}px;  }
-        .tooltip_hover { display: none; font-size: {{szH}}px;  }
-        text { font-family: {{typeface}}, monospace, sans-serif;
-              fill: {{textColor}}; }
+        text { font-family: {{typeface}}, monospace, sans-serif; }
+        .tooltip { display: none; font-size: {{sz}}px;
+                   fill: {{textColor}}; }
+        .tooltip_large { display: none; font-size: {{szL}}px;
+                         fill: {{textColor}}; }
+        .tooltip_hover { display: none; font-size: {{szH}}px;
+                         fill: {{textColor}}; }
+        .tooltip_hover rect { fill: rgba(250, 250, 250, 1.0); }
         """
+       |> String.Format.namedValue "textColor" fCfg.textColor
        |> String.Format.namedValue "sz" (String.fromInt tCfg.tooltipSize)
        |> String.Format.namedValue "szL" (String.fromInt tCfg.largeTooltipSize)
        |> String.Format.namedValue "szH" (String.fromInt tCfg.hoverTooltipSize)
-       |> String.Format.namedValue "textColor" fCfg.textColor
        |> String.Format.namedValue "typeface" fCfg.typeface

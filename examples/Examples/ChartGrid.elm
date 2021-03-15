@@ -29,9 +29,9 @@ cfg =
 
 charts : List (List (Layout.Chart msg))
 charts =
-    let labels = [ [ 1, 2, 3 ]
-                 , [ 4, 5 ]
-                 , [ 7, 8, 9]
+    let labels = [ --[ 1, 2, 3 ]
+                 [ 4, 5 ]
+                 --, [ 7, 8, 9]
                  ]
         f i = { title = Just <| "Chart " ++ String.fromInt i
               , description = Just <| "descrption " ++ String.fromInt i
