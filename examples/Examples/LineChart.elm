@@ -36,6 +36,7 @@ tooltipsCfg =
     { defaultTooltips |
       showLargeTooltips = False
     , showHoverTooltips = True
+    , hoverTooltipSize = 14
     }
 
 lineChartSpec : Cfg.ChartSpec

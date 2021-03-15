@@ -155,7 +155,7 @@ genHoverEnv : HasTooltipEnv a label ->
 genHoverEnv env colorScale lbl pairs =
     let
         sz = env.tooltips.hoverTooltipSize |> toFloat
-        hh = (List.length pairs |> toFloat) * sz * 1.4
+        hh = (List.length pairs + 2 |> toFloat) * sz * 1.03
         hw = Utils.fsts pairs
              |> List.map (String.length >> toFloat)
              |> List.maximum |> Maybe.withDefault 20
@@ -204,7 +204,6 @@ genBaseStyle fCfg tCfg =
         .tooltip { display: none; font-size: {{sz}}px; }
         .tooltip_large { display: none; font-size: {{szL}}px;  }
         .tooltip_hover { display: none; font-size: {{szH}}px;  }
-        .tooltip_hover rect { }
         text { font-family: {{typeface}}, monospace, sans-serif;
               fill: {{textColor}}; }
         """
