@@ -44,8 +44,8 @@ genChartEnv cfg model =
     { w = cfg.w
     , h = cfg.h
     , pad = cfg.pad
-    , dataScale = StdChart.genYScale cfg.h (cfg.pad.top + cfg.pad.bottom) <|
-                  Utils.snds model
+    , dataScale = StdChart.genYScale True cfg.h (cfg.pad.top + cfg.pad.bottom)
+                  (Utils.snds model)
     , labelScale = StdChart.genXScale cfg.w (cfg.pad.right + cfg.pad.left) <|
                    Utils.fsts model
     , labelShow = cfg.showLabels

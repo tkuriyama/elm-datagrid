@@ -25,11 +25,12 @@ import Internal.Utils as Utils
 --------------------------------------------------------------------------------
 -- Scales and Axes
 
-genYScale : Float -> Float -> List Float -> ContinuousScale Float
-genYScale h padding xs =
-    let dataMin = min 0 (Maybe.withDefault 0 <| List.minimum xs)
-        dataMax = Maybe.withDefault 0 <| List.maximum xs
-    in Scale.linear (h - padding, 0) (dataMin, dataMax)
+genYScale : Bool -> Float -> Float -> List Float -> ContinuousScale Float
+genYScale zeroY h padding xs =
+    let minY = (Maybe.withDefault 0 <| List.minimum xs)
+        dispMin = if not zeroY then minY else min 0 minY
+        dispMax = Maybe.withDefault 0 <| List.maximum xs
+    in Scale.linear (h - padding, 0) (dispMin, dispMax)
 
 genYAxis : Int -> ContinuousScale Float -> Svg msg
 genYAxis tickCt yScale =
