@@ -103,3 +103,14 @@ testToMatrix =
               \_ -> toMatrix sp3 |>
               Expect.equal [[1.0, 2.0], [11.0, 12.0]]
         ]
+
+--------------------------------------------------------------------------------
+-- Strings
+
+testTwoCols : Test
+testTwoCols =
+    describe "Test twoCols formatting" <|
+        [ test "2 2 a b -> a   b" <|
+              \_ -> twoCols 2 2 "a" "b" |>
+              Expect.equal ("a" ++ String.repeat 3 nbsp ++ "b")
+        ]

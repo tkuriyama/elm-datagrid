@@ -29,6 +29,9 @@ mapSnd : (b -> c) -> List (a, b) -> List (a, c)
 mapSnd f =
     List.map (\(a, b) -> (a, f b))
 
+triple : a -> b -> c -> (a, b, c)
+triple a b c = (a, b, c)
+
 
 --------------------------------------------------------------------------------
 -- Formatting
@@ -56,3 +59,17 @@ toMatrix pairs =
     snds pairs                    -- List (List (b, c))
         |> List.map List.unzip    -- List (List b, List c)
         |> snds                   -- List (List c)
+
+
+--------------------------------------------------------------------------------
+-- Strings
+
+twoCols : Int -> Int -> String -> String -> String
+twoCols n extra s1 s2 =
+    let l1 = String.length s1
+        l2 = String.length s2
+        spaces = String.repeat (n - l1 + extra) nbsp
+    in String.concat [s1, spaces, s2]
+
+nbsp : String
+nbsp = String.fromChar (Char.fromCode 160)
