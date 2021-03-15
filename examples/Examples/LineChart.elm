@@ -1,18 +1,24 @@
-module Examples.LineChart exposing (main)
+module Examples.LineChart exposing ( chart )
 
+import List.Extra as LE
 import TypedSvg.Core exposing ( Svg )
 
 import DataGrid.LineChart exposing ( render )
 import DataGrid.Config as Cfg exposing ( defaultStdChartCfg
                                        , defaultPadding, defaultTooltips )
+import Internal.Utils as Utils
 import SampleData.LineChartSample as LineChartSample
-
 
 --------------------------------------------------------------------------------
 
 main : Svg msg
 main =
-    render cfg data
+    chart 0.0 1.0
+
+chart : Float -> Float -> Svg msg
+chart lower upper =
+    let d = filterData lower upper
+    in render cfg d
 
 cfg : Cfg.StdChartCfg String
 cfg =
@@ -49,9 +55,24 @@ lineChartSpec =
 
 
 --------------------------------------------------------------------------------
+-- Data
+
+filterData : Float -> Float -> List (String, List (String, Float))
+filterData lower upper =
+    let last = Utils.snd >> Utils.snds >> LE.last >> Maybe.withDefault 0
+        f p = let last_ = last p
+              in last_ > lower && last_ <= upper
+    in List.filter f data
+        |> Utils.fsts
+        |> List.filter (String.contains "TRF" >> not)
+        |> subset
+
+subset : List String -> List (String, List (String, Float))
+subset venues =
+    data |> List.filter (\p -> List.member (Utils.fst p) venues)
 
 data : List (String, List (String, Float))
 data =
     let x100 n = n * 100
         f (name, pairs) = (name, List.map (Tuple.mapSecond x100) pairs)
-    in LineChartSample.data |> List.map f
+    in List.map f LineChartSample.data

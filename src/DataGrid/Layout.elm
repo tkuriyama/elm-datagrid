@@ -8,7 +8,7 @@ where an element is an elm-ui `Element msg`.
 -}
 
 import Element exposing ( Element, centerX, column, el, fill, paragraph
-                        , px, row, spacing, text, width )
+                        , padding, px, row, spacing, text, width )
 import Element.Font as Font
 import Html exposing (Html)
 
@@ -56,6 +56,7 @@ chartGrid cfg xss =
     in
         Element.layout
             [ Font.family [ Font.typeface tf, Font.sansSerif ]
+            , padding cfg.padding
             ]
             ( column
                  [ centerX, width <| px cfg.w, spacing cfg.rowSpacing ]

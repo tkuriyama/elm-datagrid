@@ -18,23 +18,35 @@ cfg =
     { w = 1800
     , colSpacing = 0
     , rowSpacing = 5
-    , padding = 0
+    , padding = 5
     , title = Just "Demo Chart Grid"
-    , description = Just "Demo chart grid description here."
+    , description = Just "US equity market statistics"
     , textColor = Nothing
     , typeface = Just "Consolas"
-    , gridBaseFontSize = 24
-    , cellBaseFontSize = 18
+    , gridBaseFontSize = 22
+    , cellBaseFontSize = 16
     }
 
 charts : List (List (Layout.Chart msg))
 charts =
-    let labels = [ --[ 1, 2, 3 ]
-                 [ 4, 5 ]
-                 --, [ 7, 8, 9]
-                 ]
-        f i = { title = Just <| "Chart " ++ String.fromInt i
+    let f i = { title = Just <| "Chart " ++ String.fromInt i
               , description = Just <| "descrption " ++ String.fromInt i
-              , chart = (if i == 5 then LC.main else BC.main) |> Element.html
+              , chart = BC.main |> Element.html
               }
-    in List.map (List.map f) labels
+        lineCharts =
+            [ { title = Just "Venue Mkt Share: Large"
+              , description = Just <| "Mkt share > 5%"
+              , chart = LC.chart 5.0 100.0 |> Element.html
+              }
+            , { title = Just "Venue Mkt Share: Medium"
+              , description = Just "Mkt share 1 - 5%"
+              , chart = LC.chart 1.0 5.0 |> Element.html
+              }
+            , { title = Just "Venue Mkt Share: Small"
+              , description = Just "Mkt Share < 1%"
+              , chart = LC.chart 0.0 1.0 |> Element.html
+              }
+            ]
+    in [ List.map f [1, 2, 3]
+        , lineCharts
+       ]
