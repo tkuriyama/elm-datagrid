@@ -88,7 +88,8 @@ render cfg model =
         [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
         , g [ class [ "labels" ]
-            ,  transform [ Translate (env.pad.left - 1) (env.h - env.pad.bottom) ] ]
+            ,  transform [ Translate (env.pad.left - 1)
+                               (env.h - env.pad.bottom) ] ]
             [ StdChart.genXAxis env.labelFmt env.labelShow env.labelScale ]
         , g [ class ["dataticks"]
             , transform [ Translate (env.pad.left - 1) env.pad.top ] ]
@@ -101,7 +102,7 @@ render cfg model =
             List.map (renderLine env) model
         , g [ class [ "vbars" ]
             , transform [ Translate env.pad.left env.pad.top ] ] <|
-            List.map (renderVBar env) model_
+            List.map (renderVBarHover env) model_
         ]
 
 renderLine : ChartEnv label -> SeriesPair String label -> Svg msg
@@ -111,28 +112,25 @@ renderLine env (name, points) =
         path = Shape.line Shape.monotoneInXCurve <| List.map f points
         lastY = Utils.snds points |> last |> Maybe.withDefault 0.0
                 |> Scale.convert env.dataScale
-    in svg
-        []
-        [ g [ class [ "line" ] ]
-            [ Path.element
-                  path
-                  [ stroke <| Paint <| StdChart.getColor env.colorScale name
-                  , strokeWidth 1
-                  , fill PaintNone
-                  ]
-            , text_
-                  [ class [ "name" ]
-                  , x <| env.w - env.pad.left - env.pad.right
-                  , y <| lastY
-                  , textAnchor <| AnchorStart
-                  , fill <| Paint <| StdChart.getColor env.colorScale name
-                  ]
-                  [ "{{name}}"
-                    |> String.Format.namedValue "name" name
-                    |> text
-                  ]
-            ]
-        ]
+    in g [ class [ "line" ] ]
+         [ Path.element
+               path
+               [ stroke <| Paint <| StdChart.getColor env.colorScale name
+               , strokeWidth 1
+               , fill PaintNone
+               ]
+         , text_
+               [ class [ "name" ]
+               , x <| env.w - env.pad.left - env.pad.right
+               , y <| lastY
+               , textAnchor <| AnchorStart
+               , fill <| Paint <| StdChart.getColor env.colorScale name
+               ]
+               [ "{{name}}"
+                 |> String.Format.namedValue "name" name
+                 |> text
+               ]
+         ]
 
 renderPoints : ChartEnv label -> SeriesPair String label -> Svg msg
 renderPoints env (name, points) =
@@ -142,46 +140,41 @@ renderPoints env (name, points) =
 renderPoint : ChartEnv label -> String -> Float -> (label, Float) -> Svg msg
 renderPoint env name ct (lbl, val) =
     let rSize = min 3.0 (env.w / ct / 4)
-    in svg
-        []
-        [ g [ class [ "point" ] ]
-            [ circle
-                  [ cx <| Scale.convert env.labelScale lbl
-                  , cy <| Scale.convert env.dataScale val
-                  , r rSize
-                  , fill <| Paint <| StdChart.getColor env.colorScale name
-                  ]
-                  []
-            , "{{name}} {{lbl}}: {{val}}"
-              |> String.Format.namedValue "name" name
-              |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-              |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
-              |> StdChart.genTooltip env lbl
-            , "{{name}} {{lbl}}: {{val}}"
-              |> String.Format.namedValue "name" name
-              |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-              |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
-              |> StdChart.genLargeTooltip env
-            ]
-        ]
+    in g [ class [ "point" ] ]
+         [ circle
+               [ cx <| Scale.convert env.labelScale lbl
+               , cy <| Scale.convert env.dataScale val
+               , r rSize
+               , fill <| Paint <| StdChart.getColor env.colorScale name
+               ]
+               []
+         , "{{name}} {{lbl}}: {{val}}"
+           |> String.Format.namedValue "name" name
+           |> String.Format.namedValue "lbl" (env.labelFmt lbl)
+           |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+           |> StdChart.genTooltip env lbl
+         , "{{name}} {{lbl}}: {{val}}"
+           |> String.Format.namedValue "name" name
+           |> String.Format.namedValue "lbl" (env.labelFmt lbl)
+           |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+           |> StdChart.genLargeTooltip env
+         ]
 
-renderVBar : ChartEnv label -> (label, List (String, Float)) -> Svg msg
-renderVBar env (lbl, points) =
+renderVBarHover : ChartEnv label -> (label, List (String, Float)) -> Svg msg
+renderVBarHover env (lbl, points) =
     let lineX = Scale.convert env.labelScale lbl
-    in svg
-        []
-        [ g [ class [ "vbar" ] ]
-            [ line
-                  [ x1 <| lineX
-                  , x2 <| lineX
-                  , y1 <| 0
-                  , y2 <| env.h - env.pad.top - env.pad.bottom
-                  , strokeWidth 2
-                  , stroke <| Paint <| Color.rgb 0.5 0.5 0.5
-                  ]
-                  []
-            ]
-        ]
+    in g [ class [ "vbar" ] ]
+         [ line
+               [ x1 <| lineX
+               , x2 <| lineX
+               , y1 <| 0
+               , y2 <| env.h - env.pad.top - env.pad.bottom
+               , strokeWidth 2
+               , stroke <| Paint <| Color.rgb 0.5 0.5 0.5
+               ]
+               []
+         , StdChart.genHoverTooltip env env.colorScale lbl points
+         ]
 
 
 --------------------------------------------------------------------------------
@@ -209,6 +202,7 @@ genStyle fCfg cCfg tCfg vbar =
          path { pointer-events: stroke; }
          .vbar line { display: inline; opacity: 0; }
          .vbar:hover line { opacity: {{showVBar}}; }
+         .vbar:hover .tooltip_hover { display: inline; }
      """
          |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
          |> String.Format.namedValue "showLargeTT"

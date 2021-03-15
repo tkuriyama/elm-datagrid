@@ -10,14 +10,17 @@ import Scale exposing ( BandScale, ContinuousScale, OrdinalScale
                       , defaultBandConfig )
 import Scale.Color
 import String.Format
-import TypedSvg exposing ( svg, text_ )
-import TypedSvg.Attributes exposing ( alignmentBaseline, class, style
+import TypedSvg exposing ( g, rect, svg, text_ )
+import TypedSvg.Attributes exposing ( alignmentBaseline, class, fill, style
                                     , textAnchor)
-import TypedSvg.Attributes.InPx exposing ( x, y )
+import TypedSvg.Attributes.InPx exposing ( height, rx, width, x, y )
 import TypedSvg.Core exposing ( Svg, text )
-import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..) )
+import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
+                               , Paint(..) )
 
 import DataGrid.Config as Cfg
+import Internal.Utils as Utils
+
 
 --------------------------------------------------------------------------------
 -- Scales and Axes
@@ -69,6 +72,15 @@ type alias HasTooltipEnv a label =
     , tooltips : Cfg.Tooltips
     }
 
+type alias HoverEnv =
+    { x : Float
+    , y : Float
+    , h : Float
+    , w : Float
+    , lines : List String
+    , lineParams : List (Float, Float, Color)
+    }
+
 genTooltip : HasTooltipEnv a label -> label -> String -> Svg msg
 genTooltip env lbl t =
     let textX =
@@ -104,6 +116,82 @@ genLargeTooltip env t =
         [ text t
         ]
 
+genHoverTooltip : HasTooltipEnv a label ->
+                  OrdinalScale String Color ->
+                  label ->
+                  List (String, Float) ->
+                  Svg msg
+genHoverTooltip env colorScale lbl points =
+    let hEnv = genHoverEnv env colorScale lbl points
+        pad = 5
+    in g [ class [ "tooltip_hover" ] ]
+         ([ rect [ x hEnv.x
+                 , y hEnv.y
+                 , height hEnv.h
+                 , width hEnv.w
+                 , rx 3
+                 ]
+                 []
+          , text_
+                [ x <| (hEnv.x + pad)
+                , y <| hEnv.y + toFloat env.tooltips.hoverTooltipSize + pad
+                ]
+                [ text <| env.labelFmt lbl ]
+          ] ++ List.map2 (renderHoverText pad) hEnv.lines hEnv.lineParams)
+
+renderHoverText : Float -> String -> (Float, Float, Color) -> Svg msg
+renderHoverText pad t (hx, hy, c) =
+    text_ [ x <| hx + pad
+          , y <| hy + pad
+          , fill <| Paint c
+          ]
+          [ text t ]
+
+genHoverEnv : HasTooltipEnv a label ->
+              OrdinalScale String Color ->
+              label ->
+              List (String, Float) ->
+              HoverEnv
+genHoverEnv env colorScale lbl pairs =
+    let
+        sz = env.tooltips.hoverTooltipSize |> toFloat
+        hh = (List.length pairs |> toFloat) * sz * 1.4
+        hw = Utils.fsts pairs
+             |> List.map (String.length >> toFloat)
+             |> List.maximum |> Maybe.withDefault 20
+             |> \n -> (n + 6) * (sz * 0.7)
+        hx = Scale.convert env.labelScale lbl
+        hx_ = if hx > (env.w - env.pad.right) / 2 then hx - hw - 10
+              else hx + 10
+        hy = max 0 (env.h / 2 - hh / 2)
+        (ls, ps) = genHoverText env colorScale pairs (hx_, hy)
+    in { x = hx_
+       , y = hy
+       , w = hw
+       , h = hh
+       , lines = ls
+       , lineParams = ps
+       }
+
+genHoverText : HasTooltipEnv a label ->
+               OrdinalScale String Color ->
+               List (String, Float) ->
+               (Float, Float) ->
+               (List String, List (Float, Float, Color))
+genHoverText env colorScale pairs (x0, y0) =
+    let longest = Utils.fsts pairs |> List.map String.length
+                  |> List.maximum |> Maybe.withDefault 0
+        cmp a b = compare (Utils.snd a) (Utils.snd b)
+        fmt (s, f) = Utils.twoCols longest 3 s (Utils.fmtFloat 2 f)
+        sorted = List.sortWith cmp pairs |> List.reverse
+        cs = sorted |> Utils.fsts |> List.map (getColor colorScale)
+        xs = List.repeat (List.length pairs) x0
+        ys = List.range 2 (List.length pairs + 1)
+            |> List.map
+               (\i -> y0 + (i * env.tooltips.hoverTooltipSize |> toFloat) + 5)
+    in ( sorted |> List.map fmt
+       , List.map3 Utils.triple xs ys cs)
+
 
 --------------------------------------------------------------------------------
 -- Style
@@ -115,10 +203,13 @@ genBaseStyle fCfg tCfg =
     in """
         .tooltip { display: none; font-size: {{sz}}px; }
         .tooltip_large { display: none; font-size: {{szL}}px;  }
-        text { font-family: {{typeface}}, monospace, sans-serif; 
+        .tooltip_hover { display: none; font-size: {{szH}}px;  }
+        .tooltip_hover rect { }
+        text { font-family: {{typeface}}, monospace, sans-serif;
               fill: {{textColor}}; }
         """
        |> String.Format.namedValue "sz" (String.fromInt tCfg.tooltipSize)
        |> String.Format.namedValue "szL" (String.fromInt tCfg.largeTooltipSize)
+       |> String.Format.namedValue "szH" (String.fromInt tCfg.hoverTooltipSize)
        |> String.Format.namedValue "textColor" fCfg.textColor
        |> String.Format.namedValue "typeface" fCfg.typeface
