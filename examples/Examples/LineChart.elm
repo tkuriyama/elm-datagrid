@@ -1,4 +1,4 @@
-module Examples.LineChart exposing ( chart )
+module Examples.LineChart exposing ( main, chart )
 
 import List.Extra as LE
 import TypedSvg.Core exposing ( Svg )

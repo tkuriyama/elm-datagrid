@@ -35,12 +35,12 @@ charts =
               }
         lineCharts =
             [ { title = Just "Venue Mkt Share: Large"
-              , description = Just <| "Mkt share > 5%"
-              , chart = LC.chart 5.0 100.0 |> Element.html
+              , description = Just <| "Mkt share > 3%"
+              , chart = LC.chart 3.0 100.0 |> Element.html
               }
             , { title = Just "Venue Mkt Share: Medium"
-              , description = Just "Mkt share 1 - 5%"
-              , chart = LC.chart 1.0 5.0 |> Element.html
+              , description = Just "Mkt share 1 - 3%"
+              , chart = LC.chart 1.0 3.0 |> Element.html
               }
             , { title = Just "Venue Mkt Share: Small"
               , description = Just "Mkt Share < 1%"

@@ -1,4 +1,4 @@
-module Examples.BarChart exposing (main)
+module Examples.BarChart exposing ( main )
 
 import TypedSvg.Core exposing ( Svg )
 
