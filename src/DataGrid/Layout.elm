@@ -12,6 +12,7 @@ import Element exposing ( Element, centerX, column, el, fill, paragraph
 import Element.Font as Font
 import Html exposing (Html)
 
+import DataGrid.Config as Cfg
 import Internal.Defaults as Defaults
 
 
@@ -24,6 +25,7 @@ type alias LayoutConfig =
     , padding : Int
     , title : Maybe String
     , description : Maybe String
+    , links : List String
     , textColor : Maybe Element.Color
     , typeface : Maybe String
     , gridBaseFontSize : Int
@@ -33,6 +35,8 @@ type alias LayoutConfig =
 type alias Chart msg =
     { title : Maybe String
     , description : Maybe String
+    , links : List String
+    , chartSpec : Cfg.ChartSpec
     , chart : Element msg
     }
 

@@ -108,7 +108,7 @@ defaultLineChartSpec =
 defaultLineShareChartSpec : ChartSpec
 defaultLineShareChartSpec =
     LineShareChartSpec
-    { toggleSeries = True
+    { toggleSeries = False
     , toggleRelative = True
     , toggleFirstDeriv = True
     }
