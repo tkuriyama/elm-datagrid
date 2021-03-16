@@ -31,7 +31,7 @@ type ChartSpec
                     , lineNameSize : Int
                     , showVBar : Bool
                     }
-    | LineShareChartSpec { toggleSeris : Bool
+    | LineShareChartSpec { toggleSeries : Bool
                          , toggleRelative : Bool
                          , toggleFirstDeriv : Bool
                          }
@@ -108,7 +108,7 @@ defaultLineChartSpec =
 defaultLineShareChartSpec : ChartSpec
 defaultLineShareChartSpec =
     LineShareChartSpec
-    { toggleSeris = True
+    { toggleSeries = True
     , toggleRelative = True
     , toggleFirstDeriv = True
     }
