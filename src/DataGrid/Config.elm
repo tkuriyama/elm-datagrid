@@ -10,18 +10,30 @@ import Internal.Defaults as Defaults
 --------------------------------------------------------------------------------
 -- Type Definitions
 
-type alias StdChartCfg label =
-    { w : Float
-    , h : Float
-    , pad : Padding
-    , chartSpec : ChartSpec
-    , dataAxisTicks : Int
-    , showLabels : Bool
-    , labelFormatter : label -> String
-    , tooltips : Tooltips
-    , fontSpec : FontSpec
-    , legend : Legend
-    }
+type alias ProtoChartCfg a
+    = { a |
+        w : Float
+      , h : Float
+      , pad : Padding
+      , chartSpec : ChartSpec
+      }
+
+type alias StdChartCfg label
+    = { w : Float
+      , h : Float
+      , pad : Padding
+      , chartSpec : ChartSpec
+      , dataAxisTicks : Int
+      , showLabels : Bool
+      , labelFormatter : label -> String
+      , tooltips : Tooltips
+      , fontSpec : FontSpec
+      , legend : Legend
+      }
+
+type ChartData label
+    = BarChartData (List (label, Float))
+    | LineChartData (List (String, List (label, Float)))
 
 type ChartSpec
     = BarChartSpec { fillColor : String

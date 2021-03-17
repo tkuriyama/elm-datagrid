@@ -31,8 +31,8 @@ import Internal.Utils as Utils
 --------------------------------------------------------------------------------
 -- StdChartfg is converted to ChartEnv for internal use
 
-type alias SeriesPair name label =
-    (name, List (label, Float))
+type alias SeriesPair label =
+    (String, List (label, Float))
 
 type alias ChartEnv label =
     { w: Float
@@ -48,9 +48,7 @@ type alias ChartEnv label =
     , style : String
     }
 
-genChartEnv : Cfg.StdChartCfg label ->
-              List(SeriesPair String label) ->
-              ChartEnv label
+genChartEnv : Cfg.StdChartCfg label -> List(SeriesPair label) -> ChartEnv label
 genChartEnv cfg model =
     let names = List.map Utils.fst model
         xs = List.concatMap (Utils.snd >> Utils.snds) model
@@ -81,7 +79,7 @@ parseChartSpec spec =
 --------------------------------------------------------------------------------
 -- Render
 
-render : Cfg.StdChartCfg label -> List(SeriesPair String label) -> Svg msg
+render : Cfg.StdChartCfg label -> List(SeriesPair label) -> Svg msg
 render cfg model =
     let env = genChartEnv cfg model
         model_ = Utils.reshapeSeriesPairs model
@@ -106,7 +104,7 @@ render cfg model =
             List.map (renderVBarHover env) model_
         ]
 
-renderLine : ChartEnv label -> SeriesPair String label -> Svg msg
+renderLine : ChartEnv label -> SeriesPair label -> Svg msg
 renderLine env (name, points) =
     let f (x, y) = Just ( Scale.convert env.labelScale x
                         , Scale.convert env.dataScale y )
@@ -133,7 +131,7 @@ renderLine env (name, points) =
                ]
          ]
 
-renderPoints : ChartEnv label -> SeriesPair String label -> Svg msg
+renderPoints : ChartEnv label -> SeriesPair label -> Svg msg
 renderPoints env (name, points) =
     let n = List.length points |> toFloat
     in svg [] (List.map (renderPoint env name n) points)
