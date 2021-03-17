@@ -1,4 +1,5 @@
-module DataGrid.Layout exposing ( Chart, LayoutConfig, chartGrid )
+module DataGrid.Layout exposing ( ChartCell, LayoutCfg
+                                , defaultLayoutCfg, main )
 
 {-| Create grids using elm-ui.
 
@@ -7,45 +8,115 @@ where an element is an elm-ui `Element msg`.
 
 -}
 
-import Element exposing ( Element, centerX, column, el, fill, paragraph
-                        , padding, px, row, spacing, text, width )
+import Browser
+import Element exposing ( Element, centerX, column, el, fill, height
+                        , paragraph , padding, px, row, spacing, text
+                        , width )
 import Element.Font as Font
-import Html exposing (Html)
+import Html exposing (Html)y
 
 import DataGrid.Config as Cfg
 import Internal.Defaults as Defaults
 
 
 --------------------------------------------------------------------------------
+-- Exposed Types
 
-type alias LayoutConfig =
-    { w : Int
+type alias LayoutCfg =
+    { w : Maybe Int
+    , h : Maybe Int
     , colSpacing : Int
     , rowSpacing : Int
     , padding : Int
     , title : Maybe String
     , description : Maybe String
     , links : List String
-    , textColor : Maybe Element.Color
-    , typeface : Maybe String
+    , textColor : Element.Color
+    , typeface : String
     , gridBaseFontSize : Int
     , cellBaseFontSize : Int
     }
 
-type alias Chart msg =
+type alias ChartCell label =
     { title : Maybe String
     , description : Maybe String
     , links : List String
-    , chartSpec : Cfg.ChartSpec
-    , chart : Element msg
+    , chartCfg : Cfg.ChartCfg label
+    , chartData : Cfg.ChartData label
+    , showSeries : List String
+    , showRelative : Bool
+    , showFirstderiv : Bool
     }
+
+defaultLayoutCfg : LayoutCfg
+defaultLayoutCfg =
+    { w = Just 1800
+    , h = Nothing
+    , colSpacing = 0
+    , rowSpacing = 5
+    , padding = 5
+    , title = Nothing
+    , description = Nothing
+    , links = []
+    , textColor = Defaults.rgbToElmUI Defaults.defaultTextColor
+    , typeface = Defaults.defaultTypeface
+    , gridBaseFontSize = 22
+    , cellBaseFontSize = 16
+    }
+
+
+--------------------------------------------------------------------------------
+-- Internal Types
+
+type alias Model label =
+    { cfg : LayoutCfg
+    , charts : List (List (ChartCell label))
+    , windowH : Float
+    , windowW : Float
+    }
+
+type Msg
+    = UpdateShowSeries (List String)
+    | UpdateShowRelative Bool
+    | UpdateShowFirstDeriv Bool
 
 type alias HasTitleDesc a =
     { a |
       title : Maybe String
     , description : Maybe String
+    }git sta
+
+
+--------------------------------------------------------------------------------
+
+main : Program flags model msg
+main =
+    Browser.element
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = \_ -> Sub.none
+        }
+
+init : flags -> (Model label, Cmd Msg)
+init flags =
+    { cfg = defaultLayoutCfg
+    , charts = []
+    , windowW = flags.windowWidth
+    , windowH = flags.windowHeight
     }
 
+
+--------------------------------------------------------------------------------
+
+view : Model label -> Html msg
+view = html [] []
+
+--------------------------------------------------------------------------------
+-- Update
+
+update : Msg -> Model -> (Model label, Cmd Msg)
+update msg model = Cmd.none
 
 --------------------------------------------------------------------------------
 -- Chart Grid
