@@ -11,5 +11,4 @@ import Examples.ChartGrid as ChartGrid
 
 --------------------------------------------------------------------------------
 
-main : Html msg
 main = ChartGrid.main

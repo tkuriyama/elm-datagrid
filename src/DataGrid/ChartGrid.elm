@@ -1,5 +1,5 @@
-module DataGrid.Layout exposing ( ChartCell, LayoutCfg
-                                , defaultLayoutCfg, main )
+module DataGrid.ChartGrid exposing ( ChartCell, LayoutCfg
+                                   , chartGrid, defaultLayoutCfg )
 
 {-| Create grids using elm-ui.
 
@@ -13,9 +13,10 @@ import Element exposing ( Element, centerX, column, el, fill, height
                         , paragraph , padding, px, row, spacing, text
                         , width )
 import Element.Font as Font
-import Html exposing (Html)y
+import Html exposing ( Html )
 
-import DataGrid.Config as Cfg
+import DataGrid.Config as Cfg exposing ( ChartData(..) )
+import DataGrid.Generic as Generic
 import Internal.Defaults as Defaults
 
 
@@ -45,7 +46,7 @@ type alias ChartCell label =
     , chartData : Cfg.ChartData label
     , showSeries : List String
     , showRelative : Bool
-    , showFirstderiv : Bool
+    , showFirstDeriv : Bool
     }
 
 defaultLayoutCfg : LayoutCfg
@@ -84,80 +85,83 @@ type alias HasTitleDesc a =
     { a |
       title : Maybe String
     , description : Maybe String
-    }git sta
+    }
 
+type alias Flags =
+    { windowWidth : Float
+    , windowHeight : Float
+    }
 
 --------------------------------------------------------------------------------
 
-main : Program flags model msg
-main =
+chartGrid : LayoutCfg ->
+            List (List (ChartCell label)) ->
+            Program Flags (Model label) Msg
+chartGrid cfg charts =
     Browser.element
-        { init = init
+        { init = init cfg charts
         , view = view
         , update = update
         , subscriptions = \_ -> Sub.none
         }
 
-init : flags -> (Model label, Cmd Msg)
-init flags =
-    { cfg = defaultLayoutCfg
-    , charts = []
-    , windowW = flags.windowWidth
-    , windowH = flags.windowHeight
-    }
+init : LayoutCfg ->
+       List (List (ChartCell label)) ->
+       Flags -> 
+       (Model label, Cmd Msg)
+init cfg charts =
+    \flags ->
+        ( { cfg = cfg
+          , charts = charts
+          , windowW = flags.windowWidth
+          , windowH = flags.windowHeight
+          }
+        , Cmd.none
+        )
 
 
 --------------------------------------------------------------------------------
 
 view : Model label -> Html msg
-view = html [] []
-
---------------------------------------------------------------------------------
--- Update
-
-update : Msg -> Model -> (Model label, Cmd Msg)
-update msg model = Cmd.none
-
---------------------------------------------------------------------------------
--- Chart Grid
-
-chartGrid : LayoutConfig -> List (List (Chart msg)) -> Html msg
-chartGrid cfg xss =
-    let rows = List.map genRow xss
+view model =
+    let cfg = model.cfg
+        xss = model.charts
+        w = Maybe.withDefault 1800 cfg.w
+        rows = List.map genRow xss
         genRow xs = row [ width fill, spacing cfg.colSpacing ]
                         (List.map (chartCell cfg) xs)
         gridTitle = title cfg cfg.textColor cfg.gridBaseFontSize
-        tf = Maybe.withDefault Defaults.defaultTypeface cfg.typeface
     in
         Element.layout
-            [ Font.family [ Font.typeface tf, Font.sansSerif ]
+            [ Font.family [ Font.typeface cfg.typeface, Font.sansSerif ]
             , padding cfg.padding
             ]
             ( column
-                 [ centerX, width <| px cfg.w, spacing cfg.rowSpacing ]
+                 [ centerX, width <| px w, spacing cfg.rowSpacing ]
                  ([gridTitle, text "\n"] ++ rows) )
 
-chartCell : LayoutConfig -> Chart msg -> Element msg
-chartCell cfg c =
-    column
+chartCell : LayoutCfg -> ChartCell label -> Element msg
+chartCell cfg cell =
+    let chart = Generic.render cell.chartCfg cell.chartData
+    in column
         [ width fill ]
-        [ title c cfg.textColor cfg.cellBaseFontSize
-        , c.chart ]
+        [ title cell cfg.textColor cfg.cellBaseFontSize
+        , chart |> Element.html ]
 
-
---------------------------------------------------------------------------------
--- Helpers
-
-title : HasTitleDesc a -> Maybe Element.Color -> Int -> Element msg
-title r mColor baseFont =
+title : HasTitleDesc a -> Element.Color -> Int -> Element msg
+title r textColor baseFont =
     let t = Maybe.withDefault "" r.title
         d = Maybe.withDefault "" r.description
-        fc = Maybe.withDefault (Defaults.rgbToElmUI Defaults.defaultTextColor)
-             mColor
         smallFont = round <| toFloat baseFont * 0.8
     in paragraph
-        [ Font.color fc ]
+        [ Font.color textColor ]
         [ el [ Font.bold, Font.size baseFont ] (text t)
         , text " | "
         , el [ Font.size smallFont ] (text d)
         ]
+
+--------------------------------------------------------------------------------
+-- Update
+
+update : Msg -> Model label -> (Model label, Cmd Msg)
+update msg model = (model, Cmd.none)

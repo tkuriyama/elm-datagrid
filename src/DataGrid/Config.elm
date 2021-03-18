@@ -8,15 +8,31 @@ import Internal.Defaults as Defaults
 
 
 --------------------------------------------------------------------------------
--- Type Definitions
+-- Top-Level Types
 
-type alias ProtoChartCfg a
-    = { a |
-        w : Float
-      , h : Float
-      , pad : Padding
-      , chartSpec : ChartSpec
-      }
+type ChartCfg label
+    = Std (StdChartCfg label)
+
+type ChartData label
+    = BarChartData (List (label, Float))
+    | LineChartData (List (String, List (label, Float)))
+
+type ChartSpec
+    = BarChartSpec { fillColor : String
+                   , hoverColor : String
+                   }
+    | LineChartSpec { showLineName : Bool
+                    , lineNameSize : Int
+                    , showVBar : Bool
+                    ,  toggleSeries : Bool
+                    , toggleRelative : Bool
+                    , toggleFirstDeriv : Bool
+                    }
+    | DefaultSpec
+
+
+--------------------------------------------------------------------------------
+-- StdChart and Defaults
 
 type alias StdChartCfg label
     = { w : Float
@@ -31,27 +47,41 @@ type alias StdChartCfg label
       , legend : Legend
       }
 
-type ChartData label
-    = BarChartData (List (label, Float))
-    | LineChartData (List (String, List (label, Float)))
+defaultStdChartCfg : StdChartCfg label
+defaultStdChartCfg =
+    { w = 900
+    , h = 450
+    , pad = defaultPadding
+    , chartSpec = DefaultSpec
+    , dataAxisTicks = 5
+    , showLabels = True
+    , labelFormatter = \_ -> ""
+    , tooltips = defaultTooltips
+    , fontSpec = defaultFontSpec
+    , legend = defaultLegend
+    }
 
-type ChartSpec
-    = BarChartSpec { fillColor : String
-                   , hoverColor : String
-                   }
-    | LineChartSpec { showLineName : Bool
-                    , lineNameSize : Int
-                    , showVBar : Bool
-                    }
-    | LineShareChartSpec { toggleSeries : Bool
-                         , toggleRelative : Bool
-                         , toggleFirstDeriv : Bool
-                         }
-    | DefaultSpec
+defaultBarChartSpec : ChartSpec
+defaultBarChartSpec =
+    BarChartSpec
+    { fillColor = Defaults.rgbaToString Defaults.defaultFillColor
+    , hoverColor = Defaults.rgbaToString Defaults.defaultHoverColor
+    }
+
+defaultLineChartSpec : ChartSpec
+defaultLineChartSpec =
+    LineChartSpec
+    { showLineName = True
+    , lineNameSize = 12
+    , showVBar = True
+    ,  toggleSeries = False
+    , toggleRelative = True
+    , toggleFirstDeriv = True
+    }
 
 
 --------------------------------------------------------------------------------
--- Helper Types
+-- Helper Types and Defaults
 
 type alias Padding =
     { top : Float
@@ -85,45 +115,6 @@ type Position
     | Left
     | Bottom
     | Inline
---------------------------------------------------------------------------------
--- StdChartCfg Defaults
-
-defaultStdChartCfg : StdChartCfg label
-defaultStdChartCfg =
-    { w = 900
-    , h = 450
-    , pad = defaultPadding
-    , chartSpec = DefaultSpec
-    , dataAxisTicks = 5
-    , showLabels = True
-    , labelFormatter = \_ -> ""
-    , tooltips = defaultTooltips
-    , fontSpec = defaultFontSpec
-    , legend = defaultLegend
-    }
-
-defaultBarChartSpec : ChartSpec
-defaultBarChartSpec =
-    BarChartSpec
-    { fillColor = Defaults.rgbaToString Defaults.defaultFillColor
-    , hoverColor = Defaults.rgbaToString Defaults.defaultHoverColor
-    }
-
-defaultLineChartSpec : ChartSpec
-defaultLineChartSpec =
-    LineChartSpec
-    { showLineName = True
-    , lineNameSize = 12
-    , showVBar = False
-    }
-
-defaultLineShareChartSpec : ChartSpec
-defaultLineShareChartSpec =
-    LineShareChartSpec
-    { toggleSeries = False
-    , toggleRelative = True
-    , toggleFirstDeriv = True
-    }
 
 defaultPadding : Padding
 defaultPadding =

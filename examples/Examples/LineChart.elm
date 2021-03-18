@@ -1,10 +1,11 @@
-module Examples.LineChart exposing ( main, cfg, chart )
+module Examples.LineChart exposing ( main, cfg, chart, filterData )
 
 import List.Extra as LE
 import TypedSvg.Core exposing ( Svg )
 
 import DataGrid.LineChart exposing ( render )
 import DataGrid.Config as Cfg exposing ( defaultStdChartCfg
+                                       , defaultLineChartSpec
                                        , defaultPadding, defaultTooltips )
 import Internal.Utils as Utils
 import SampleData.LineChartSample as LineChartSample
@@ -47,12 +48,13 @@ tooltipsCfg =
 
 lineChartSpec : Cfg.ChartSpec
 lineChartSpec =
-    Cfg.LineChartSpec
-        { showLineName = True
-        , lineNameSize = 14
-        , showVBar = True
-        }
-
+    case defaultLineChartSpec of
+        Cfg.LineChartSpec d
+            -> Cfg.LineChartSpec { d |
+                                   lineNameSize = 14
+                                 }
+        _
+            -> defaultLineChartSpec
 
 --------------------------------------------------------------------------------
 -- Data

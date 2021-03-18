@@ -1,4 +1,4 @@
-module Examples.BarChart exposing ( cfg, main )
+module Examples.BarChart exposing ( cfg, main, data )
 
 import TypedSvg.Core exposing ( Svg )
 
@@ -10,7 +10,7 @@ import DataGrid.Config as Cfg exposing ( defaultStdChartCfg, defaultTooltips )
 
 main : Svg msg
 main =
-    render cfg timeSeries
+    render cfg data
 
 cfg : Cfg.StdChartCfg String
 cfg =
@@ -27,8 +27,8 @@ tooltipsCfg =
      showLargeTooltips = True
     }
 
-timeSeries : List (String, Float)
-timeSeries =
+data : List (String, Float)
+data =
     [("2020-10-07", 9181835573.0)
     , ("2020-10-08", 9161733481.0)
     , ("2020-10-09", 9021962916.0)
