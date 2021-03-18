@@ -1,7 +1,12 @@
 module Internal.Defaults exposing (..)
 
+{-| Default styles and associated style converters.
+
+-}
+
 import Element
 import String.Format
+
 
 --------------------------------------------------------------------------------
 

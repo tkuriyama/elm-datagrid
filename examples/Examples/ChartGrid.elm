@@ -4,7 +4,8 @@ import Browser
 import Element
 
 import DataGrid.Config as Cfg
-import DataGrid.ChartGrid as ChartGrid exposing ( chartGrid, defaultLayoutCfg )
+import DataGrid.ChartGrid as ChartGrid exposing ( chartGrid, defaultChartCell
+                                                , defaultLayoutCfg )
 import Examples.BarChart as BC
 import Examples.LineChart as LC
 
@@ -23,44 +24,33 @@ cfg =
 
 charts : List (List (ChartGrid.ChartCell String))
 charts =
-    let f i = { title = Just <| "Chart " ++ String.fromInt i
-              , description = Just <| "description " ++ String.fromInt i
-              , links = []
-              , chartCfg = Cfg.Std BC.cfg
-              , chartData = Cfg.BarChartData BC.data
-              , showSeries = []
-              , showRelative = False
-              , showFirstDeriv = False
+    let f i =
+            { defaultChartCell |
+              title = Just <| "Chart " ++ String.fromInt i
+            , description = Just <| "description " ++ String.fromInt i
+            , chartCfg = Cfg.Std BC.cfg
+            , chartData = Cfg.BarChartData BC.data
               }
-        lineCharts =
-            [ { title = Just "Venue Mkt Share: Large"
-              , description = Just <| "Mkt share > 3%"
-              , links = []
-              , chartCfg = Cfg.Std LC.cfg
-              , chartData = Cfg.LineChartData <| LC.filterData 3.0 100.0
-              , showSeries = []
-              , showRelative = False
-              , showFirstDeriv = False
-              }
-            , { title = Just "Venue Mkt Share: Medium"
-              , description = Just "Mkt share 1 - 3%"
-              , links = []
-              , chartCfg = Cfg.Std LC.cfg
-              , chartData = Cfg.LineChartData <| LC.filterData 1.0 3.0
-              , showSeries = []
-              , showRelative = False
-              , showFirstDeriv = False
-              }
-            , { title = Just "Venue Mkt Share: Small"
-              , description = Just "Mkt Share < 1%"
-              , links = []
-              , chartCfg = Cfg.Std LC.cfg
-              , chartData = Cfg.LineChartData <| LC.filterData 0.0 1.0
-              , showSeries = []
-              , showRelative = False
-              , showFirstDeriv = False
-              }
-            ]
+        g (title, desc, data) =
+            { defaultChartCell |
+              title = Just title
+            , description = Just desc
+            , chartCfg = Cfg.Std LC.cfg
+            , chartData = Cfg.LineChartData data
+            }
     in [ List.map f [1, 2, 3]
-        , lineCharts
+       , List.map g [ ( "Venue Mkt Share: Large"
+                      , "Mkt share > 3%"
+                      , LC.filterData 3.0 100.0
+                      )
+                    , ( "Venue Mkt Share: Medium"
+                      , "Mkt share 1 - 3%"
+                      , LC.filterData 1.0 3.0
+                      )
+                    , ( "Venue Mkt Share: Small"
+                      , "Mkt share < 1%"
+                      , LC.filterData 0.0 1.0
+                      )
+                    ]
        ]
+

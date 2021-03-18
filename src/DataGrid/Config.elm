@@ -12,10 +12,12 @@ import Internal.Defaults as Defaults
 
 type ChartCfg label
     = Std (StdChartCfg label)
+    | DefaultChartCfg
 
 type ChartData label
     = BarChartData (List (label, Float))
     | LineChartData (List (String, List (label, Float)))
+    | DefaultData
 
 type ChartSpec
     = BarChartSpec { fillColor : String
@@ -27,6 +29,7 @@ type ChartSpec
                     ,  toggleSeries : Bool
                     , toggleRelative : Bool
                     , toggleFirstDeriv : Bool
+                    , toggleHeight : Int
                     }
     | DefaultSpec
 
@@ -77,6 +80,7 @@ defaultLineChartSpec =
     ,  toggleSeries = False
     , toggleRelative = True
     , toggleFirstDeriv = True
+    , toggleHeight = 20
     }
 
 

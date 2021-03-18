@@ -1,5 +1,6 @@
 module DataGrid.ChartGrid exposing ( ChartCell, LayoutCfg
-                                   , chartGrid, defaultLayoutCfg )
+                                   , chartGrid, defaultChartCell
+                                   , defaultLayoutCfg, reindex )
 
 {-| Create grids using elm-ui.
 
@@ -10,15 +11,18 @@ where an element is an elm-ui `Element msg`.
 
 import Browser
 import Element exposing ( Element, centerX, column, el, fill, height
-                        , paragraph , padding, px, row, spacing, text
-                        , width )
+                        , paragraph , padding, px, row, shrink, spacing
+                        , text, width )
 import Element.Font as Font
+import Element.Input as Input
 import Html exposing ( Html )
 
-import DataGrid.Config as Cfg exposing ( ChartData(..) )
-import DataGrid.Generic as Generic
+import DataGrid.Config as Cfg exposing ( ChartCfg(..), ChartData(..)
+                                       , ChartSpec(..) )
 import Internal.Defaults as Defaults
-
+import Internal.Generic as Generic
+import Internal.UI as UI
+import Internal.Utils as Utils
 
 --------------------------------------------------------------------------------
 -- Exposed Types
@@ -39,12 +43,13 @@ type alias LayoutCfg =
     }
 
 type alias ChartCell label =
-    { title : Maybe String
+    { index : Int
+    , title : Maybe String
     , description : Maybe String
     , links : List String
     , chartCfg : Cfg.ChartCfg label
     , chartData : Cfg.ChartData label
-    , showSeries : List String
+    , hideSeries : List String
     , showRelative : Bool
     , showFirstDeriv : Bool
     }
@@ -65,21 +70,42 @@ defaultLayoutCfg =
     , cellBaseFontSize = 16
     }
 
+defaultChartCell : ChartCell label
+defaultChartCell =
+    { index = 0
+    , title = Nothing
+    , description = Nothing
+    , links = []
+    , chartCfg = Cfg.DefaultChartCfg
+    , chartData = Cfg.DefaultData
+    , hideSeries = []
+    , showRelative = True
+    , showFirstDeriv = True
+    }
+
 
 --------------------------------------------------------------------------------
 -- Internal Types
 
+type alias ChartGrid label
+    = List (List (ChartCell label))
+
 type alias Model label =
     { cfg : LayoutCfg
-    , charts : List (List (ChartCell label))
+    , charts : ChartGrid label
     , windowH : Float
     , windowW : Float
     }
 
 type Msg
-    = UpdateShowSeries (List String)
-    | UpdateShowRelative Bool
-    | UpdateShowFirstDeriv Bool
+    = ToggleHideSeries Int String Bool
+    | ToggleRelative Int Bool
+    | ToggleFirstDeriv Int Bool
+
+type alias Flags =
+    { windowWidth : Float
+    , windowHeight : Float
+    }
 
 type alias HasTitleDesc a =
     { a |
@@ -87,16 +113,16 @@ type alias HasTitleDesc a =
     , description : Maybe String
     }
 
-type alias Flags =
-    { windowWidth : Float
-    , windowHeight : Float
+type alias HasIndex a =
+    { a |
+      index : Int
     }
 
---------------------------------------------------------------------------------
 
-chartGrid : LayoutCfg ->
-            List (List (ChartCell label)) ->
-            Program Flags (Model label) Msg
+--------------------------------------------------------------------------------
+-- Main
+
+chartGrid : LayoutCfg -> ChartGrid label -> Program Flags (Model label) Msg
 chartGrid cfg charts =
     Browser.element
         { init = init cfg charts
@@ -107,22 +133,32 @@ chartGrid cfg charts =
 
 init : LayoutCfg ->
        List (List (ChartCell label)) ->
-       Flags -> 
+       Flags ->
        (Model label, Cmd Msg)
 init cfg charts =
     \flags ->
         ( { cfg = cfg
-          , charts = charts
+          , charts = reindex charts
           , windowW = flags.windowWidth
           , windowH = flags.windowHeight
           }
         , Cmd.none
         )
 
+reindex : List (List (HasIndex a)) -> List (List (HasIndex a))
+reindex xss =
+    let colInds = List.map (\xs -> List.range 1 (List.length xs)) xss
+        f r c x = { x |
+                    index = r * 1000 + c
+                  }
+    in List.map2 Tuple.pair colInds xss
+        |> List.indexedMap (\r (cs, xs) -> List.map2 (\c x -> f r c x) cs xs)
+
 
 --------------------------------------------------------------------------------
+-- View
 
-view : Model label -> Html msg
+view : Model label -> Html Msg
 view model =
     let cfg = model.cfg
         xss = model.charts
@@ -140,15 +176,16 @@ view model =
                  [ centerX, width <| px w, spacing cfg.rowSpacing ]
                  ([gridTitle, text "\n"] ++ rows) )
 
-chartCell : LayoutCfg -> ChartCell label -> Element msg
+chartCell : LayoutCfg -> ChartCell label -> Element Msg
 chartCell cfg cell =
     let chart = Generic.render cell.chartCfg cell.chartData
     in column
         [ width fill ]
         [ title cell cfg.textColor cfg.cellBaseFontSize
+        , controls cfg cell
         , chart |> Element.html ]
 
-title : HasTitleDesc a -> Element.Color -> Int -> Element msg
+title : HasTitleDesc a -> Element.Color -> Int -> Element Msg
 title r textColor baseFont =
     let t = Maybe.withDefault "" r.title
         d = Maybe.withDefault "" r.description
@@ -160,8 +197,76 @@ title r textColor baseFont =
         , el [ Font.size smallFont ] (text d)
         ]
 
+controls : LayoutCfg -> ChartCell label -> Element Msg
+controls cfg cell =
+    let ((toggleSs, toggleRel, toggleFD), toggleH) = parseToggles cell.chartCfg
+        attrs = [ width shrink
+                , Font.size <| round (toFloat toggleH * 0.7)
+                ]
+    in row
+        [ width shrink
+        , spacing 2
+        ]
+        [ if not toggleRel then Element.none
+          else
+              Input.checkbox attrs
+              { onChange = ToggleRelative cell.index
+              , icon = UI.toggle toggleH "Relative" "Notional"
+              , checked = not cell.showRelative
+              , label = Input.labelHidden "Notional / Relative"
+              }
+        , if not toggleFD then Element.none
+          else
+              Input.checkbox attrs
+              { onChange = ToggleFirstDeriv cell.index
+              , icon = UI.toggle toggleH "1Δ " " 0Δ"
+              , checked = not cell.showFirstDeriv
+              , label = Input.labelHidden "0th Deriv / 1st Deriv"
+              }
+        ]
+
+parseToggles : Cfg.ChartCfg label -> ((Bool, Bool, Bool), Int)
+parseToggles cfg =
+    let noToggle = ((False, False, False), 0)
+    in case cfg of
+        Std c -> case c.chartSpec of
+                     LineChartSpec spec -> ( ( spec.toggleSeries
+                                             , spec.toggleRelative
+                                             , spec.toggleFirstDeriv
+                                             )
+                                           , spec.toggleHeight
+                                           )
+                     _ -> noToggle
+        DefaultChartCfg -> noToggle
+
+
+
 --------------------------------------------------------------------------------
 -- Update
 
 update : Msg -> Model label -> (Model label, Cmd Msg)
-update msg model = (model, Cmd.none)
+update msg model =
+    case msg of
+        ToggleRelative i b ->
+            ( { model | charts = mapGrid (updateRelative i b) model.charts }
+            , Cmd.none
+            )
+        ToggleFirstDeriv i b ->
+            ( { model | charts = mapGrid (updateFirstDeriv i b) model.charts }
+            , Cmd.none
+            )
+        _ ->
+            (model, Cmd.none)
+
+mapGrid : (ChartCell label -> ChartCell label) ->
+          ChartGrid label ->
+          ChartGrid label
+mapGrid f = List.map (\row -> List.map f row)
+
+updateRelative : Int -> Bool -> ChartCell label -> ChartCell label
+updateRelative i b cell =
+    if cell.index /= i then cell else { cell | showRelative = xor b True }
+
+updateFirstDeriv: Int -> Bool -> ChartCell label -> ChartCell label
+updateFirstDeriv i b cell =
+    if cell.index /= i then cell else { cell | showFirstDeriv = xor b True }
