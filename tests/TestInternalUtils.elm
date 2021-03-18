@@ -50,6 +50,18 @@ testFmtFloat =
               \_ -> fmtFloat 3 0.1234 |> Expect.equal "0.123"
         ]
 
+--------------------------------------------------------------------------------
+-- Lists
+
+testSplitN : Test
+testSplitN  =
+    describe "Test splitN"
+        [ test "well-formed data" <|
+              \_ -> splitN 2 [1, 2, 3, 4] |> Expect.equal [[1, 2], [3, 4]]
+        , test "not so well-formed but valid data" <|
+              \_ -> splitN 2 [1, 2, 3, 4, 5] |>
+                    Expect.equal [[1, 2], [3, 4], [5]]
+        ]
 
 --------------------------------------------------------------------------------
 -- Reshaping

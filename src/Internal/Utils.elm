@@ -43,6 +43,16 @@ fmtFloat dp f =
 
 
 --------------------------------------------------------------------------------
+-- Lists
+
+splitN : Int -> List a -> List (List a)
+splitN i xs =
+  case List.take i xs of
+    [] -> []
+    ys -> ys :: splitN i (List.drop i xs)
+
+
+--------------------------------------------------------------------------------
 -- Reshaping
 
 -- Essentially a matrix transpose of a x b -> b x a
