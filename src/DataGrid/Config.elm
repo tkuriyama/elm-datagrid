@@ -80,7 +80,7 @@ defaultLineChartSpec =
     ,  toggleSeries = False
     , toggleRelative = True
     , toggleFirstDeriv = True
-    , toggleHeight = 20
+    , toggleHeight = 18
     }
 
 

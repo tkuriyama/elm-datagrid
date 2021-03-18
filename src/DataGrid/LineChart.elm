@@ -1,4 +1,5 @@
-module DataGrid.LineChart exposing ( render )
+module DataGrid.LineChart exposing ( offsetDelta, projectFirstDeriv
+                                   , projectRelative, projectSeries, render )
 
 {-| Render a a single LineChart with some limited config options.
 
@@ -210,3 +211,26 @@ genStyle fCfg cCfg tCfg vbar =
          |> String.Format.namedValue "nameSize" nameSize
          |> String.Format.namedValue "showVBar" (reveal vbar 0.8)
 
+
+--------------------------------------------------------------------------------
+-- Projections
+
+projectFirstDeriv : List (SeriesPair label) -> List (SeriesPair label)
+projectFirstDeriv = identity
+    List.map (\(name, pairs) -> (name, offsetDelta 1 pairs))
+
+projectRelative : List (SeriesPair label) -> List (SeriesPair label)
+projectRelative = identity
+
+projectSeries : List String ->
+                List (SeriesPair label) ->
+                List (SeriesPair label)
+projectSeries hide =
+    List.filter (\(name, pairs) -> List.member name hide |> not)
+
+offsetDelta : Int -> List (label, Float) -> List (label, Float)
+offsetDelta i pairs =
+    let pairs_ = List.drop i pairs
+        head = List.take i pairs |> List.map (\(lbl, _) -> (lbl, 0.0))
+        f (_, prev) (lbl, next) = (lbl, next - prev)
+    in head ++ List.map2 f pairs pairs_

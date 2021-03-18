@@ -19,6 +19,7 @@ import Html exposing ( Html )
 
 import DataGrid.Config as Cfg exposing ( ChartCfg(..), ChartData(..)
                                        , ChartSpec(..) )
+import DataGrid.LineChart as LC
 import Internal.Defaults as Defaults
 import Internal.Generic as Generic
 import Internal.UI as UI
@@ -79,8 +80,8 @@ defaultChartCell =
     , chartCfg = Cfg.DefaultChartCfg
     , chartData = Cfg.DefaultData
     , hideSeries = []
-    , showRelative = True
-    , showFirstDeriv = True
+    , showRelative = False
+    , showFirstDeriv = False
     }
 
 
@@ -145,6 +146,7 @@ init cfg charts =
         , Cmd.none
         )
 
+-- only works for rows of length < 1000
 reindex : List (List (HasIndex a)) -> List (List (HasIndex a))
 reindex xss =
     let colInds = List.map (\xs -> List.range 1 (List.length xs)) xss
@@ -178,12 +180,27 @@ view model =
 
 chartCell : LayoutCfg -> ChartCell label -> Element Msg
 chartCell cfg cell =
-    let chart = Generic.render cell.chartCfg cell.chartData
+    let chart = project cell |> Generic.render cell.chartCfg
     in column
         [ width fill ]
         [ title cell cfg.textColor cfg.cellBaseFontSize
-        , controls cfg cell
+        , controls cell
         , chart |> Element.html ]
+
+project : ChartCell label -> ChartData label
+project cell =
+    case cell.chartData of
+        LineChartData d ->
+            d
+             |> (if cell.showRelative then LC.projectRelative else identity)
+             |> (if cell.showFirstDeriv then LC.projectFirstDeriv else identity)
+             |> (if List.length cell.hideSeries > 0 then
+                     LC.projectSeries cell.hideSeries
+                 else
+                     identity)
+             |> LineChartData
+        _ ->
+            cell.chartData
 
 title : HasTitleDesc a -> Element.Color -> Int -> Element Msg
 title r textColor baseFont =
@@ -197,8 +214,8 @@ title r textColor baseFont =
         , el [ Font.size smallFont ] (text d)
         ]
 
-controls : LayoutCfg -> ChartCell label -> Element Msg
-controls cfg cell =
+controls : ChartCell label -> Element Msg
+controls cell =
     let ((toggleSs, toggleRel, toggleFD), toggleH) = parseToggles cell.chartCfg
         attrs = [ width shrink
                 , Font.size <| round (toFloat toggleH * 0.7)
@@ -212,7 +229,7 @@ controls cfg cell =
               Input.checkbox attrs
               { onChange = ToggleRelative cell.index
               , icon = UI.toggle toggleH "Relative" "Notional"
-              , checked = not cell.showRelative
+              , checked = cell.showRelative
               , label = Input.labelHidden "Notional / Relative"
               }
         , if not toggleFD then Element.none
@@ -220,7 +237,7 @@ controls cfg cell =
               Input.checkbox attrs
               { onChange = ToggleFirstDeriv cell.index
               , icon = UI.toggle toggleH "1Δ " " 0Δ"
-              , checked = not cell.showFirstDeriv
+              , checked = cell.showFirstDeriv
               , label = Input.labelHidden "0th Deriv / 1st Deriv"
               }
         ]
@@ -238,7 +255,6 @@ parseToggles cfg =
                                            )
                      _ -> noToggle
         DefaultChartCfg -> noToggle
-
 
 
 --------------------------------------------------------------------------------
@@ -265,8 +281,10 @@ mapGrid f = List.map (\row -> List.map f row)
 
 updateRelative : Int -> Bool -> ChartCell label -> ChartCell label
 updateRelative i b cell =
-    if cell.index /= i then cell else { cell | showRelative = xor b True }
+    if cell.index /= i then cell
+    else { cell | showRelative = b }
 
 updateFirstDeriv: Int -> Bool -> ChartCell label -> ChartCell label
 updateFirstDeriv i b cell =
-    if cell.index /= i then cell else { cell | showFirstDeriv = xor b True }
+    if cell.index /= i then cell
+    else { cell | showFirstDeriv = b }
