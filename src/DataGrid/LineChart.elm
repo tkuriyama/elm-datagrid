@@ -1,5 +1,6 @@
-module DataGrid.LineChart exposing ( offsetDelta, projectFirstDeriv
-                                   , projectRelative, projectSeries, render )
+module DataGrid.LineChart exposing ( normalize, offsetDelta, projectFirstDeriv
+                                   , projectRelative, projectSeries, render
+                                   , sumSeries, toMatrix, transpose )
 
 {-| Render a a single LineChart with some limited config options.
 
@@ -25,7 +26,6 @@ import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
 
 import DataGrid.Config as Cfg
 import DataGrid.StdChart as StdChart
-import Internal.Defaults as Defaults
 import Internal.Utils as Utils
 
 
@@ -83,7 +83,7 @@ parseChartSpec spec =
 render : Cfg.StdChartCfg label -> List(SeriesPair label) -> Svg msg
 render cfg model =
     let env = genChartEnv cfg model
-        model_ = reshapeSeriesPairs model
+        model_ = transpose model
     in svg
         [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
@@ -215,15 +215,13 @@ genStyle fCfg cCfg tCfg vbar =
 --------------------------------------------------------------------------------
 -- Projections
 
--- Essentially a matrix transpose of a x b -> b x a
-reshapeSeriesPairs : List (a, List (b, c)) -> List (b, List (a, c))
-reshapeSeriesPairs pairs =
+-- Essentially a matrix transpose of a x b -> b x a for SeriesPairs
+transpose : List (a, List (b, c)) -> List (b, List (a, c))
+transpose pairs =
     let names = Utils.fsts pairs
         m = toMatrix pairs |> LE.transpose
-        labels = Utils.snds pairs
-               |> List.head
-               |> Maybe.withDefault []
-               |> Utils.fsts
+        labels =
+            Utils.snds pairs |> List.head |> Maybe.withDefault [] |> Utils.fsts
         f x ys = (x, List.map2 Tuple.pair names ys)
     in List.map2 f labels m
 
@@ -233,18 +231,24 @@ toMatrix pairs =
         |> List.map List.unzip    -- List (List b, List c)
         |> Utils.snds                   -- List (List c)
 
-projectFirstDeriv : List (SeriesPair label) -> List (SeriesPair label)
-projectFirstDeriv = identity
-    List.map (\(name, pairs) -> (name, offsetDelta 1 pairs))
-
 projectRelative : List (SeriesPair label) -> List (SeriesPair label)
-projectRelative = identity
+projectRelative pairs =
+    let sums = sumSeries pairs
+    in List.foldr (normalize sums) [] pairs |> List.reverse
 
-projectSeries : List String ->
-                List (SeriesPair label) ->
-                List (SeriesPair label)
-projectSeries hide =
-    List.filter (\(name, pairs) -> List.member name hide |> not)
+sumSeries : List (SeriesPair label) -> List Float
+sumSeries =
+    Utils.snds >> List.map Utils.snds >> LE.transpose >> List.map List.sum
+
+normalize : List Float -> SeriesPair label -> List (SeriesPair label) -> List (SeriesPair label)
+normalize sums (name, xs) acc =
+    let (labels, nums) = (Utils.fsts xs, Utils.snds xs)
+        nums_ = List.map2 (\a b -> a / b * 100) nums sums
+    in (name, List.map2 Tuple.pair labels nums_) :: acc
+
+projectFirstDeriv : List (SeriesPair label) -> List (SeriesPair label)
+projectFirstDeriv =
+    List.map (\(name, pairs) -> (name, offsetDelta 1 pairs))
 
 offsetDelta : Int -> List (label, Float) -> List (label, Float)
 offsetDelta i pairs =
@@ -252,3 +256,9 @@ offsetDelta i pairs =
         head = List.take i pairs |> List.map (\(lbl, _) -> (lbl, 0.0))
         f (_, prev) (lbl, next) = (lbl, next - prev)
     in head ++ List.map2 f pairs pairs_
+
+projectSeries : List String ->
+                List (SeriesPair label) ->
+                List (SeriesPair label)
+projectSeries hide =
+    List.filter (\(name, pairs) -> List.member name hide |> not)

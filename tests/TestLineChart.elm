@@ -4,6 +4,8 @@ import Expect exposing (Expectation)
 import Test exposing (..)
 
 import DataGrid.LineChart exposing (..)
+import Internal.Utils as Utils
+
 
 --------------------------------------------------------------------------------
 -- Reshaping
@@ -58,6 +60,38 @@ testToMatrix =
               Expect.equal [[1.0, 2.0], [11.0, 12.0]]
         ]
 
+testProjectRelative : Test
+testProjectRelative =
+    let pairs = [ ("a", [ ("1", 1.0), ("2", 2.0), ("3", 3.0) ] )
+                , ("b", [ ("1", 99.0), ("2", 98.0), ("3", 97.0) ] )
+                ]
+        expectA xs =
+            List.map2 (\a b -> abs (a - b) < 0.00001) [1.0, 2.0, 3.0] xs
+        expectB xs =
+            List.map2 (\a b -> abs (a - b) < 0.00001) [99.0, 98.0, 97.0] xs
+    in describe "Test projectRelative"
+        [ test "sample SeriesPairs..." <|
+              \_->  projectRelative pairs
+              |> List.map (\(name, xs) ->
+                               if name == "a" then expectA (Utils.snds xs)
+                               else expectB (Utils.snds xs))
+              |> Expect.equal [ [True, True, True]
+                              , [True, True, True]
+                              ]
+
+        ]
+
+testSumSeries : Test
+testSumSeries =
+    let pairs = [ ("a", [ ("1", 1.0), ("2", 2.0), ("3", 3.0) ] )
+                , ("b", [ ("1", 99.0), ("2", 98.0), ("3", 97.0) ] )
+                ]
+    in describe "Test sumSeries"
+        [ test "sample series" <|
+              \_->  sumSeries pairs
+              |> List.map2 (\a b -> abs (a - b) < 0.0001) [100.0, 100.0, 100.0]
+              |> Expect.equal [True, True, True]
+        ]
 
 testProjectFirstDeriv : Test
 testProjectFirstDeriv =
