@@ -1,4 +1,4 @@
-module Internal.UI exposing ( toggle )
+module Internal.UI exposing ( Padding, toggle )
 
 
 import Element exposing (..)
@@ -7,6 +7,15 @@ import Element.Border as Border
 
 import Internal.Defaults as Defaults
 
+
+--------------------------------------------------------------------------------
+
+type alias Padding
+    = { top : Int
+      , right : Int
+      , bottom : Int
+      , left : Int
+      }
 
 --------------------------------------------------------------------------------
 -- Labelled Boolean Toggle

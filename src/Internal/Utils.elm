@@ -2,6 +2,7 @@ module Internal.Utils exposing (..)
 
 import FormatNumber
 import FormatNumber.Locales exposing (Decimals(..), usLocale)
+import List.Extra as LE
 
 
 --------------------------------------------------------------------------------
@@ -50,6 +51,9 @@ splitN i xs =
     [] -> []
     ys -> ys :: splitN i (List.drop i xs)
 
+toggleMember : a -> List a -> List a
+toggleMember x xs =
+    if List.member x xs then LE.remove x xs else x :: xs
 
 --------------------------------------------------------------------------------
 -- Strings
