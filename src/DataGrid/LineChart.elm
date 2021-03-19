@@ -9,7 +9,7 @@ axes is better handled by direct interaction with the elm-visualization API.
 -}
 
 import Color exposing ( Color )
-import List.Extra exposing ( last )
+import List.Extra as LE exposing ( last )
 import Path exposing ( Path )
 import Scale exposing ( BandScale, ContinuousScale, OrdinalScale )
 import Shape
@@ -83,7 +83,7 @@ parseChartSpec spec =
 render : Cfg.StdChartCfg label -> List(SeriesPair label) -> Svg msg
 render cfg model =
     let env = genChartEnv cfg model
-        model_ = Utils.reshapeSeriesPairs model
+        model_ = reshapeSeriesPairs model
     in svg
         [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
@@ -214,6 +214,24 @@ genStyle fCfg cCfg tCfg vbar =
 
 --------------------------------------------------------------------------------
 -- Projections
+
+-- Essentially a matrix transpose of a x b -> b x a
+reshapeSeriesPairs : List (a, List (b, c)) -> List (b, List (a, c))
+reshapeSeriesPairs pairs =
+    let names = Utils.fsts pairs
+        m = toMatrix pairs |> LE.transpose
+        labels = Utils.snds pairs
+               |> List.head
+               |> Maybe.withDefault []
+               |> Utils.fsts
+        f x ys = (x, List.map2 Tuple.pair names ys)
+    in List.map2 f labels m
+
+toMatrix : List (a, List (b, c)) -> List (List c)
+toMatrix pairs =
+    Utils.snds pairs                    -- List (List (b, c))
+        |> List.map List.unzip    -- List (List b, List c)
+        |> Utils.snds                   -- List (List c)
 
 projectFirstDeriv : List (SeriesPair label) -> List (SeriesPair label)
 projectFirstDeriv = identity
