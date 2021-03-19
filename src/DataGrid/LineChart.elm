@@ -25,8 +25,8 @@ import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
                                , Paint(..), Transform(..) )
 
 import DataGrid.Config as Cfg
+import DataGrid.Internal.Utils as Utils
 import DataGrid.StdChart as StdChart
-import Internal.Utils as Utils
 
 
 --------------------------------------------------------------------------------

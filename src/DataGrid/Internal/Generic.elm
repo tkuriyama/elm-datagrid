@@ -1,8 +1,4 @@
-module DataGrid.Generic exposing ( render )
-
-{-| Generic operations for working with top-level chart types.
-
--}
+module DataGrid.Internal.Generic exposing ( render )
 
 import TypedSvg exposing ( svg )
 import TypedSvg.Core exposing ( Svg )

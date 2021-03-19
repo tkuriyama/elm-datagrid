@@ -18,9 +18,9 @@ import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
                                , Transform(..) )
 
 import DataGrid.Config as Cfg
+import DataGrid.Internal.Defaults as Defaults
+import DataGrid.Internal.Utils as Utils
 import DataGrid.StdChart as StdChart
-import Internal.Defaults as Defaults
-import Internal.Utils as Utils
 
 
 --------------------------------------------------------------------------------

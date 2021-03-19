@@ -4,7 +4,7 @@ module DataGrid.Config exposing (..)
 
 -}
 
-import Internal.Defaults as Defaults
+import DataGrid.Internal.Defaults as Defaults
 
 
 --------------------------------------------------------------------------------

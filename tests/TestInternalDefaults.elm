@@ -4,7 +4,7 @@ import Element
 import Expect exposing (Expectation)
 import Test exposing (..)
 
-import Internal.Defaults exposing (..)
+import DataGrid.Internal.Defaults exposing (..)
 
 
 --------------------------------------------------------------------------------

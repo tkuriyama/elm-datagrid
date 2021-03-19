@@ -4,7 +4,7 @@ import Expect exposing (Expectation)
 import Test exposing (..)
 
 import DataGrid.LineChart exposing (..)
-import Internal.Utils as Utils
+import DataGrid.Internal.Utils as Utils
 
 
 --------------------------------------------------------------------------------

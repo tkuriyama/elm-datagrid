@@ -3,7 +3,7 @@ module TestInternalUtils exposing (..)
 import Expect exposing (Expectation)
 import Test exposing (..)
 
-import Internal.Utils exposing (..)
+import DataGrid.Internal.Utils exposing (..)
 
 
 --------------------------------------------------------------------------------

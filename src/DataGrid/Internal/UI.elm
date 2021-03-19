@@ -1,11 +1,11 @@
-module Internal.UI exposing ( Padding, toggle )
+module DataGrid.Internal.UI exposing ( Padding, toggle )
 
 
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 
-import Internal.Defaults as Defaults
+import DataGrid.Internal.Defaults as Defaults
 
 
 --------------------------------------------------------------------------------

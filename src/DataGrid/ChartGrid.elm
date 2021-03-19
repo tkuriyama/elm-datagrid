@@ -19,11 +19,11 @@ import Html exposing ( Html )
 
 import DataGrid.Config as Cfg exposing ( ChartCfg(..), ChartData(..)
                                        , ChartSpec(..) )
+import DataGrid.Internal.Defaults as Defaults
+import DataGrid.Internal.Generic as Generic
+import DataGrid.Internal.UI as UI
+import DataGrid.Internal.Utils as Utils
 import DataGrid.LineChart as LC
-import Internal.Defaults as Defaults
-import Internal.Generic as Generic
-import Internal.UI as UI
-import Internal.Utils as Utils
 
 --------------------------------------------------------------------------------
 -- Exposed Types

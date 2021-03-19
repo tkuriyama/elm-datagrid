@@ -7,7 +7,7 @@ import DataGrid.LineChart exposing ( render )
 import DataGrid.Config as Cfg exposing ( defaultStdChartCfg
                                        , defaultLineChartSpec
                                        , defaultPadding, defaultTooltips )
-import Internal.Utils as Utils
+import DataGrid.Internal.Utils as Utils
 import SampleData.LineChartSample as LineChartSample
 
 --------------------------------------------------------------------------------

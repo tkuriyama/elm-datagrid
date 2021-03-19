@@ -19,7 +19,7 @@ import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
                                , Paint(..) )
 
 import DataGrid.Config as Cfg
-import Internal.Utils as Utils
+import DataGrid.Internal.Utils as Utils
 
 
 --------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-module Internal.Defaults exposing (..)
+module DataGrid.Internal.Defaults exposing (..)
 
 {-| Default styles and associated style converters.
 

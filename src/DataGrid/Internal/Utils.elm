@@ -1,4 +1,4 @@
-module Internal.Utils exposing (..)
+module DataGrid.Internal.Utils exposing (..)
 
 import FormatNumber
 import FormatNumber.Locales exposing (Decimals(..), usLocale)
