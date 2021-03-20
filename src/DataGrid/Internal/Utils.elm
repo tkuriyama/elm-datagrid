@@ -61,7 +61,6 @@ toggleMember x xs =
 twoCols : Int -> Int -> String -> String -> String
 twoCols n extra s1 s2 =
     let l1 = String.length s1
-        l2 = String.length s2
         spaces = String.repeat (n - l1 + extra) nbsp
     in String.concat [s1, spaces, s2]
 

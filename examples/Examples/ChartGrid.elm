@@ -1,8 +1,5 @@
 module Examples.ChartGrid exposing ( main )
 
-import Browser
-import Element
-
 import DataGrid.Config as Cfg
 import DataGrid.ChartGrid as ChartGrid exposing ( chartGrid, defaultChartCell
                                                 , defaultLayoutCfg )

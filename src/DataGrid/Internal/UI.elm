@@ -1,14 +1,13 @@
-module DataGrid.Internal.UI exposing ( Padding, toggle )
+module DataGrid.Internal.UI exposing ( Padding, padLeft, padRight, toggle )
 
 
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
 
-import DataGrid.Internal.Defaults as Defaults
-
 
 --------------------------------------------------------------------------------
+-- Padding
 
 type alias Padding
     = { top : Int
@@ -17,15 +16,33 @@ type alias Padding
       , left : Int
       }
 
+zeroPad : Padding
+zeroPad =
+    { top = 0
+    , right = 0
+    , bottom = 0
+    , left = 0
+    }
+
+padRight : Int -> Element.Attribute msg
+padRight n =
+    paddingEach { zeroPad | right = n }
+
+
+padLeft : Int -> Element.Attribute msg
+padLeft n =
+    paddingEach { zeroPad | left = n }
+
+
 --------------------------------------------------------------------------------
 -- Labelled Boolean Toggle
 -- See https://korban.net/elm/elm-ui-patterns/checkbox
 
-toggle : Int -> String -> String -> Bool -> Element msg 
+toggle : Int -> String -> String -> Bool -> Element msg
 toggle sz on off isChecked =
     let
         w = max (String.length on) (String.length off)
-            |> \l -> (toFloat l + 2) * (toFloat sz) * 0.55 |> round
+            |> \l -> (toFloat l + 2) * toFloat sz * 0.55 |> round
         knob =
             el
                 [ width <| px sz

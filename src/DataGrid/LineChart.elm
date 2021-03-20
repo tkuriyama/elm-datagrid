@@ -11,14 +11,14 @@ axes is better handled by direct interaction with the elm-visualization API.
 
 import Color exposing ( Color )
 import List.Extra as LE exposing ( last )
-import Path exposing ( Path )
+import Path
 import Scale exposing ( BandScale, ContinuousScale, OrdinalScale )
 import Shape
 import String.Format
 import TypedSvg exposing ( g, circle, line, style, svg, text_ )
-import TypedSvg.Attributes exposing ( alignmentBaseline, class, fill, stroke
+import TypedSvg.Attributes exposing ( class, fill, stroke
                                     , textAnchor, transform, viewBox )
-import TypedSvg.Attributes.InPx exposing ( cx, cy, height, r, strokeWidth, width
+import TypedSvg.Attributes.InPx exposing ( cx, cy, r, strokeWidth
                                          , x, x1, x2, y, y1, y2 )
 import TypedSvg.Core exposing ( Svg, text )
 import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
@@ -261,4 +261,4 @@ projectSeries : List String ->
                 List (SeriesPair label) ->
                 List (SeriesPair label)
 projectSeries hide =
-    List.filter (\(name, pairs) -> List.member name hide |> not)
+    List.filter (\(name, _) -> List.member name hide |> not)

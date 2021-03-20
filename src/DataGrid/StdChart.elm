@@ -11,8 +11,7 @@ import Scale exposing ( BandScale, ContinuousScale, OrdinalScale
 import Scale.Color
 import String.Format
 import TypedSvg exposing ( g, rect, svg, text_ )
-import TypedSvg.Attributes exposing ( alignmentBaseline, class, fill, style
-                                    , textAnchor)
+import TypedSvg.Attributes exposing ( alignmentBaseline, class, textAnchor)
 import TypedSvg.Attributes.InPx exposing ( height, rx, width, x, y )
 import TypedSvg.Core exposing ( Svg, text )
 import TypedSvg.Types exposing ( AlignmentBaseline(..), AnchorAlignment(..)
@@ -27,7 +26,7 @@ import DataGrid.Internal.Utils as Utils
 
 genYScale : Bool -> Float -> Float -> List Float -> ContinuousScale Float
 genYScale zeroY h padding xs =
-    let minY = (Maybe.withDefault 0 <| List.minimum xs)
+    let minY = Maybe.withDefault 0 <| List.minimum xs
         dispMin = if not zeroY then minY else min 0 minY
         dispMax = Maybe.withDefault 0 <| List.maximum xs
     in Scale.linear (h - padding, 0) (dispMin, dispMax)
@@ -98,8 +97,7 @@ genTooltip env lbl t =
     in text_
         [ class [ "tooltip" ]
         , x <| textX
-        , y <| env.h - (2 * env.pad.bottom) +
-            (toFloat env.tooltips.tooltipSize)
+        , y <| env.h - (2 * env.pad.bottom) + toFloat env.tooltips.tooltipSize
         , textAnchor <| anchor
         ]
         [ text t
@@ -142,10 +140,9 @@ genHoverTooltip env colorScale lbl points =
           ] ++ List.map2 (renderHoverText pad) hEnv.lines hEnv.lineParams)
 
 renderHoverText : Float -> String -> (Float, Float, Color) -> Svg msg
-renderHoverText pad t (hx, hy, c) =
+renderHoverText pad t (hx, hy, _) =
     text_ [ x <| hx + pad
           , y <| hy + pad
-          -- , fill <| Paint c
           ]
           [ text t ]
 
@@ -202,19 +199,18 @@ genHoverText env colorScale pairs (x0, y0) =
 
 genBaseStyle : Cfg.FontSpec -> Cfg.Tooltips -> String
 genBaseStyle fCfg tCfg =
-    let display b = if b then "inline" else "none"
-    in """
-        text { font-family: {{typeface}}, monospace, sans-serif; }
-        .tooltip { display: none; font-size: {{sz}}px;
-                   fill: {{textColor}}; }
-        .tooltip_large { display: none; font-size: {{szL}}px;
-                         fill: {{textColor}}; }
-        .tooltip_hover { display: none; font-size: {{szH}}px;
-                         fill: {{textColor}}; }
-        .tooltip_hover rect { fill: rgba(250, 250, 250, 1.0); }
-        """
-       |> String.Format.namedValue "textColor" fCfg.textColor
-       |> String.Format.namedValue "sz" (String.fromInt tCfg.tooltipSize)
-       |> String.Format.namedValue "szL" (String.fromInt tCfg.largeTooltipSize)
-       |> String.Format.namedValue "szH" (String.fromInt tCfg.hoverTooltipSize)
-       |> String.Format.namedValue "typeface" fCfg.typeface
+    """
+     text { font-family: {{typeface}}, monospace, sans-serif; }
+     .tooltip { display: none; font-size: {{sz}}px;
+     fill: {{textColor}}; }
+     .tooltip_large { display: none; font-size: {{szL}}px;
+     fill: {{textColor}}; }
+     .tooltip_hover { display: none; font-size: {{szH}}px;
+     fill: {{textColor}}; }
+     .tooltip_hover rect { fill: rgba(250, 250, 250, 1.0); }
+     """
+     |> String.Format.namedValue "textColor" fCfg.textColor
+     |> String.Format.namedValue "sz" (String.fromInt tCfg.tooltipSize)
+     |> String.Format.namedValue "szL" (String.fromInt tCfg.largeTooltipSize)
+     |> String.Format.namedValue "szH" (String.fromInt tCfg.hoverTooltipSize)
+     |> String.Format.namedValue "typeface" fCfg.typeface
