@@ -1,5 +1,5 @@
-module DataGrid.Internal.UI exposing ( Padding, padLeft, padRight, toggle
-                                     , htmlTooltip )
+module DataGrid.Internal.UI exposing ( Padding, htmlTooltip, padBottom, padLeft
+                                     , padRight, toggle )
 
 {-| Elm UI components and helpers.
 
@@ -71,11 +71,13 @@ padRight : Int -> Element.Attribute msg
 padRight n =
     paddingEach { zeroPad | right = n }
 
-
 padLeft : Int -> Element.Attribute msg
 padLeft n =
     paddingEach { zeroPad | left = n }
 
+padBottom : Int -> Element.Attribute msg
+padBottom n =
+    paddingEach { zeroPad | bottom = n }
 
 --------------------------------------------------------------------------------
 -- Tooptip
