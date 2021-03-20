@@ -1,37 +1,14 @@
-module DataGrid.Internal.UI exposing ( Padding, padLeft, padRight, toggle )
+module DataGrid.Internal.UI exposing ( Padding, padLeft, padRight, toggle
+                                     , htmlTooltip )
 
+{-| Elm UI components and helpers.
+
+-}
 
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-
-
---------------------------------------------------------------------------------
--- Padding
-
-type alias Padding
-    = { top : Int
-      , right : Int
-      , bottom : Int
-      , left : Int
-      }
-
-zeroPad : Padding
-zeroPad =
-    { top = 0
-    , right = 0
-    , bottom = 0
-    , left = 0
-    }
-
-padRight : Int -> Element.Attribute msg
-padRight n =
-    paddingEach { zeroPad | right = n }
-
-
-padLeft : Int -> Element.Attribute msg
-padLeft n =
-    paddingEach { zeroPad | left = n }
+import Html.Attributes
 
 
 --------------------------------------------------------------------------------
@@ -72,3 +49,37 @@ toggle sz on off isChecked =
                     [ knob, el [ centerX ] <| text off ]
 
 
+--------------------------------------------------------------------------------
+-- Padding
+
+type alias Padding
+    = { top : Int
+      , right : Int
+      , bottom : Int
+      , left : Int
+      }
+
+zeroPad : Padding
+zeroPad =
+    { top = 0
+    , right = 0
+    , bottom = 0
+    , left = 0
+    }
+
+padRight : Int -> Element.Attribute msg
+padRight n =
+    paddingEach { zeroPad | right = n }
+
+
+padLeft : Int -> Element.Attribute msg
+padLeft n =
+    paddingEach { zeroPad | left = n }
+
+
+--------------------------------------------------------------------------------
+-- Tooptip
+
+htmlTooltip : String -> Element.Attribute msg
+htmlTooltip s =
+    htmlAttribute <| Html.Attributes.title s
