@@ -44,7 +44,7 @@ view model =
             ]
             ( column
                  [ centerX, width <| px w, spacing cfg.rowSpacing ]
-                 ( [gridTitle, text "\n"] ++ rows )
+                 ( (el [ UI.padBottom 10 ] gridTitle) :: rows )
             )
 
 chartCell : LayoutCfg -> ChartCell label -> Element Msg
