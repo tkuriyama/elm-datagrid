@@ -6,7 +6,7 @@ import DataGrid.Config as Cfg exposing ( ChartCfg (..), ChartData (..)
                                        , ChartSpec (..) )
 
 --------------------------------------------------------------------------------
--- Exposed Types 
+-- Exposed Types
 
 type alias LayoutCfg =
     { w : Maybe Int
@@ -63,6 +63,7 @@ type alias HasTitleDesc a =
     { a |
       title : Maybe String
     , description : Maybe String
+    , links : List String
     }
 
 type alias HasIndex a =
