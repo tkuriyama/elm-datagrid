@@ -1,6 +1,6 @@
 module DataGrid.ChartGrid.View exposing ( view )
 
-{-| Render module for ChartGrid
+{-| Render module for ChartGrid.
 
 -}
 
@@ -120,9 +120,9 @@ controlRelFD attrs cell =
           else
               Input.checkbox attrs
               { onChange = ToggleRelative cell.index
-              , icon = UI.toggle toggleH "Relative" "Notional"
+              , icon = UI.toggle toggleH "Relative" "Nominal"
               , checked = cell.showRelative
-              , label = Input.labelHidden "Notional / Relative"
+              , label = Input.labelHidden "Nominal / Relative"
               }
         , if not toggleFD then Element.none
           else
