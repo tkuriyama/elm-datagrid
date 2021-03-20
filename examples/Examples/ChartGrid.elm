@@ -16,7 +16,9 @@ cfg =
     { defaultLayoutCfg |
       title = Just "Demo Chart Grid"
     , description = Just "US equity market statistics"
-    , links = []
+    , links = [ ( "CBOE Bats"
+                , "https://certification.batstrading.com/market_summary/")
+              ]
     }
 
 charts : List (List (ChartGrid.ChartCell String))

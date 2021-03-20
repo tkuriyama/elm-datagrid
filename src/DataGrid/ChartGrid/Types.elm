@@ -16,7 +16,7 @@ type alias LayoutCfg =
     , padding : Int
     , title : Maybe String
     , description : Maybe String
-    , links : List String
+    , links : List (String, String)
     , textColor : Element.Color
     , typeface : String
     , gridBaseFontSize : Int
@@ -27,7 +27,7 @@ type alias ChartCell label =
     { index : Int
     , title : Maybe String
     , description : Maybe String
-    , links : List String
+    , links : List (String, String)
     , chartCfg : Cfg.ChartCfg label
     , chartData : Cfg.ChartData label
     , hideSeries : List String
@@ -63,7 +63,7 @@ type alias HasTitleDesc a =
     { a |
       title : Maybe String
     , description : Maybe String
-    , links : List String
+    , links : List (String, String)
     }
 
 type alias HasIndex a =

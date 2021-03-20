@@ -4,9 +4,7 @@ module DataGrid.ChartGrid.View exposing ( view )
 
 -}
 
-import Element exposing ( Element, alignLeft, alignRight, centerX, centerY
-                        , column, el, fill, height, paragraph , padding, px
-                        , row, shrink, spacing, text, width )
+import Element exposing (..)
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing ( Html )
@@ -45,7 +43,7 @@ view model =
             ]
             ( column
                  [ centerX, width w, height h, spacing cfg.rowSpacing ]
-                 ( (el [ UI.padBottom 10 ] gridTitle) :: rows )
+                 ( (el [ UI.padBottom 10, width fill ] gridTitle) :: rows )
             )
 
 chartCell : LayoutCfg -> ChartCell label -> Element Msg
@@ -76,10 +74,12 @@ title r textColor baseFont =
         d = Maybe.withDefault "" r.description
         smallFont = round <| toFloat baseFont * 0.8
     in paragraph
-        [ Font.color textColor ]
+        [ Font.color textColor, width fill ]
         [ el [ Font.bold, Font.size baseFont ] (text t)
         , text " | "
-        , el [ Font.size smallFont ] (text d)
+        , el [ Font.size smallFont ] <| text d
+        , el [ Font.size smallFont, alignRight, UI.padRight 30 ] <|
+            UI.genLinks r.links
         ]
 
 controls : ChartCell label -> Element Msg

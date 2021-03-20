@@ -7,6 +7,7 @@ module DataGrid.Internal.UI exposing (..)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Font as Font
 import Html.Attributes
 
 
@@ -46,6 +47,23 @@ toggle sz on off isChecked =
 
                 else
                     [ knob, el [ centerX ] <| text off ]
+
+--------------------------------------------------------------------------------
+-- Links
+
+genLinks : List (String, String) -> Element msg
+genLinks links =
+    let f (desc, url) =
+            link
+                [ Font.underline, Font.color <| Element.rgb255 0 0 255 ]
+                { url = url, label = text desc }
+        linkElems =
+            List.map f links |> List.intersperse (text " | ")
+    in paragraph
+        []
+        ( if List.length linkElems == 0 then [ Element.none ]
+          else text "[" :: linkElems ++ [text "]"]
+        )
 
 
 --------------------------------------------------------------------------------
