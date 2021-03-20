@@ -32,7 +32,8 @@ view : Model label -> Html Msg
 view model =
     let cfg = model.cfg
         xss = model.charts
-        w = Maybe.withDefault 1800 cfg.w
+        w = UI.maybeLength cfg.w fill
+        h = UI.maybeLength cfg.h fill
         rows = List.map genRow xss
         genRow xs = row [ width fill, spacing cfg.colSpacing ]
                         (List.map (chartCell cfg) xs)
@@ -43,7 +44,7 @@ view model =
             , padding cfg.padding
             ]
             ( column
-                 [ centerX, width <| px w, spacing cfg.rowSpacing ]
+                 [ centerX, width w, height h, spacing cfg.rowSpacing ]
                  ( (el [ UI.padBottom 10 ] gridTitle) :: rows )
             )
 
@@ -112,7 +113,7 @@ controlRelFD : List (Element.Attribute Msg) ->
                ChartCell label ->
                Element Msg
 controlRelFD attrs cell =
-    let attrs_ = attrs ++ [ alignRight, UI.padRight 5 ]
+    let attrs_ = attrs ++ [ alignRight, UI.padRight 30 ]
         ((_, toggleRel, toggleFD), toggleH) = parseToggles cell.chartCfg
     in row
         attrs_

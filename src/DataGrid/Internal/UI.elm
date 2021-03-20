@@ -1,5 +1,4 @@
-module DataGrid.Internal.UI exposing ( Padding, htmlTooltip, padBottom, padLeft
-                                     , padRight, toggle )
+module DataGrid.Internal.UI exposing (..)
 
 {-| Elm UI components and helpers.
 
@@ -85,3 +84,13 @@ padBottom n =
 htmlTooltip : String -> Element.Attribute msg
 htmlTooltip s =
     htmlAttribute <| Html.Attributes.title s
+
+
+--------------------------------------------------------------------------------
+-- Styling
+
+maybeLength : Maybe Int -> Length -> Length
+maybeLength mn default =
+    case mn of
+        Just n -> px n
+        Nothing -> default

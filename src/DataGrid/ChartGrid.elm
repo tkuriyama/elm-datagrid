@@ -31,7 +31,7 @@ type alias ChartCell label
 
 defaultLayoutCfg : LayoutCfg
 defaultLayoutCfg =
-    { w = Just 1800
+    { w = Nothing
     , h = Nothing
     , colSpacing = 0
     , rowSpacing = 5
