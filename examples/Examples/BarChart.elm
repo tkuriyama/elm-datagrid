@@ -28,7 +28,7 @@ cfg =
 paddingCfg : Cfg.Padding
 paddingCfg =
     { defaultPadding
-        | right = 80
+        | right = 50
     }
 
 

@@ -7,11 +7,13 @@ axes is better handled by direct interaction with the elm-visualization API.
 
 -}
 
+import DataGrid.Components as Components
 import DataGrid.Config as Cfg
 import DataGrid.Internal.Defaults as Defaults
 import DataGrid.Internal.StdChart as StdChart
 import DataGrid.Internal.Utils as Utils
 import Scale exposing (BandScale, ContinuousScale)
+import Statistics
 import String.Format
 import TypedSvg exposing (g, rect, style, svg)
 import TypedSvg.Attributes exposing (class, transform, viewBox)
@@ -40,7 +42,6 @@ type alias ChartEnv label =
     , labelFmt : label -> String
     , dataTickCt : Int
     , tooltips : Cfg.Tooltips
-    , showDist : Bool
     , style : String
     }
 
@@ -62,8 +63,8 @@ genChartEnv cfg model =
     , labelFmt = cfg.labelFormatter
     , dataTickCt = min cfg.dataAxisTicks 10
     , tooltips = cfg.tooltips
-    , showDist = parseChartSpec cfg.chartSpec
-    , style = genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips
+    , style = genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips <|
+              parseChartSpec cfg.chartSpec
     }
 
 parseChartSpec : Cfg.ChartSpec -> Bool
@@ -73,6 +74,7 @@ parseChartSpec spec =
             d.showDistribution
         _ ->
             False
+
 
 --------------------------------------------------------------------------------
 -- Render
@@ -101,8 +103,12 @@ render cfg ( _, model ) =
             [ class [ "bars" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-          <|
-            List.map (renderBar env) model
+            ( List.map (renderBar env) model )
+        , g
+            [ class [ "distribution" ]
+            , transform [ Translate (env.w - env.pad.right) env.pad.top ]
+            ]
+            ( renderBoxPlot env <| Utils.snds model )
         ]
 
 
@@ -133,13 +139,34 @@ renderBar env ( lbl, val ) =
         ]
 
 
+renderBoxPlot : ChartEnv label -> List Float -> List (Svg msg)
+renderBoxPlot env xs =
+    let xs_ =
+            List.sort xs
+
+        convert =
+             Maybe.withDefault 0 >> Scale.convert env.dataScale
+
+    in
+        [ Components.boxPlot
+              { x = 10
+              , y = 0
+              , w = 10
+              , p0 = List.minimum xs_ |> convert
+              , p25 = Statistics.quantile 0.25 xs_ |> convert
+              , p50 = Statistics.quantile 0.5 xs_ |> convert
+              , p75 = Statistics.quantile 0.75 xs_ |> convert
+              , p100 = List.maximum xs_ |> convert
+              }
+        ]
+
 
 --------------------------------------------------------------------------------
 -- Style
 
 
-genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> String
-genStyle fCfg cCfg tCfg =
+genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> Bool -> String
+genStyle fCfg cCfg tCfg showBoxPlot =
     let
         display b =
             if b then
@@ -162,12 +189,15 @@ genStyle fCfg cCfg tCfg =
          .bar:hover rect { fill: {{hoverColor}}; }
          .bar:hover .tooltip { display: {{showTT}}; }
          .bar:hover .tooltip_large { display: {{showLargeTT}}; }
+         .distribution { display: {{showBoxPlot}}; }
+         .boxplot rect { fill: {{fillColor }}; }
          """
         |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
         |> String.Format.namedValue "showLargeTT"
             (display tCfg.showLargeTooltips)
         |> String.Format.namedValue "fillColor" fillColor
         |> String.Format.namedValue "hoverColor" hoverColor
+        |> String.Format.namedValue "showBoxPlot"(display showBoxPlot)
 
 
 defaultFillColor : String
