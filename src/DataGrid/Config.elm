@@ -26,6 +26,7 @@ type ChartSpec
     = BarChartSpec
         { fillColor : String
         , hoverColor : String
+        , showDistribution : Bool
         }
     | LineChartSpec
         { showLineName : Bool
@@ -95,6 +96,7 @@ defaultBarChartSpec =
     BarChartSpec
         { fillColor = Defaults.rgbaToString Defaults.defaultFillColor
         , hoverColor = Defaults.rgbaToString Defaults.defaultHoverColor
+        , showDistribution = True
         }
 
 

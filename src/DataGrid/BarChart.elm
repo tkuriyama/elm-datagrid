@@ -40,6 +40,7 @@ type alias ChartEnv label =
     , labelFmt : label -> String
     , dataTickCt : Int
     , tooltips : Cfg.Tooltips
+    , showDist : Bool
     , style : String
     }
 
@@ -61,10 +62,17 @@ genChartEnv cfg model =
     , labelFmt = cfg.labelFormatter
     , dataTickCt = min cfg.dataAxisTicks 10
     , tooltips = cfg.tooltips
+    , showDist = parseChartSpec cfg.chartSpec
     , style = genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips
     }
 
-
+parseChartSpec : Cfg.ChartSpec -> Bool
+parseChartSpec spec =
+    case spec of
+        Cfg.BarChartSpec d ->
+            d.showDistribution
+        _ ->
+            False
 
 --------------------------------------------------------------------------------
 -- Render
