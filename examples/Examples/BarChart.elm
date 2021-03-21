@@ -1,10 +1,9 @@
 module Examples.BarChart exposing (cfg, data, main)
 
 import DataGrid.BarChart exposing (render)
-import DataGrid.Config as Cfg exposing (defaultStdChartCfg, defaultTooltips)
+import DataGrid.Config as Cfg exposing (defaultPadding, defaultStdChartCfg, defaultTooltips)
 import SampleData.BarChartSample as BarChartSample
 import TypedSvg.Core exposing (Svg)
-
 
 
 --------------------------------------------------------------------------------
@@ -18,10 +17,18 @@ main =
 cfg : Cfg.StdChartCfg String
 cfg =
     { defaultStdChartCfg
-        | chartSpec = Cfg.defaultBarChartSpec
+        | pad = paddingCfg
+        , chartSpec = Cfg.defaultBarChartSpec
         , showLabels = False
         , labelFormatter = identity
         , tooltips = tooltipsCfg
+    }
+
+
+paddingCfg : Cfg.Padding
+paddingCfg =
+    { defaultPadding
+        | right = 80
     }
 
 
