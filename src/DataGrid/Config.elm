@@ -1,54 +1,62 @@
 module DataGrid.Config exposing (..)
 
 {-| Chart configuration type specifications, as well as defaults.
-
 -}
 
 import DataGrid.Internal.Defaults as Defaults
 
 
+
 --------------------------------------------------------------------------------
 -- Top-Level Types
+
 
 type ChartCfg label
     = Std (StdChartCfg label)
     | DefaultChartCfg
 
+
 type ChartData label
-    = BarChartData (List (label, Float))
-    | LineChartData (List (String, List (label, Float)))
+    = BarChartData (List ( label, Float ))
+    | LineChartData (List ( String, List ( label, Float ) ))
     | DefaultData
 
+
 type ChartSpec
-    = BarChartSpec { fillColor : String
-                   , hoverColor : String
-                   }
-    | LineChartSpec { showLineName : Bool
-                    , lineNameSize : Int
-                    , showVBar : Bool
-                    ,  toggleSeries : Bool
-                    , toggleRelative : Bool
-                    , toggleFirstDeriv : Bool
-                    , toggleHeight : Int
-                    }
+    = BarChartSpec
+        { fillColor : String
+        , hoverColor : String
+        }
+    | LineChartSpec
+        { showLineName : Bool
+        , lineNameSize : Int
+        , showVBar : Bool
+        , toggleSeries : Bool
+        , toggleRelative : Bool
+        , toggleFirstDeriv : Bool
+        , toggleHeight : Int
+        }
     | DefaultSpec
+
 
 
 --------------------------------------------------------------------------------
 -- StdChart and Defaults
 
-type alias StdChartCfg label
-    = { w : Float
-      , h : Float
-      , pad : Padding
-      , chartSpec : ChartSpec
-      , dataAxisTicks : Int
-      , showLabels : Bool
-      , labelFormatter : label -> String
-      , tooltips : Tooltips
-      , fontSpec : FontSpec
-      , legend : Legend
-      }
+
+type alias StdChartCfg label =
+    { w : Float
+    , h : Float
+    , pad : Padding
+    , chartSpec : ChartSpec
+    , dataAxisTicks : Int
+    , showLabels : Bool
+    , labelFormatter : label -> String
+    , tooltips : Tooltips
+    , fontSpec : FontSpec
+    , legend : Legend
+    }
+
 
 defaultStdChartCfg : StdChartCfg label
 defaultStdChartCfg =
@@ -64,28 +72,32 @@ defaultStdChartCfg =
     , legend = defaultLegend
     }
 
+
 defaultBarChartSpec : ChartSpec
 defaultBarChartSpec =
     BarChartSpec
-    { fillColor = Defaults.rgbaToString Defaults.defaultFillColor
-    , hoverColor = Defaults.rgbaToString Defaults.defaultHoverColor
-    }
+        { fillColor = Defaults.rgbaToString Defaults.defaultFillColor
+        , hoverColor = Defaults.rgbaToString Defaults.defaultHoverColor
+        }
+
 
 defaultLineChartSpec : ChartSpec
 defaultLineChartSpec =
     LineChartSpec
-    { showLineName = True
-    , lineNameSize = 12
-    , showVBar = True
-    ,  toggleSeries = True
-    , toggleRelative = True
-    , toggleFirstDeriv = True
-    , toggleHeight = 18
-    }
+        { showLineName = True
+        , lineNameSize = 12
+        , showVBar = True
+        , toggleSeries = True
+        , toggleRelative = True
+        , toggleFirstDeriv = True
+        , toggleHeight = 18
+        }
+
 
 
 --------------------------------------------------------------------------------
 -- Helper Types and Defaults
+
 
 type alias Padding =
     { top : Float
@@ -93,6 +105,7 @@ type alias Padding =
     , bottom : Float
     , left : Float
     }
+
 
 type alias Tooltips =
     { showTooltips : Bool
@@ -103,15 +116,18 @@ type alias Tooltips =
     , hoverTooltipSize : Int
     }
 
+
 type alias FontSpec =
     { textColor : String
     , typeface : String
     }
 
+
 type alias Legend =
     { show : Bool
     , location : Position
     }
+
 
 type Position
     = Top
@@ -120,6 +136,7 @@ type Position
     | Bottom
     | Inline
 
+
 defaultPadding : Padding
 defaultPadding =
     { top = 30
@@ -127,6 +144,7 @@ defaultPadding =
     , bottom = 30
     , left = 30
     }
+
 
 defaultTooltips : Tooltips
 defaultTooltips =
@@ -138,11 +156,13 @@ defaultTooltips =
     , hoverTooltipSize = 16
     }
 
+
 defaultFontSpec : FontSpec
 defaultFontSpec =
     { textColor = Defaults.rgbToString Defaults.defaultTextColor
     , typeface = "Consolas"
     }
+
 
 defaultLegend : Legend
 defaultLegend =

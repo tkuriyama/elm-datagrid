@@ -1,12 +1,14 @@
 module DataGrid exposing (main)
 
-import Html exposing (Html)
-
 import DataGrid.BarChart
 import DataGrid.Layout
+import Html exposing (Html)
+
 
 
 --------------------------------------------------------------------------------
 
+
 main : Html msg
-main = Html.text "package main"
+main =
+    Html.text "package main"

@@ -1,12 +1,18 @@
 module DataGrid.ChartGrid.Types exposing (..)
 
+import DataGrid.Config as Cfg
+    exposing
+        ( ChartCfg(..)
+        , ChartData(..)
+        , ChartSpec(..)
+        )
 import Element
 
-import DataGrid.Config as Cfg exposing ( ChartCfg (..), ChartData (..)
-                                       , ChartSpec (..) )
+
 
 --------------------------------------------------------------------------------
 -- Exposed Types
+
 
 type alias LayoutCfg =
     { w : Maybe Int
@@ -16,18 +22,19 @@ type alias LayoutCfg =
     , padding : Int
     , title : Maybe String
     , description : Maybe String
-    , links : List (String, String)
+    , links : List ( String, String )
     , textColor : Element.Color
     , typeface : String
     , gridBaseFontSize : Int
     , cellBaseFontSize : Int
     }
 
+
 type alias ChartCell label =
     { index : Int
     , title : Maybe String
     , description : Maybe String
-    , links : List (String, String)
+    , links : List ( String, String )
     , chartCfg : Cfg.ChartCfg label
     , chartData : Cfg.ChartData label
     , hideSeries : List String
@@ -36,11 +43,14 @@ type alias ChartCell label =
     }
 
 
+
 --------------------------------------------------------------------------------
 -- Internal Types
 
-type alias ChartGrid label
-    = List (List (ChartCell label))
+
+type alias ChartGrid label =
+    List (List (ChartCell label))
+
 
 type alias Model label =
     { cfg : LayoutCfg
@@ -49,24 +59,28 @@ type alias Model label =
     , windowW : Float
     }
 
+
 type Msg
     = ToggleSeries Int String Bool
     | ToggleRelative Int Bool
     | ToggleFirstDeriv Int Bool
+
 
 type alias Flags =
     { windowWidth : Float
     , windowHeight : Float
     }
 
+
 type alias HasTitleDesc a =
-    { a |
-      title : Maybe String
-    , description : Maybe String
-    , links : List (String, String)
+    { a
+        | title : Maybe String
+        , description : Maybe String
+        , links : List ( String, String )
     }
 
+
 type alias HasIndex a =
-    { a |
-      index : Int
+    { a
+        | index : Int
     }
