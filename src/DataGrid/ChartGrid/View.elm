@@ -13,7 +13,7 @@ import DataGrid.Config as Cfg
 import DataGrid.Internal.Generic as Generic
 import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils
-import DataGrid.LineChart as LC
+import DataGrid.Internal.StdChart as StdChart
 import Element exposing (..)
 import Element.Font as Font
 import Element.Input as Input
@@ -88,18 +88,18 @@ project cell =
         LineChartData d ->
             d
                 |> (if cell.showRelative then
-                        LC.projectRelative
+                        StdChart.projectRelative
 
                     else
                         identity
                    )
                 |> (if cell.showFirstDeriv then
-                        LC.projectFirstDeriv
+                        StdChart.projectFirstDeriv
 
                     else
                         identity
                    )
-                |> LC.projectSeries cell.hideSeries
+                |> StdChart.projectSeries cell.hideSeries
                 |> LineChartData
 
         _ ->

@@ -4,10 +4,14 @@ module SampleData.LineChartSample exposing (data)
 Source: <https://www.cboe.com/us/equities/market_share/>
 -}
 
+import DataGrid.Config as Cfg
+
+
+
 --------------------------------------------------------------------------------
 
 
-data : List ( String, List ( String, Float ) )
+data : Cfg.StdSeriesPairs String
 data =
     [ ( "American"
       , [ ( "2020-10-09", 0.0057 )

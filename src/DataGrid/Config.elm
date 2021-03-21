@@ -17,8 +17,8 @@ type ChartCfg label
 
 
 type ChartData label
-    = BarChartData (List ( label, Float ))
-    | LineChartData (List ( String, List ( label, Float ) ))
+    = BarChartData (StdSeriesPair label)
+    | LineChartData (StdSeriesPairs label)
     | DefaultData
 
 
@@ -37,6 +37,23 @@ type ChartSpec
         , toggleHeight : Int
         }
     | DefaultSpec
+
+
+
+--------------------------------------------------------------------------------
+-- Data
+
+
+type alias SeriesName =
+    String
+
+
+type alias StdSeriesPair label =
+    ( SeriesName, List ( label, Float ) )
+
+
+type alias StdSeriesPairs label =
+    List (StdSeriesPair label)
 
 
 

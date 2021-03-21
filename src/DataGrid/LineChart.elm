@@ -1,14 +1,4 @@
-module DataGrid.LineChart exposing
-    ( normalize
-    , offsetDelta
-    , projectFirstDeriv
-    , projectRelative
-    , projectSeries
-    , render
-    , sumSeries
-    , toMatrix
-    , transpose
-    )
+module DataGrid.LineChart exposing (render)
 
 {-| Render a a single LineChart with some limited config options.
 
@@ -19,9 +9,9 @@ axes is better handled by direct interaction with the elm-visualization API.
 
 import Color exposing (Color)
 import DataGrid.Config as Cfg
+import DataGrid.Internal.StdChart as StdChart
 import DataGrid.Internal.Utils as Utils
-import DataGrid.StdChart as StdChart
-import List.Extra as LE exposing (last)
+import List.Extra as LE
 import Path
 import Scale exposing (BandScale, ContinuousScale, OrdinalScale)
 import Shape
@@ -63,11 +53,6 @@ import TypedSvg.Types
 --------------------------------------------------------------------------------
 -- StdChartfg is converted to ChartEnv for internal use
 
-
-type alias SeriesPair label =
-    ( String, List ( label, Float ) )
-
-
 type alias ChartEnv label =
     { w : Float
     , h : Float
@@ -83,7 +68,7 @@ type alias ChartEnv label =
     }
 
 
-genChartEnv : Cfg.StdChartCfg label -> List (SeriesPair label) -> ChartEnv label
+genChartEnv : Cfg.StdChartCfg label -> Cfg.StdSeriesPairs label -> ChartEnv label
 genChartEnv cfg model =
     let
         names =
@@ -132,14 +117,14 @@ parseChartSpec spec =
 -- Render
 
 
-render : Cfg.StdChartCfg label -> List (SeriesPair label) -> Svg msg
+render : Cfg.StdChartCfg label -> Cfg.StdSeriesPairs label -> Svg msg
 render cfg model =
     let
         env =
             genChartEnv cfg model
 
         model_ =
-            transpose model
+            StdChart.transpose model
     in
     svg
         [ viewBox 0 0 env.w env.h ]
@@ -178,7 +163,7 @@ render cfg model =
         ]
 
 
-renderLine : ChartEnv label -> SeriesPair label -> Svg msg
+renderLine : ChartEnv label -> Cfg.StdSeriesPair label -> Svg msg
 renderLine env ( name, points ) =
     let
         f ( x, y ) =
@@ -192,7 +177,7 @@ renderLine env ( name, points ) =
 
         lastY =
             Utils.snds points
-                |> last
+                |> LE.last
                 |> Maybe.withDefault 0.0
                 |> Scale.convert env.dataScale
     in
@@ -217,7 +202,7 @@ renderLine env ( name, points ) =
         ]
 
 
-renderPoints : ChartEnv label -> SeriesPair label -> Svg msg
+renderPoints : ChartEnv label -> Cfg.StdSeriesPair label -> Svg msg
 renderPoints env ( name, points ) =
     let
         n =
@@ -330,92 +315,3 @@ genStyle fCfg cCfg tCfg vbar =
         |> String.Format.namedValue "showVBar" (reveal vbar 0.8)
 
 
-
---------------------------------------------------------------------------------
--- Projections
--- Essentially a matrix transpose of a x b -> b x a for SeriesPairs
-
-
-transpose : List ( a, List ( b, c ) ) -> List ( b, List ( a, c ) )
-transpose pairs =
-    let
-        names =
-            Utils.fsts pairs
-
-        m =
-            toMatrix pairs |> LE.transpose
-
-        labels =
-            Utils.snds pairs |> List.head |> Maybe.withDefault [] |> Utils.fsts
-
-        f x ys =
-            ( x, List.map2 Tuple.pair names ys )
-    in
-    List.map2 f labels m
-
-
-toMatrix : List ( a, List ( b, c ) ) -> List (List c)
-toMatrix pairs =
-    Utils.snds pairs
-        -- List (List (b, c))
-        |> List.map List.unzip
-        -- List (List b, List c)
-        |> Utils.snds
-
-
-
--- List (List c)
-
-
-projectRelative : List (SeriesPair label) -> List (SeriesPair label)
-projectRelative pairs =
-    let
-        sums =
-            sumSeries pairs
-    in
-    List.foldr (normalize sums) [] pairs |> List.reverse
-
-
-sumSeries : List (SeriesPair label) -> List Float
-sumSeries =
-    Utils.snds >> List.map Utils.snds >> LE.transpose >> List.map List.sum
-
-
-normalize : List Float -> SeriesPair label -> List (SeriesPair label) -> List (SeriesPair label)
-normalize sums ( name, xs ) acc =
-    let
-        ( labels, nums ) =
-            ( Utils.fsts xs, Utils.snds xs )
-
-        nums_ =
-            List.map2 (\a b -> a / b * 100) nums sums
-    in
-    ( name, List.map2 Tuple.pair labels nums_ ) :: acc
-
-
-projectFirstDeriv : List (SeriesPair label) -> List (SeriesPair label)
-projectFirstDeriv =
-    List.map (\( name, pairs ) -> ( name, offsetDelta 1 pairs ))
-
-
-offsetDelta : Int -> List ( label, Float ) -> List ( label, Float )
-offsetDelta i pairs =
-    let
-        pairs_ =
-            List.drop i pairs
-
-        head =
-            List.take i pairs |> List.map (\( lbl, _ ) -> ( lbl, 0.0 ))
-
-        f ( _, prev ) ( lbl, next ) =
-            ( lbl, next - prev )
-    in
-    head ++ List.map2 f pairs pairs_
-
-
-projectSeries :
-    List String
-    -> List (SeriesPair label)
-    -> List (SeriesPair label)
-projectSeries hide =
-    List.filter (\( name, _ ) -> List.member name hide |> not)

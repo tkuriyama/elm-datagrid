@@ -78,7 +78,7 @@ lineChartSpec =
 -- Data
 
 
-filterData : Float -> Float -> List ( String, List ( String, Float ) )
+filterData : Float -> Float -> Cfg.StdSeriesPairs String
 filterData lower upper =
     let
         last =
@@ -97,12 +97,12 @@ filterData lower upper =
         |> subset
 
 
-subset : List String -> List ( String, List ( String, Float ) )
+subset : List String -> Cfg.StdSeriesPairs String
 subset venues =
     data |> List.filter (\p -> List.member (Utils.fst p) venues)
 
 
-data : List ( String, List ( String, Float ) )
+data : Cfg.StdSeriesPairs String
 data =
     let
         x100 n =

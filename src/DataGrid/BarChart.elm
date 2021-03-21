@@ -9,8 +9,8 @@ axes is better handled by direct interaction with the elm-visualization API.
 
 import DataGrid.Config as Cfg
 import DataGrid.Internal.Defaults as Defaults
+import DataGrid.Internal.StdChart as StdChart
 import DataGrid.Internal.Utils as Utils
-import DataGrid.StdChart as StdChart
 import Scale exposing (BandScale, ContinuousScale)
 import String.Format
 import TypedSvg exposing (g, rect, style, svg)
@@ -70,8 +70,8 @@ genChartEnv cfg model =
 -- Render
 
 
-render : Cfg.StdChartCfg label -> List ( label, Float ) -> Svg msg
-render cfg model =
+render : Cfg.StdChartCfg label -> Cfg.StdSeriesPair label -> Svg msg
+render cfg ( _, model ) =
     let
         env =
             genChartEnv cfg model
