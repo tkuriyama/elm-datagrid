@@ -42,11 +42,5 @@ tooltipsCfg =
 data : Cfg.StdSeriesPair String
 data =
     BarChartSample.data
-        |> List.map (Tuple.mapSecond (List.map (Tuple.mapSecond billions)))
         |> List.head
         |> Maybe.withDefault ( "Empty", [] )
-
-
-billions : Float -> Float
-billions x =
-    x / 1000000000.0

@@ -18,6 +18,7 @@ type ChartCfg label
 
 type ChartData label
     = BarChartData (StdSeriesPair label)
+    | BarChartStackedData (StdSeriesPairs label)
     | LineChartData (StdSeriesPairs label)
     | DefaultData
 
@@ -27,6 +28,11 @@ type ChartSpec
         { fillColor : String
         , hoverColor : String
         , showDistribution : Bool
+        }
+    | BarChartStackedSpec
+        { toggleSeries : Bool
+        , toggleRelative : Bool
+        , toggleHeight : Int
         }
     | LineChartSpec
         { showLineName : Bool
@@ -100,6 +106,15 @@ defaultBarChartSpec =
         }
 
 
+defaultBarChartStackedSpec : ChartSpec
+defaultBarChartStackedSpec =
+    BarChartStackedSpec
+        { toggleSeries = True
+        , toggleRelative = True
+        , toggleHeight = 18
+        }
+
+
 defaultLineChartSpec : ChartSpec
 defaultLineChartSpec =
     LineChartSpec
@@ -111,7 +126,6 @@ defaultLineChartSpec =
         , toggleFirstDeriv = True
         , toggleHeight = 18
         }
-
 
 
 --------------------------------------------------------------------------------

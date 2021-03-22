@@ -8,6 +8,7 @@ import DataGrid.ChartGrid as ChartGrid
         )
 import DataGrid.Config as Cfg
 import Examples.BarChart as BC
+import Examples.BarChartStacked as BCS
 import Examples.LineChart as LC
 
 
@@ -38,14 +39,6 @@ cfg =
 charts : List (List (ChartGrid.ChartCell String))
 charts =
     let
-        f i =
-            { defaultChartCell
-                | title = Just <| "Chart " ++ String.fromInt i
-                , description = Just <| "description " ++ String.fromInt i
-                , chartCfg = Cfg.Std BC.cfg
-                , chartData = Cfg.BarChartData BC.data
-            }
-
         g ( title, desc, data ) =
             { defaultChartCell
                 | title = Just title
@@ -54,7 +47,25 @@ charts =
                 , chartData = Cfg.LineChartData data
             }
     in
-    [ List.map f [ 1, 2, 3 ]
+    [ [ { defaultChartCell
+                | title = Just <| "Daily Market Volume"
+                , description = Just <| "in shares"
+                , chartCfg = Cfg.Std BC.cfg
+                , chartData = Cfg.BarChartData BC.data
+            }
+      , { defaultChartCell
+                | title = Just <| "Market Volume by Tape"
+                , description = Just <| "in shares"
+                , chartCfg = Cfg.Std BCS.cfg
+                , chartData = Cfg.BarChartStackedData BCS.dataByTape
+            }
+      , { defaultChartCell
+                | title = Just <| "Market Volume by Group"
+                , description = Just <| "in shares"
+                , chartCfg = Cfg.Std BCS.cfg
+                , chartData = Cfg.BarChartStackedData BCS.dataByGroup
+            }
+      ]
     , List.map g
         [ ( "Venue Mkt Share: Large"
           , "Mkt share > 3%"

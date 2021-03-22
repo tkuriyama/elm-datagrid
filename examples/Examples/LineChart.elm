@@ -1,4 +1,4 @@
-module Examples.LineChart exposing (cfg, chart, filterData, main)
+module Examples.LineChart exposing (cfg, filterData, main)
 
 import DataGrid.Config as Cfg
     exposing
