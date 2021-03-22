@@ -105,8 +105,8 @@ render cfg ( _, model ) =
             ]
             ( List.map (renderBar env) model )
         , g
-            [ class [ "distribution" ]
-            , transform [ Translate (env.w - env.pad.right) env.pad.top ]
+            [ class [ "statistics" ]
+            , transform [ Translate 0 env.pad.top ]
             ]
             ( renderBoxPlot env <| Utils.snds model )
         ]
@@ -144,20 +144,41 @@ renderBoxPlot env xs =
     let xs_ =
             List.sort xs
 
+        quantile q =
+            Statistics.quantile q >> Maybe.withDefault 0
+
         convert =
-             Maybe.withDefault 0 >> Scale.convert env.dataScale
+             Scale.convert env.dataScale
+
+        (p25, p50, p75) =
+            ( quantile 0.25 xs_, quantile 0.5 xs_, quantile 0.75 xs_ )
+
+        bp =
+            { x = 10
+            , y = 0
+            , w = 10
+            , p0 = List.minimum xs_ |> Maybe.withDefault 0 |> convert
+            , p25 = p25 |> convert
+            , p50 = p50 |> convert
+            , p75 = p75 |> convert
+            , p100 = List.maximum xs_ |> Maybe.withDefault 0 |> convert
+            }
+
+        pairs =
+            [ ("25%", p25)
+            , ("50%", p50)
+            , ("75%", p75)
+            , ("Mean", Utils.mean xs)
+            , ("Std", Statistics.deviation xs |> Maybe.withDefault 0)
+            ]
+
+        tooltipX =
+            env.w - env.pad.right + bp.x
 
     in
-        [ Components.boxPlot
-              { x = 10
-              , y = 0
-              , w = 10
-              , p0 = List.minimum xs_ |> convert
-              , p25 = Statistics.quantile 0.25 xs_ |> convert
-              , p50 = Statistics.quantile 0.5 xs_ |> convert
-              , p75 = Statistics.quantile 0.75 xs_ |> convert
-              , p100 = List.maximum xs_ |> convert
-              }
+        [ g [ transform [ Translate (env.w - env.pad.right)  0] ]
+            [ Components.boxPlot bp ]
+        , StdChart.genHoverTooltipTitled env "Statistics" tooltipX pairs
         ]
 
 
@@ -189,8 +210,10 @@ genStyle fCfg cCfg tCfg showBoxPlot =
          .bar:hover rect { fill: {{hoverColor}}; }
          .bar:hover .tooltip { display: {{showTT}}; }
          .bar:hover .tooltip_large { display: {{showLargeTT}}; }
-         .distribution { display: {{showBoxPlot}}; }
+         .statistics { display: {{showBoxPlot}}; }
          .boxplot rect { fill: {{fillColor }}; }
+         .statistics .tooltip_hover { display: none; }
+         .statistics:hover .tooltip_hover { display: inline; }
          """
         |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
         |> String.Format.namedValue "showLargeTT"

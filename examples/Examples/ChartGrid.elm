@@ -28,6 +28,9 @@ cfg =
             [ ( "CBOE Bats"
               , "https://certification.batstrading.com/market_summary/"
               )
+            , ( "Source"
+              , "https://github.com/tkuriyama/elm-datagrid"
+              )
             ]
     }
 

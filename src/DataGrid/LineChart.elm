@@ -254,7 +254,7 @@ renderVBarHover env ( lbl, points ) =
             , stroke <| Paint <| Color.rgb 0.5 0.5 0.5
             ]
             []
-        , StdChart.genHoverTooltip env env.colorScale lbl points
+        , StdChart.genHoverTooltipLabelled env lbl points
         ]
 
 

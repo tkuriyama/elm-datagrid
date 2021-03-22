@@ -83,6 +83,12 @@ toggleMember x xs =
         x :: xs
 
 
+--------------------------------------------------------------------------------
+-- Statistics
+
+mean : List Float -> Float
+mean xs = List.sum xs / (toFloat <| List.length xs)
+
 
 --------------------------------------------------------------------------------
 -- Strings

@@ -117,7 +117,7 @@ type alias HoverEnv =
     , h : Float
     , w : Float
     , lines : List String
-    , lineParams : List ( Float, Float, Color )
+    , lineParams : List ( Float, Float )
     }
 
 
@@ -162,18 +162,43 @@ genLargeTooltip env t =
         [ text t
         ]
 
-
-genHoverTooltip :
+genHoverTooltipLabelled :
     HasTooltipEnv a label
-    -> OrdinalScale String Color
     -> label
     -> List ( String, Float )
     -> Svg msg
-genHoverTooltip env colorScale lbl points =
+genHoverTooltipLabelled env lbl points =
     let
         hEnv =
-            genHoverEnv env colorScale lbl points
+            genHoverEnv env (Scale.convert env.labelScale lbl)  points
+        title =
+            env.labelFmt lbl
+    in
+        renderHoverTooltip env hEnv title points
 
+
+genHoverTooltipTitled :
+    HasTooltipEnv a label
+    -> String
+    -> Float
+    -> List ( String, Float )
+    -> Svg msg
+genHoverTooltipTitled env title hx points =
+    let
+        hEnv =
+            genHoverEnv env hx  points
+
+    in
+        renderHoverTooltip env hEnv title points
+
+
+renderHoverTooltip :
+    HasTooltipEnv a label ->
+    HoverEnv -> String ->
+    List ( String, Float ) ->
+    Svg msg
+renderHoverTooltip env hEnv title points =
+    let
         pad =
             5
     in
@@ -191,14 +216,14 @@ genHoverTooltip env colorScale lbl points =
             [ x <| (hEnv.x + pad)
             , y <| hEnv.y + toFloat env.tooltips.hoverTooltipSize + pad
             ]
-            [ text <| env.labelFmt lbl ]
+            [ text <| title ]
          ]
             ++ List.map2 (renderHoverText pad) hEnv.lines hEnv.lineParams
         )
 
 
-renderHoverText : Float -> String -> ( Float, Float, Color ) -> Svg msg
-renderHoverText pad t ( hx, hy, _ ) =
+renderHoverText : Float -> String -> ( Float, Float ) -> Svg msg
+renderHoverText pad t ( hx, hy ) =
     text_
         [ x <| hx + pad
         , y <| hy + pad
@@ -208,11 +233,10 @@ renderHoverText pad t ( hx, hy, _ ) =
 
 genHoverEnv :
     HasTooltipEnv a label
-    -> OrdinalScale String Color
-    -> label
+    -> Float
     -> List ( String, Float )
     -> HoverEnv
-genHoverEnv env colorScale lbl pairs =
+genHoverEnv env hx pairs =
     let
         xOffset =
             5
@@ -230,9 +254,6 @@ genHoverEnv env colorScale lbl pairs =
                 |> Maybe.withDefault 20
                 |> (\n -> (n + 6) * (sz * 0.7))
 
-        hx =
-            Scale.convert env.labelScale lbl
-
         hx_ =
             if hx > (env.w - env.pad.right) / 2 then
                 hx - hw - xOffset
@@ -244,7 +265,7 @@ genHoverEnv env colorScale lbl pairs =
             max 0 (env.h / 2 - hh)
 
         ( ls, ps ) =
-            genHoverText env colorScale pairs ( hx_, hy )
+            genHoverText env pairs ( hx_, hy )
     in
     { x = hx_
     , y = hy
@@ -257,11 +278,10 @@ genHoverEnv env colorScale lbl pairs =
 
 genHoverText :
     HasTooltipEnv a label
-    -> OrdinalScale String Color
     -> List ( String, Float )
     -> ( Float, Float )
-    -> ( List String, List ( Float, Float, Color ) )
-genHoverText env colorScale pairs ( x0, y0 ) =
+    -> ( List String, List ( Float, Float ) )
+genHoverText env pairs ( x0, y0 ) =
     let
         longest =
             Utils.fsts pairs
@@ -278,9 +298,6 @@ genHoverText env colorScale pairs ( x0, y0 ) =
         sorted =
             List.sortWith cmp pairs |> List.reverse
 
-        cs =
-            sorted |> Utils.fsts |> List.map (getColor colorScale)
-
         xs =
             List.repeat (List.length pairs) x0
 
@@ -290,7 +307,7 @@ genHoverText env colorScale pairs ( x0, y0 ) =
                     (\i -> y0 + (i * env.tooltips.hoverTooltipSize |> toFloat) + 5)
     in
     ( sorted |> List.map fmt
-    , List.map3 Utils.triple xs ys cs
+    , List.map2 Tuple.pair xs ys 
     )
 
 
