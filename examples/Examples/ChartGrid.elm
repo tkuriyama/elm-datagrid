@@ -48,23 +48,23 @@ charts =
             }
     in
     [ [ { defaultChartCell
-                | title = Just <| "Daily Market Volume"
-                , description = Just <| "in shares"
-                , chartCfg = Cfg.Std BC.cfg
-                , chartData = Cfg.BarChartData BC.data
-            }
+            | title = Just <| "Daily Market Volume"
+            , description = Just <| "in shares"
+            , chartCfg = Cfg.Std BC.cfg
+            , chartData = Cfg.BarChartData BC.data
+        }
       , { defaultChartCell
-                | title = Just <| "Market Volume by Tape"
-                , description = Just <| "in shares"
-                , chartCfg = Cfg.Std BCS.cfg
-                , chartData = Cfg.BarChartStackedData BCS.dataByTape
-            }
+            | title = Just <| "Market Volume by Tape"
+            , description = Just <| "in shares"
+            , chartCfg = Cfg.Std BCS.cfg
+            , chartData = Cfg.BarChartStackedData BCS.dataByTape
+        }
       , { defaultChartCell
-                | title = Just <| "Market Volume by Group"
-                , description = Just <| "in shares"
-                , chartCfg = Cfg.Std BCS.cfg
-                , chartData = Cfg.BarChartStackedData BCS.dataByGroup
-            }
+            | title = Just <| "Market Volume by Group"
+            , description = Just <| "in shares"
+            , chartCfg = Cfg.Std BCS.cfg
+            , chartData = Cfg.BarChartStackedData BCS.dataByGroup
+        }
       ]
     , List.map g
         [ ( "Venue Mkt Share: Large"

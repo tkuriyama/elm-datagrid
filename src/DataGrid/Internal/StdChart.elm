@@ -162,6 +162,7 @@ genLargeTooltip env t =
         [ text t
         ]
 
+
 genHoverTooltipLabelled :
     HasTooltipEnv a label
     -> label
@@ -170,11 +171,12 @@ genHoverTooltipLabelled :
 genHoverTooltipLabelled env lbl points =
     let
         hEnv =
-            genHoverEnv env (Scale.convert env.labelScale lbl)  points
+            genHoverEnv env (Scale.convert env.labelScale lbl) points
+
         title =
             env.labelFmt lbl
     in
-        renderHoverTooltip env hEnv title points
+    renderHoverTooltip env hEnv title points
 
 
 genHoverTooltipTitled :
@@ -186,17 +188,17 @@ genHoverTooltipTitled :
 genHoverTooltipTitled env title hx points =
     let
         hEnv =
-            genHoverEnv env hx  points
-
+            genHoverEnv env hx points
     in
-        renderHoverTooltip env hEnv title points
+    renderHoverTooltip env hEnv title points
 
 
 renderHoverTooltip :
-    HasTooltipEnv a label ->
-    HoverEnv -> String ->
-    List ( String, Float ) ->
-    Svg msg
+    HasTooltipEnv a label
+    -> HoverEnv
+    -> String
+    -> List ( String, Float )
+    -> Svg msg
 renderHoverTooltip env hEnv title points =
     let
         pad =
@@ -307,7 +309,7 @@ genHoverText env pairs ( x0, y0 ) =
                     (\i -> y0 + (i * env.tooltips.hoverTooltipSize |> toFloat) + 5)
     in
     ( sorted |> List.map fmt
-    , List.map2 Tuple.pair xs ys 
+    , List.map2 Tuple.pair xs ys
     )
 
 

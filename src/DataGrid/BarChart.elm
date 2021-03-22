@@ -63,17 +63,21 @@ genChartEnv cfg model =
     , labelFmt = cfg.labelFormatter
     , dataTickCt = min cfg.dataAxisTicks 10
     , tooltips = cfg.tooltips
-    , style = genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips <|
-              parseChartSpec cfg.chartSpec
+    , style =
+        genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips <|
+            parseChartSpec cfg.chartSpec
     }
+
 
 parseChartSpec : Cfg.ChartSpec -> Bool
 parseChartSpec spec =
     case spec of
         Cfg.BarChartSpec d ->
             d.showDistribution
+
         _ ->
             False
+
 
 
 --------------------------------------------------------------------------------
@@ -103,12 +107,12 @@ render cfg ( _, model ) =
             [ class [ "bars" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            ( List.map (renderBar env) model )
+            (List.map (renderBar env) model)
         , g
             [ class [ "statistics" ]
             , transform [ Translate 0 env.pad.top ]
             ]
-            ( renderBoxPlot env <| Utils.snds model )
+            (renderBoxPlot env <| Utils.snds model)
         ]
 
 
@@ -141,16 +145,17 @@ renderBar env ( lbl, val ) =
 
 renderBoxPlot : ChartEnv label -> List Float -> List (Svg msg)
 renderBoxPlot env xs =
-    let xs_ =
+    let
+        xs_ =
             List.sort xs
 
         quantile q =
             Statistics.quantile q >> Maybe.withDefault 0
 
         convert =
-             Scale.convert env.dataScale
+            Scale.convert env.dataScale
 
-        (p25, p50, p75) =
+        ( p25, p50, p75 ) =
             ( quantile 0.25 xs_, quantile 0.5 xs_, quantile 0.75 xs_ )
 
         bp =
@@ -165,21 +170,21 @@ renderBoxPlot env xs =
             }
 
         pairs =
-            [ ("25%", p25)
-            , ("50%", p50)
-            , ("75%", p75)
-            , ("Mean", Utils.mean xs)
-            , ("Std", Statistics.deviation xs |> Maybe.withDefault 0)
+            [ ( "25%", p25 )
+            , ( "50%", p50 )
+            , ( "75%", p75 )
+            , ( "Mean", Utils.mean xs )
+            , ( "Std", Statistics.deviation xs |> Maybe.withDefault 0 )
             ]
 
         tooltipX =
             env.w - env.pad.right + bp.x
-
     in
-        [ g [ transform [ Translate (env.w - env.pad.right)  0] ]
-            [ Components.boxPlot bp ]
-        , StdChart.genHoverTooltipTitled env "Statistics" tooltipX pairs
-        ]
+    [ g [ transform [ Translate (env.w - env.pad.right) 0 ] ]
+        [ Components.boxPlot bp ]
+    , StdChart.genHoverTooltipTitled env "Statistics" tooltipX pairs
+    ]
+
 
 
 --------------------------------------------------------------------------------
@@ -220,7 +225,7 @@ genStyle fCfg cCfg tCfg showBoxPlot =
             (display tCfg.showLargeTooltips)
         |> String.Format.namedValue "fillColor" fillColor
         |> String.Format.namedValue "hoverColor" hoverColor
-        |> String.Format.namedValue "showBoxPlot"(display showBoxPlot)
+        |> String.Format.namedValue "showBoxPlot" (display showBoxPlot)
 
 
 defaultFillColor : String

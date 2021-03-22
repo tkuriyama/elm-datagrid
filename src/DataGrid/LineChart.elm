@@ -53,6 +53,7 @@ import TypedSvg.Types
 --------------------------------------------------------------------------------
 -- StdChartfg is converted to ChartEnv for internal use
 
+
 type alias ChartEnv label =
     { w : Float
     , h : Float
@@ -313,5 +314,3 @@ genStyle fCfg cCfg tCfg vbar =
         |> String.Format.namedValue "showName" showName
         |> String.Format.namedValue "nameSize" nameSize
         |> String.Format.namedValue "showVBar" (reveal vbar 0.8)
-
-

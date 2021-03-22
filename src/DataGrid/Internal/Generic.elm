@@ -1,4 +1,3 @@
-
 module DataGrid.Internal.Generic exposing (render)
 
 import DataGrid.BarChart as BC

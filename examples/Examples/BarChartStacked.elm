@@ -1,14 +1,15 @@
-module Examples.BarChartStacked exposing (cfg, main, dataByTape, dataByGroup)
+module Examples.BarChartStacked exposing (cfg, dataByGroup, dataByTape, main)
 
+import DataGrid.BarChartStacked exposing (render)
 import DataGrid.Config as Cfg
     exposing
         ( defaultBarChartStackedSpec
         , defaultStdChartCfg
         , defaultTooltips
         )
-import DataGrid.BarChartStacked exposing (render)
 import SampleData.BarChartStackedSample as BarChartStackedSample
 import TypedSvg.Core exposing (Svg)
+
 
 
 --------------------------------------------------------------------------------
@@ -23,6 +24,7 @@ chart : String -> Svg msg
 chart s =
     if s == "tape" then
         render cfg dataByTape
+
     else
         render cfg dataByGroup
 
@@ -64,6 +66,7 @@ barChartStackedSpec =
 dataByTape : Cfg.StdSeriesPairs String
 dataByTape =
     BarChartStackedSample.dataByTape
+
 
 dataByGroup : Cfg.StdSeriesPairs String
 dataByGroup =

@@ -11,9 +11,9 @@ import DataGrid.Config as Cfg
         , ChartSpec(..)
         )
 import DataGrid.Internal.Generic as Generic
+import DataGrid.Internal.StdChart as StdChart
 import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils
-import DataGrid.Internal.StdChart as StdChart
 import Element exposing (..)
 import Element.Font as Font
 import Element.Input as Input
