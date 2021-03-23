@@ -26,7 +26,7 @@ cfg =
         | title = Just "Demo Chart Grid"
         , description = Just "US equity market statistics"
         , links =
-            [ ( "CBOE Bats"
+            [ ( "CBOE"
               , "https://certification.batstrading.com/market_summary/"
               )
             , ( "Source"
@@ -48,35 +48,35 @@ charts =
             }
     in
     [ [ { defaultChartCell
-            | title = Just <| "Daily Market Volume"
-            , description = Just <| "in shares"
+            | title = Just <| "Total Market Volume"
+            , description = Just <| "in billions of shares"
             , chartCfg = Cfg.Std BC.cfg
             , chartData = Cfg.BarChartData BC.data
         }
       , { defaultChartCell
             | title = Just <| "Market Volume by Tape"
-            , description = Just <| "in shares"
+            , description = Just <| "in billions of shares"
             , chartCfg = Cfg.Std BCS.cfg
             , chartData = Cfg.BarChartStackedData BCS.dataByTape
         }
       , { defaultChartCell
             | title = Just <| "Market Volume by Group"
-            , description = Just <| "in shares"
+            , description = Just <| "in billions of shares"
             , chartCfg = Cfg.Std BCS.cfg
             , chartData = Cfg.BarChartStackedData BCS.dataByGroup
         }
       ]
     , List.map g
         [ ( "Venue Mkt Share: Large"
-          , "Mkt share > 3%"
+          , "mkt share > 3%"
           , LC.filterData 3.0 100.0
           )
         , ( "Venue Mkt Share: Medium"
-          , "Mkt share 1 - 3%"
+          , "mkt share 1 - 3%"
           , LC.filterData 1.0 3.0
           )
         , ( "Venue Mkt Share: Small"
-          , "Mkt share < 1%"
+          , "mkt share < 1%"
           , LC.filterData 0.0 1.0
           )
         ]

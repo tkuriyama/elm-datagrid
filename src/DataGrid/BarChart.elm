@@ -128,7 +128,7 @@ renderBar env ( lbl, val ) =
                 , height <|
                     env.h
                         - Scale.convert env.dataScale val
-                        - (2 * env.pad.bottom)
+                        - (env.pad.bottom + env.pad.top)
                 ]
                 []
             , "{{lbl}}: {{val}}"
@@ -182,7 +182,7 @@ renderBoxPlot env xs =
     in
     [ g [ transform [ Translate (env.w - env.pad.right) 0 ] ]
         [ Components.boxPlot bp ]
-    , StdChart.genHoverTooltipTitled env "Statistics" tooltipX pairs
+    , StdChart.genHoverTooltipTitled env True "Statistics" tooltipX pairs
     ]
 
 

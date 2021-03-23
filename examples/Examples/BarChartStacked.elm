@@ -33,7 +33,7 @@ cfg : Cfg.StdChartCfg String
 cfg =
     { defaultStdChartCfg
         | chartSpec = barChartStackedSpec
-        , dataAxisTicks = 10
+        , dataAxisTicks = 5
         , showLabels = False
         , labelFormatter = identity
         , tooltips = tooltipsCfg
@@ -43,8 +43,10 @@ cfg =
 tooltipsCfg : Cfg.Tooltips
 tooltipsCfg =
     { defaultTooltips
-        | showHoverTooltips = True
-        , hoverTooltipSize = 14
+        | showTooltips = False
+        , showLargeTooltips = False
+        , showHoverTooltips = True
+        , hoverTooltipSize = 16
     }
 
 

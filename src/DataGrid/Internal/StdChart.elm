@@ -111,14 +111,6 @@ type alias HasTooltipEnv a label =
     }
 
 
-type alias HoverEnv =
-    { x : Float
-    , y : Float
-    , h : Float
-    , w : Float
-    }
-
-
 genTooltip : HasTooltipEnv a label -> label -> String -> Svg msg
 genTooltip env lbl t =
     let
@@ -161,15 +153,25 @@ genLargeTooltip env t =
         ]
 
 
+type alias HoverEnv =
+    { x : Float
+    , y : Float
+    , h : Float
+    , w : Float
+    , sortLines : Bool
+    }
+
+
 genHoverTooltipLabelled :
     HasTooltipEnv a label
+    -> Bool
     -> label
     -> List ( String, Float )
     -> Svg msg
-genHoverTooltipLabelled env lbl points =
+genHoverTooltipLabelled env sortLines lbl points =
     let
         hEnv =
-            genHoverEnv env (Scale.convert env.labelScale lbl) points
+            genHoverEnv env sortLines (Scale.convert env.labelScale lbl) points
 
         title =
             env.labelFmt lbl
@@ -179,14 +181,15 @@ genHoverTooltipLabelled env lbl points =
 
 genHoverTooltipTitled :
     HasTooltipEnv a label
+    -> Bool
     -> String
     -> Float
     -> List ( String, Float )
     -> Svg msg
-genHoverTooltipTitled env title hx points =
+genHoverTooltipTitled env sortLines title hx points =
     let
         hEnv =
-            genHoverEnv env hx points
+            genHoverEnv env sortLines hx points
     in
     renderHoverTooltip env hEnv title points
 
@@ -203,8 +206,7 @@ renderHoverTooltip env hEnv title points =
             5
 
         ( lines, lineParams ) =
-            genHoverText env points ( hEnv.x, hEnv.y )
-
+            genHoverText env hEnv.sortLines points ( hEnv.x, hEnv.y )
     in
     g [ class [ "tooltip_hover" ] ]
         ([ rect
@@ -237,10 +239,11 @@ renderHoverText pad t ( hx, hy ) =
 
 genHoverEnv :
     HasTooltipEnv a label
+    -> Bool
     -> Float
     -> List ( String, Float )
     -> HoverEnv
-genHoverEnv env hx pairs =
+genHoverEnv env sortLines hx pairs =
     let
         xOffset =
             5
@@ -267,21 +270,22 @@ genHoverEnv env hx pairs =
 
         hy =
             max 0 (env.h / 2 - hh)
-
     in
     { x = hx_
     , y = hy
     , w = hw
     , h = hh
+    , sortLines = sortLines
     }
 
 
 genHoverText :
     HasTooltipEnv a label
+    -> Bool
     -> List ( String, Float )
     -> ( Float, Float )
     -> ( List String, List ( Float, Float ) )
-genHoverText env pairs ( x0, y0 ) =
+genHoverText env sortLines pairs ( x0, y0 ) =
     let
         longest =
             Utils.fsts pairs
@@ -296,7 +300,11 @@ genHoverText env pairs ( x0, y0 ) =
             Utils.twoCols longest 3 s (Utils.fmtFloat 2 f)
 
         sorted =
-            List.sortWith cmp pairs |> List.reverse
+            if sortLines then
+                List.sortWith cmp pairs |> List.reverse
+
+            else
+                pairs
 
         xs =
             List.repeat (List.length pairs) x0

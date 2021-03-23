@@ -144,13 +144,13 @@ render cfg model =
             ]
             [ StdChart.genYAxis env.dataTickCt env.dataScale ]
         , g
-            [ class [ "lines" ]
+            [ class [ "points" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
           <|
             List.map (renderPoints env) model
         , g
-            [ class [ "points" ]
+            [ class [ "lines" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
           <|
@@ -255,7 +255,7 @@ renderVBarHover env ( lbl, points ) =
             , stroke <| Paint <| Color.rgb 0.5 0.5 0.5
             ]
             []
-        , StdChart.genHoverTooltipLabelled env lbl points
+        , StdChart.genHoverTooltipLabelled env True lbl points
         ]
 
 
@@ -306,11 +306,13 @@ genStyle fCfg cCfg tCfg vbar =
          path { pointer-events: stroke; }
          .vbar line { display: inline; opacity: 0; }
          .vbar:hover line { opacity: {{showVBar}}; }
-         .vbar:hover .tooltip_hover { display: inline; }
+         .vbar:hover .tooltip_hover { display: {{showHoverTT}}; }
      """
         |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
         |> String.Format.namedValue "showLargeTT"
             (display tCfg.showLargeTooltips)
+        |> String.Format.namedValue "showHoverTT"
+            (display tCfg.showHoverTooltips)
         |> String.Format.namedValue "showName" showName
         |> String.Format.namedValue "nameSize" nameSize
         |> String.Format.namedValue "showVBar" (reveal vbar 0.8)

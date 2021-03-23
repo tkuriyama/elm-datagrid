@@ -54,9 +54,10 @@ paddingCfg =
 tooltipsCfg : Cfg.Tooltips
 tooltipsCfg =
     { defaultTooltips
-        | showLargeTooltips = False
+        | showTooltips = False
+        , showLargeTooltips = False
         , showHoverTooltips = True
-        , hoverTooltipSize = 14
+        , hoverTooltipSize = 16
     }
 
 

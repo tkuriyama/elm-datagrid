@@ -179,6 +179,7 @@ controlSeries attrs cell =
         case cell.chartData of
             BarChartStackedData d ->
                 row attrs_ (Utils.fsts d |> List.map f)
+
             LineChartData d ->
                 row attrs_ (Utils.fsts d |> List.map f)
 
