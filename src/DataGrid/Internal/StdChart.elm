@@ -116,8 +116,6 @@ type alias HoverEnv =
     , y : Float
     , h : Float
     , w : Float
-    , lines : List String
-    , lineParams : List ( Float, Float )
     }
 
 
@@ -203,6 +201,10 @@ renderHoverTooltip env hEnv title points =
     let
         pad =
             5
+
+        ( lines, lineParams ) =
+            genHoverText env points ( hEnv.x, hEnv.y )
+
     in
     g [ class [ "tooltip_hover" ] ]
         ([ rect
@@ -220,7 +222,7 @@ renderHoverTooltip env hEnv title points =
             ]
             [ text <| title ]
          ]
-            ++ List.map2 (renderHoverText pad) hEnv.lines hEnv.lineParams
+            ++ List.map2 (renderHoverText pad) lines lineParams
         )
 
 
@@ -266,15 +268,11 @@ genHoverEnv env hx pairs =
         hy =
             max 0 (env.h / 2 - hh)
 
-        ( ls, ps ) =
-            genHoverText env pairs ( hx_, hy )
     in
     { x = hx_
     , y = hy
     , w = hw
     , h = hh
-    , lines = ls
-    , lineParams = ps
     }
 
 

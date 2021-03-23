@@ -4,8 +4,8 @@ module DataGrid.Components exposing (boxPlot)
 
 -}
 
-import Color exposing (Color)
-import TypedSvg exposing (g, line, rect, svg)
+import Color
+import TypedSvg exposing (g, line, rect)
 import TypedSvg.Attributes exposing (class, stroke)
 import TypedSvg.Attributes.InPx exposing (height, strokeWidth, width, x, x1, x2, y, y1, y2)
 import TypedSvg.Core exposing (Svg)
