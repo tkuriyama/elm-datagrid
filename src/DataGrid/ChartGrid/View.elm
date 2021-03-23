@@ -87,17 +87,18 @@ project cell =
     case cell.chartData of
         BarChartStackedData d ->
             d
+                |> StdChart.projectSeries cell.hideSeries
                 |> (if cell.showRelative then
                         StdChart.projectRelative
 
                     else
                         identity
                    )
-                |> StdChart.projectSeries cell.hideSeries
                 |> BarChartStackedData
 
         LineChartData d ->
             d
+                |> StdChart.projectSeries cell.hideSeries
                 |> (if cell.showRelative then
                         StdChart.projectRelative
 
@@ -110,7 +111,6 @@ project cell =
                     else
                         identity
                    )
-                |> StdChart.projectSeries cell.hideSeries
                 |> LineChartData
 
         _ ->
