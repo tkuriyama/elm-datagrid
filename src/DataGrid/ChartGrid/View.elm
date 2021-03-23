@@ -85,6 +85,17 @@ chartCell cfg cell =
 project : ChartCell label -> ChartData label
 project cell =
     case cell.chartData of
+        BarChartStackedData d ->
+            d
+                |> (if cell.showRelative then
+                        StdChart.projectRelative
+
+                    else
+                        identity
+                   )
+                |> StdChart.projectSeries cell.hideSeries
+                |> BarChartStackedData
+
         LineChartData d ->
             d
                 |> (if cell.showRelative then
@@ -166,6 +177,8 @@ controlSeries attrs cell =
 
     else
         case cell.chartData of
+            BarChartStackedData d ->
+                row attrs_ (Utils.fsts d |> List.map f)
             LineChartData d ->
                 row attrs_ (Utils.fsts d |> List.map f)
 
@@ -219,6 +232,14 @@ parseToggles cfg =
     case cfg of
         Std c ->
             case c.chartSpec of
+                BarChartStackedSpec spec ->
+                    ( ( spec.toggleSeries
+                      , spec.toggleRelative
+                      , False
+                      )
+                    , spec.toggleHeight
+                    )
+
                 LineChartSpec spec ->
                     ( ( spec.toggleSeries
                       , spec.toggleRelative
