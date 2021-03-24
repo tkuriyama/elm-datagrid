@@ -2,10 +2,10 @@ module Examples.ChartGrid exposing (main)
 
 import DataGrid.ChartGrid as ChartGrid
     exposing
-        ( chartGrid
-        , defaultChartCell
+        ( defaultChartCell
         , defaultLayoutCfg
         )
+import DataGrid.ChartGrid.Types exposing (ChartCell, ChartGrid(..), LayoutCfg)
 import DataGrid.Config as Cfg
 import Examples.BarChart as BC
 import Examples.BarChartStacked as BCS
@@ -20,7 +20,7 @@ main =
     ChartGrid.chartGrid cfg charts
 
 
-cfg : ChartGrid.LayoutCfg
+cfg : LayoutCfg
 cfg =
     { defaultLayoutCfg
         | title = Just "Demo Chart Grid"
@@ -36,48 +36,83 @@ cfg =
     }
 
 
-charts : List (List (ChartGrid.ChartCell String))
+charts : ChartGrid String
 charts =
-    let
-        g ( title, desc, data ) =
-            { defaultChartCell
-                | title = Just title
-                , description = Just desc
-                , chartCfg = Cfg.Std LC.cfg
-                , chartData = Cfg.LineChartData data
-            }
-    in
-    [ [ { defaultChartCell
-            | title = Just <| "Total Market Volume"
-            , description = Just <| "in billions of shares"
-            , chartCfg = Cfg.Std BC.cfg
-            , chartData = Cfg.BarChartData BC.data
-        }
-      , { defaultChartCell
-            | title = Just <| "Market Volume by Tape"
-            , description = Just <| "in billions of shares"
-            , chartCfg = Cfg.Std BCS.cfg
-            , chartData = Cfg.BarChartStackedData BCS.dataByTape
-        }
-      , { defaultChartCell
-            | title = Just <| "Market Volume by Group"
-            , description = Just <| "in billions of shares"
-            , chartCfg = Cfg.Std BCS.cfg
-            , chartData = Cfg.BarChartStackedData BCS.dataByGroup
-        }
-      ]
-    , List.map g
-        [ ( "Venue Mkt Share: Large"
-          , "mkt share > 3%"
-          , LC.filterData 3.0 100.0
-          )
-        , ( "Venue Mkt Share: Medium"
-          , "mkt share 1 - 3%"
-          , LC.filterData 1.0 3.0
-          )
-        , ( "Venue Mkt Share: Small"
+    Row (Nothing, Nothing)
+        [ Column (Nothing, Nothing) [ Cell totalMkt
+                                 , Column (Just 450, Nothing)
+                                     [ Cell totalMktByTape
+                                     , Cell totalMktByGroup
+                                     ]
+                                 ]
+        , Column (Nothing, Nothing) [ Cell lineChartLarge
+                                 , Cell lineChartMed
+                                 , Cell lineChartSmall ]
+        , Column (Nothing, Nothing) [ Cell totalMkt
+                                    ]
+        ]
+
+
+--------------------------------------------------------------------------------
+-- Cells
+
+totalMkt : ChartCell String
+totalMkt =
+    { defaultChartCell
+        | title = Just <| "Total Market Volume"
+        , description = Just <| "in billions of shares"
+        , chartCfg = Cfg.Std BC.cfg
+        , chartData = Cfg.BarChartData BC.data
+    }
+
+totalMktByTape : ChartCell String
+totalMktByTape =
+    { defaultChartCell
+        | title = Just <| "Market Volume by Tape"
+        , description = Just <| "in billions of shares"
+        , chartCfg = Cfg.Std BCS.cfg
+        , chartData = Cfg.BarChartStackedData BCS.dataByTape
+    }
+
+totalMktByGroup : ChartCell String
+totalMktByGroup =
+    { defaultChartCell
+        | title = Just <| "Market Volume by Group"
+        , description = Just <| "in billions of shares"
+        , chartCfg = Cfg.Std BCS.cfg
+        , chartData = Cfg.BarChartStackedData BCS.dataByGroup
+    }
+
+
+lineChart : (String, String, Cfg.StdSeriesPairs String) -> ChartCell String
+lineChart ( title, desc, data ) =
+    { defaultChartCell
+        | title = Just title
+        , description = Just desc
+        , chartCfg = Cfg.Std LC.cfg
+        , chartData = Cfg.LineChartData data
+    }
+
+lineChartLarge : ChartCell String
+lineChartLarge =
+    lineChart ( "Venue Mkt Share: Large"
+              , "mkt share > 3%"
+              , LC.filterData 3.0 100.0
+              )
+
+lineChartMed : ChartCell String
+lineChartMed =
+    lineChart ( "Venue Mkt Share: Medium"
+              , "mkt share 1 - 3%"
+              , LC.filterData 1.0 3.0
+              )
+
+
+lineChartSmall : ChartCell String
+lineChartSmall =
+    lineChart
+        ( "Venue Mkt Share: Small"
           , "mkt share < 1%"
           , LC.filterData 0.0 1.0
           )
-        ]
-    ]
+

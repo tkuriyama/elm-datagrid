@@ -1,7 +1,5 @@
 module DataGrid.ChartGrid exposing
-    ( ChartCell
-    , LayoutCfg
-    , chartGrid
+    ( chartGrid
     , defaultChartCell
     , defaultLayoutCfg
     , reindex
@@ -31,14 +29,6 @@ import Html exposing (Html)
 
 --------------------------------------------------------------------------------
 -- Exposed Types and Defaults
-
-
-type alias LayoutCfg =
-    Types.LayoutCfg
-
-
-type alias ChartCell label =
-    Types.ChartCell label
 
 
 defaultLayoutCfg : LayoutCfg
@@ -89,13 +79,13 @@ chartGrid cfg charts =
 
 init :
     LayoutCfg
-    -> List (List (ChartCell label))
+    -> ChartGrid label
     -> Flags
     -> ( Model label, Cmd Msg )
 init cfg charts =
     \flags ->
         ( { cfg = cfg
-          , charts = reindex charts
+          , charts = reindex 1 charts
           , windowW = flags.windowWidth
           , windowH = flags.windowHeight
           }
@@ -103,25 +93,17 @@ init cfg charts =
         )
 
 
-
--- only works for rows of length < 1000
-
-
-reindex : List (List (HasIndex a)) -> List (List (HasIndex a))
-reindex xss =
-    let
-        colInds =
-            List.map (\xs -> List.range 1 (List.length xs)) xss
-
-        f r c x =
-            { x
-                | index = r * 1000 + c
-            }
-    in
-    List.map2 Tuple.pair colInds xss
-        |> List.indexedMap (\r ( cs, xs ) -> List.map2 (\c x -> f r c x) cs xs)
-
-
+reindex : Int -> ChartGrid label -> ChartGrid label
+reindex i grid =
+    case grid of
+        Column dims cells ->
+            List.indexedMap (\i_ x -> reindex (i * 100 + i_) x) cells
+               |> Column dims
+        Row dims cells ->
+            List.indexedMap (\i_ x -> reindex (i * 100 + i_) x) cells
+               |> Row dims
+        Cell cell ->
+             Cell {cell | index = i }
 
 --------------------------------------------------------------------------------
 -- View
@@ -160,9 +142,14 @@ mapGrid :
     (ChartCell label -> ChartCell label)
     -> ChartGrid label
     -> ChartGrid label
-mapGrid f =
-    List.map (\row -> List.map f row)
-
+mapGrid f grid =
+    case grid of
+        Column dims cells ->
+            Column dims <| List.map (mapGrid f) cells
+        Row dims cells ->
+            Row dims <| List.map (mapGrid f) cells
+        Cell cell ->
+             Cell (f cell)
 
 updateSeries : Int -> String -> ChartCell label -> ChartCell label
 updateSeries i name cell =

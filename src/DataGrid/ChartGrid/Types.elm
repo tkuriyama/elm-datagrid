@@ -47,9 +47,16 @@ type alias ChartCell label =
 --------------------------------------------------------------------------------
 -- Internal Types
 
+type alias GridWidth =
+    Maybe Int
 
-type alias ChartGrid label =
-    List (List (ChartCell label))
+type alias GridHeight =
+    Maybe Int
+
+type ChartGrid label
+    = Column (GridHeight, GridWidth) (List (ChartGrid label))
+    | Row (GridHeight, GridWidth) (List (ChartGrid label))
+    | Cell (ChartCell label)
 
 
 type alias Model label =
@@ -79,8 +86,3 @@ type alias HasTitleDesc a =
         , links : List ( String, String )
     }
 
-
-type alias HasIndex a =
-    { a
-        | index : Int
-    }

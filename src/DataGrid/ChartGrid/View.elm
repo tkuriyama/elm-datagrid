@@ -3,7 +3,7 @@ module DataGrid.ChartGrid.View exposing (view)
 {-| Render module for ChartGrid.
 -}
 
-import DataGrid.ChartGrid.Types exposing (..)
+import DataGrid.ChartGrid.Types as T exposing (..)
 import DataGrid.Config as Cfg
     exposing
         ( ChartCfg(..)
@@ -39,21 +39,7 @@ view model =
         cfg =
             model.cfg
 
-        xss =
-            model.charts
-
-        w =
-            UI.maybeLength cfg.w fill
-
-        h =
-            UI.maybeLength cfg.h fill
-
-        rows =
-            List.map genRow xss
-
-        genRow xs =
-            row [ width fill, spacing cfg.colSpacing ]
-                (List.map (chartCell cfg) xs)
+        (w, h) = ( UI.maybeLength cfg.w fill, UI.maybeLength cfg.h fill)
 
         gridTitle =
             title cfg cfg.textColor cfg.gridBaseFontSize
@@ -62,10 +48,32 @@ view model =
         [ Font.family [ Font.typeface cfg.typeface, Font.sansSerif ]
         , padding cfg.padding
         ]
-        (column
+        ( column
             [ centerX, width w, height h, spacing cfg.rowSpacing ]
-            (el [ UI.padBottom 10, width fill ] gridTitle :: rows)
+            [ el [ UI.padBottom 10, width fill ] gridTitle
+            , parseGrid model.cfg model.charts
+            ]
         )
+
+
+parseGrid : LayoutCfg -> ChartGrid label -> Element Msg
+parseGrid cfg grid =
+    case grid of
+        T.Column (mh, mw) cells ->
+            let (w, h) = ( UI.maybeLength mw fill, UI.maybeLength mh fill)
+            in
+                column
+                    [ alignTop, width w, height h, spacing cfg.rowSpacing ]
+                    ( List.map (parseGrid cfg) cells )
+        T.Row (mh, mw) cells ->
+            let (w, h) = ( UI.maybeLength mw fill, UI.maybeLength mh fill)
+            in
+                row
+                    [ alignTop, width w, height h, spacing cfg.colSpacing ]
+                    ( List.map (parseGrid cfg) cells )
+        T.Cell cell ->
+            chartCell cfg cell
+
 
 
 chartCell : LayoutCfg -> ChartCell label -> Element Msg
