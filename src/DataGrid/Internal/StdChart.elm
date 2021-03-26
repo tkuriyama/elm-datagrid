@@ -120,6 +120,12 @@ genTooltip env lbl t =
         e =
             toFloat (String.length t * env.tooltips.tooltipSize) / 1.5 / 2
 
+        textY =
+            env.h
+                - env.pad.bottom
+                - env.pad.top
+                + toFloat env.tooltips.tooltipSize
+
         anchor =
             if textX - e < env.pad.left then
                 AnchorStart
@@ -133,7 +139,7 @@ genTooltip env lbl t =
     text_
         [ class [ "tooltip" ]
         , x <| textX
-        , y <| env.h - (2 * env.pad.bottom) + toFloat env.tooltips.tooltipSize
+        , y <| textY
         , textAnchor <| anchor
         ]
         [ text t
@@ -259,7 +265,7 @@ genHoverEnv env sortLines hx pairs =
                 |> List.map (String.length >> toFloat)
                 |> List.maximum
                 |> Maybe.withDefault 20
-                |> (\n -> (n + 6) * (sz * 0.7))
+                |> (\n -> (n + 7) * (sz * 0.7))
 
         hx_ =
             if hx > (env.w - env.pad.right) / 2 then

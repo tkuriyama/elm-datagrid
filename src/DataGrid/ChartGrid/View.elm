@@ -15,6 +15,8 @@ import DataGrid.Internal.StdChart as StdChart
 import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils
 import Element exposing (..)
+import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import Element.Input as Input
 import Html exposing (Html)
@@ -39,7 +41,8 @@ view model =
         cfg =
             model.cfg
 
-        (w, h) = ( UI.maybeLength cfg.w fill, UI.maybeLength cfg.h fill)
+        ( w, h ) =
+            ( UI.maybeLength cfg.w fill, UI.maybeLength cfg.h fill )
 
         gridTitle =
             title cfg cfg.textColor cfg.gridBaseFontSize
@@ -48,8 +51,8 @@ view model =
         [ Font.family [ Font.typeface cfg.typeface, Font.sansSerif ]
         , padding cfg.padding
         ]
-        ( column
-            [ centerX, width w, height h, spacing cfg.rowSpacing ]
+        (column
+            [ centerX, height h, width w, spacing cfg.rowSpacing ]
             [ el [ UI.padBottom 10, width fill ] gridTitle
             , parseGrid model.cfg model.charts
             ]
@@ -59,21 +62,29 @@ view model =
 parseGrid : LayoutCfg -> ChartGrid label -> Element Msg
 parseGrid cfg grid =
     case grid of
-        T.Column (mh, mw) cells ->
-            let (w, h) = ( UI.maybeLength mw fill, UI.maybeLength mh fill)
+        T.Column ( mw, mh ) cells ->
+            let
+                ( w, h ) =
+                    ( UI.maybeLength mw fill, UI.maybeLength mh fill )
             in
-                column
-                    [ alignTop, width w, height h, spacing cfg.rowSpacing ]
-                    ( List.map (parseGrid cfg) cells )
-        T.Row (mh, mw) cells ->
-            let (w, h) = ( UI.maybeLength mw fill, UI.maybeLength mh fill)
+            column
+                [ alignTop, width w, height h, spacing cfg.rowSpacing ]
+                (List.map (parseGrid cfg) cells)
+
+        T.Row ( mw, mh ) cells ->
+            let
+                ( w, h ) =
+                    ( UI.maybeLength mw fill, UI.maybeLength mh fill )
             in
-                row
-                    [ alignTop, width w, height h, spacing cfg.colSpacing ]
-                    ( List.map (parseGrid cfg) cells )
+            row
+                [ alignTop, width w, height h, spacing cfg.colSpacing ]
+                (List.map (parseGrid cfg) cells)
+
+        T.TabbedCell name cells ->
+            tabbedChartCell name cfg cells
+
         T.Cell cell ->
             chartCell cfg cell
-
 
 
 chartCell : LayoutCfg -> ChartCell label -> Element Msg
@@ -83,11 +94,101 @@ chartCell cfg cell =
             project cell |> Generic.render cell.chartCfg
     in
     column
-        [ width fill ]
+        [ alignTop, width fill ]
         [ title cell cfg.textColor cfg.cellBaseFontSize
         , controls cell
         , chart |> Element.html
         ]
+
+
+tabbedChartCell :
+    String
+    -> LayoutCfg
+    -> List ( String, ChartCell label )
+    -> Element Msg
+tabbedChartCell active cfg cells =
+    let
+        f ( name, cell ) acc =
+            if active == name then
+                chartCell cfg cell
+
+            else
+                acc
+    in
+    column
+        [ spacing 5, width fill ]
+        [ tabs active cfg cells
+        , List.foldr f Element.none cells
+        ]
+
+
+tabs :
+    String
+    -> LayoutCfg
+    -> List ( String, ChartCell label )
+    -> Element Msg
+tabs active cfg cells =
+    row
+        [ Font.size <| round <| toFloat cfg.cellBaseFontSize
+        , centerX
+        , alignLeft
+        ]
+        (List.map (tab active) <| Utils.fsts cells)
+
+
+tab : String -> String -> Element Msg
+tab active name =
+    let
+        borders =
+            { bottom = 0, top = 1, left = 1, right = 1 }
+
+        corners =
+            { topLeft = 6, topRight = 6, bottomLeft = 0, bottomRight = 0 }
+
+        background =
+            if active == name then
+                Element.rgb 0.8 0.8 0.8
+
+            else
+                Element.rgb 1 1 1
+    in
+    Input.button
+        [ paddingXY 10 5
+        , Border.widthEach borders
+        , Border.roundEach corners
+        , Border.color <| Element.rgb 0.3 0.3 0.3
+        , Background.color background
+        ]
+        { onPress = Just <| ActivateTab name
+        , label = text name
+        }
+
+
+title : HasTitleDesc a -> Element.Color -> Int -> Element Msg
+title r textColor baseFont =
+    let
+        t =
+            Maybe.withDefault "" r.title
+
+        d =
+            Maybe.withDefault "" r.description
+
+        smallFont =
+            round <| toFloat baseFont * 0.8
+    in
+    paragraph
+        [ Font.color textColor, width fill ]
+        [ el [ Font.bold, Font.size baseFont ] (text t)
+        , text " | "
+        , el [ Font.size smallFont ] <| text d
+        , el [ Font.size smallFont, alignRight, UI.padRight 30 ] <|
+            UI.genLinks r.links
+        ]
+
+
+
+--------------------------------------------------------------------------------
+-- Data Projection
 
 
 project : ChartCell label -> ChartData label
@@ -125,26 +226,9 @@ project cell =
             cell.chartData
 
 
-title : HasTitleDesc a -> Element.Color -> Int -> Element Msg
-title r textColor baseFont =
-    let
-        t =
-            Maybe.withDefault "" r.title
 
-        d =
-            Maybe.withDefault "" r.description
-
-        smallFont =
-            round <| toFloat baseFont * 0.8
-    in
-    paragraph
-        [ Font.color textColor, width fill ]
-        [ el [ Font.bold, Font.size baseFont ] (text t)
-        , text " | "
-        , el [ Font.size smallFont ] <| text d
-        , el [ Font.size smallFont, alignRight, UI.padRight 30 ] <|
-            UI.genLinks r.links
-        ]
+--------------------------------------------------------------------------------
+-- Control Components
 
 
 controls : ChartCell label -> Element Msg
@@ -160,7 +244,10 @@ controls cell =
     in
     row
         [ width fill, spacing 2 ]
-        [ controlSeries attrs cell, controlRelFD attrs cell ]
+        [ controlSeries attrs cell
+        , text " "
+        , controlRelFD attrs cell
+        ]
 
 
 controlSeries : Attributes Msg -> ChartCell label -> Element Msg

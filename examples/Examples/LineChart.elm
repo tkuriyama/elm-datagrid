@@ -20,14 +20,14 @@ import TypedSvg.Core exposing (Svg)
 
 main : Svg msg
 main =
-    chart 0.0 1.0
+    chart 3.0 100.0 True
 
 
-chart : Float -> Float -> Svg msg
-chart lower upper =
+chart : Float -> Float -> Bool -> Svg msg
+chart lower upper ignoreTRF =
     let
         d =
-            filterData lower upper
+            filterData lower upper ignoreTRF
     in
     render cfg d
 
@@ -79,8 +79,8 @@ lineChartSpec =
 -- Data
 
 
-filterData : Float -> Float -> Cfg.StdSeriesPairs String
-filterData lower upper =
+filterData : Float -> Float -> Bool -> Cfg.StdSeriesPairs String
+filterData lower upper containsTRF =
     let
         last =
             Utils.snd >> Utils.snds >> LE.last >> Maybe.withDefault 0
@@ -91,10 +91,19 @@ filterData lower upper =
                     last p
             in
             last_ > lower && last_ <= upper
+
+        filterTRF =
+            String.contains "TRF"
+                >> (if containsTRF then
+                        identity
+
+                    else
+                        not
+                   )
     in
     List.filter f data
         |> Utils.fsts
-        |> List.filter (String.contains "TRF" >> not)
+        |> List.filter filterTRF
         |> subset
 
 

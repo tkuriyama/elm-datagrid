@@ -35,8 +35,8 @@ defaultLayoutCfg : LayoutCfg
 defaultLayoutCfg =
     { w = Nothing
     , h = Nothing
-    , colSpacing = 0
-    , rowSpacing = 5
+    , colSpacing = 2
+    , rowSpacing = 2
     , padding = 5
     , title = Nothing
     , description = Nothing
@@ -98,12 +98,23 @@ reindex i grid =
     case grid of
         Column dims cells ->
             List.indexedMap (\i_ x -> reindex (i * 100 + i_) x) cells
-               |> Column dims
+                |> Column dims
+
         Row dims cells ->
             List.indexedMap (\i_ x -> reindex (i * 100 + i_) x) cells
-               |> Row dims
+                |> Row dims
+
+        TabbedCell active cells ->
+            let
+                f i_ ( name, cell ) =
+                    ( name, { cell | index = i * 100 + i_ } )
+            in
+            List.indexedMap f cells |> TabbedCell active
+
         Cell cell ->
-             Cell {cell | index = i }
+            Cell { cell | index = i }
+
+
 
 --------------------------------------------------------------------------------
 -- View
@@ -137,6 +148,11 @@ update msg model =
             , Cmd.none
             )
 
+        ActivateTab name ->
+            ( { model | charts = updateActiveTab name model.charts }
+            , Cmd.none
+            )
+
 
 mapGrid :
     (ChartCell label -> ChartCell label)
@@ -146,10 +162,17 @@ mapGrid f grid =
     case grid of
         Column dims cells ->
             Column dims <| List.map (mapGrid f) cells
+
         Row dims cells ->
             Row dims <| List.map (mapGrid f) cells
+
+        TabbedCell active cells ->
+            TabbedCell active <|
+                List.map (\( name, cell ) -> ( name, f cell )) cells
+
         Cell cell ->
-             Cell (f cell)
+            Cell (f cell)
+
 
 updateSeries : Int -> String -> ChartCell label -> ChartCell label
 updateSeries i name cell =
@@ -176,3 +199,23 @@ updateFirstDeriv i b cell =
 
     else
         { cell | showFirstDeriv = b }
+
+
+updateActiveTab : String -> ChartGrid label -> ChartGrid label
+updateActiveTab name grid =
+    case grid of
+        Column dims cells ->
+            Column dims <| List.map (updateActiveTab name) cells
+
+        Row dims cells ->
+            Row dims <| List.map (updateActiveTab name) cells
+
+        TabbedCell active cells ->
+            if List.member name (Utils.fsts cells) then
+                TabbedCell name cells
+
+            else
+                TabbedCell active cells
+
+        Cell cell ->
+            Cell cell

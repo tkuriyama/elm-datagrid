@@ -1,4 +1,4 @@
-module Examples.BarChart exposing (cfg, data, main)
+module Examples.BarChart exposing (cfg, dataNotional, dataShares, main)
 
 import DataGrid.BarChart exposing (render)
 import DataGrid.Config as Cfg exposing (defaultPadding, defaultStdChartCfg, defaultTooltips)
@@ -12,7 +12,7 @@ import TypedSvg.Core exposing (Svg)
 
 main : Svg msg
 main =
-    render cfg data
+    render cfg dataShares
 
 
 cfg : Cfg.StdChartCfg String
@@ -40,8 +40,15 @@ tooltipsCfg =
     }
 
 
-data : Cfg.StdSeriesPair String
-data =
-    BarChartSample.data
+dataShares : Cfg.StdSeriesPair String
+dataShares =
+    BarChartSample.dataShares
+        |> List.head
+        |> Maybe.withDefault ( "Empty", [] )
+
+
+dataNotional : Cfg.StdSeriesPair String
+dataNotional =
+    BarChartSample.dataNotional
         |> List.head
         |> Maybe.withDefault ( "Empty", [] )

@@ -138,7 +138,7 @@ maybeLength : Maybe Int -> Length -> Length
 maybeLength mn default =
     case mn of
         Just n ->
-            px n
+            fill |> maximum n
 
         Nothing ->
             default

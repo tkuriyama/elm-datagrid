@@ -47,15 +47,19 @@ type alias ChartCell label =
 --------------------------------------------------------------------------------
 -- Internal Types
 
+
 type alias GridWidth =
     Maybe Int
+
 
 type alias GridHeight =
     Maybe Int
 
+
 type ChartGrid label
-    = Column (GridHeight, GridWidth) (List (ChartGrid label))
-    | Row (GridHeight, GridWidth) (List (ChartGrid label))
+    = Column ( GridWidth, GridHeight ) (List (ChartGrid label))
+    | Row ( GridWidth, GridHeight ) (List (ChartGrid label))
+    | TabbedCell String (List ( String, ChartCell label ))
     | Cell (ChartCell label)
 
 
@@ -71,6 +75,7 @@ type Msg
     = ToggleSeries Int String Bool
     | ToggleRelative Int Bool
     | ToggleFirstDeriv Int Bool
+    | ActivateTab String
 
 
 type alias Flags =
@@ -85,4 +90,3 @@ type alias HasTitleDesc a =
         , description : Maybe String
         , links : List ( String, String )
     }
-
