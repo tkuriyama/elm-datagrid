@@ -1,7 +1,6 @@
 module DataGrid.GridChart exposing (render)
 
 {-| Render a a single Grid Chart.
-
 -}
 
 import Color exposing (Color)
@@ -41,12 +40,11 @@ import TypedSvg.Types
         )
 
 
---------------------------------------------------------------------------------
-
-
-
 
 --------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
 
 render : Cfg.GridChartCfg -> List Cfg.GridSeries -> Svg msg
-render cfg data = svg [] []
+render cfg data =
+    svg [] []

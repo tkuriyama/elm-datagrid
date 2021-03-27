@@ -41,10 +41,10 @@ renderStd cfg data =
         _ ->
             svg [] []
 
+
 renderGrid : Cfg.GridChartCfg -> ChartData label -> Svg msg
 renderGrid cfg data =
     case data of
-
         GridChartData d ->
             GC.render cfg d
 

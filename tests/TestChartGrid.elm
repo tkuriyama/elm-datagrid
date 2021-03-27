@@ -39,17 +39,17 @@ testReindex =
         , test "reindex Row -> Cell" <|
             \_ ->
                 reindex 1
-                    ( Row (Nothing, Nothing)
-                        [ Column (Nothing, Nothing) [ Cell cell ]
-                        , Column (Nothing, Nothing) [ Cell cell ]
+                    (Row ( Nothing, Nothing )
+                        [ Column ( Nothing, Nothing ) [ Cell cell ]
+                        , Column ( Nothing, Nothing ) [ Cell cell ]
                         ]
                     )
                     |> Expect.equal
-                       ( Row (Nothing, Nothing)
-                        [ Column (Nothing, Nothing)
-                              [ Cell { cell | index = 10000 } ]
-                        , Column (Nothing, Nothing)
-                              [ Cell { cell | index = 10100 } ]
-                        ]
-                       )
+                        (Row ( Nothing, Nothing )
+                            [ Column ( Nothing, Nothing )
+                                [ Cell { cell | index = 10000 } ]
+                            , Column ( Nothing, Nothing )
+                                [ Cell { cell | index = 10100 } ]
+                            ]
+                        )
         ]
