@@ -347,5 +347,8 @@ parseToggles cfg =
                 _ ->
                     noToggle
 
+        Grid c ->
+            noToggle
+
         DefaultChartCfg ->
             noToggle

@@ -13,6 +13,7 @@ import DataGrid.Internal.Defaults as Defaults
 
 type ChartCfg label
     = Std (StdChartCfg label)
+    | Grid GridChartCfg
     | DefaultChartCfg
 
 
@@ -20,6 +21,7 @@ type ChartData label
     = BarChartData (StdSeriesPair label)
     | BarChartStackedData (StdSeriesPairs label)
     | LineChartData (StdSeriesPairs label)
+    | GridChartData (List GridSeries)
     | DefaultData
 
 
@@ -43,29 +45,39 @@ type ChartSpec
         , toggleFirstDeriv : Bool
         , toggleHeight : Int
         }
+    | GridChartSpec
+        { snowHBar : Bool
+        }
     | DefaultSpec
 
 
 
 --------------------------------------------------------------------------------
--- Data
+-- StdChart Data
 
+{-| StdSeriesPair define data for working with StdChartCfg charts.
+Logically, a single StdSeriesPair defines a single series (such as
+a timeseries), paired with a string representin its name.
 
-type alias SeriesName =
-    String
+Each point in the series is a (label, Float) pair, where the conventioanl
+representationmaps it to (x, y) coordinates in some form.
 
+For consistency, all StdChartCfg charts take a list of StdSeriesPairs,
+even if they only expect a single series (e.g. a simple bar chart).
 
-type alias StdSeriesPair label =
-    ( SeriesName, List ( label, Float ) )
-
+-}
 
 type alias StdSeriesPairs label =
     List (StdSeriesPair label)
 
+type alias StdSeriesPair label =
+    ( SeriesName, List ( label, Float ) )
 
+type alias SeriesName =
+    String
 
 --------------------------------------------------------------------------------
--- StdChart and Defaults
+-- StdChart Configs and Defaults
 
 
 type alias StdChartCfg label =
@@ -127,6 +139,78 @@ defaultLineChartSpec =
         , toggleHeight = 18
         }
 
+--------------------------------------------------------------------------------
+-- GridChart Data
+
+{-| GridSeries define data for working with GridChartCfg charts.
+
+Each series consists of a name and a lsit of groups, called GridTriples.
+Each GridTriple has a name, a list of datapoints, and an optional datapoint..
+- It is expected that the number of data points is identical across all groups
+- The optional datapoint, if supplied, will be scaled across all groups
+
+This is not a common chart type so an example may help:
+
+   ("Apple Mkt Share", [ ( "Americas"
+                         , [ ( "52 Week", 0.3)
+                           , ( "Last Month", 0.4)
+                           ]
+                         , ( "Units Sold", 120000 )
+                         )
+                       , ( "EMEA"
+                         , [ ( "52 Week", 0.2)
+                           , ( "Last Month", 0.25)
+                           ]
+                         , ( "Units SOld", 95000 )
+                         )
+                       ]
+   , "Android Mkt SHare", [...]
+   )
+
+Because the grid chart represents changes **within** each group,
+supplying an optional datapoint provides a basis of comparison
+across all groups.
+
+-}
+
+type alias GridSeries =
+    ( SeriesName, List GridTriple )
+
+type alias GridTriple =
+    ( GroupName, List GridPair, Maybe GridPair )
+
+type alias GridPair =
+    ( String, Float )
+
+type alias GroupName =
+    String
+
+
+--------------------------------------------------------------------------------
+-- GridChart Configs and Defaults
+
+type alias GridChartCfg =
+    { w : Float
+    , h : Float
+    , pad : Padding
+    , baseFontSize : Int
+    , chartSpec : ChartSpec
+    , tooltips : Tooltips
+    , fontSpec : FontSpec
+    , legend : Legend
+    }
+
+defaultGridCfg : GridChartCfg
+defaultGridCfg =
+    { w = 900
+    , h = 450
+    , pad = defaultPadding
+    , baseFontSize = 16
+    , chartSpec = DefaultSpec
+    , tooltips = defaultTooltips
+    , fontSpec = defaultFontSpec
+    , legend = defaultLegend
+    }
 
 
 --------------------------------------------------------------------------------

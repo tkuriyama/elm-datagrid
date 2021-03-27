@@ -52,7 +52,8 @@ charts =
                 , ( "Notional", totalMktNotional )
                 ]
             , TabbedCell "Large"
-                [ ( "TRF", lineChartTRF )
+                [ ( "All ex TRF", lineChartAllExTRF )
+                , ( "TRF", lineChartTRF )
                 , ( "Large", lineChartLarge )
                 , ( "Medum", lineChartMed )
                 , ( "Small", lineChartSmall )
@@ -114,6 +115,14 @@ lineChart ( title, desc, data ) =
         , chartCfg = Cfg.Std LC.cfg
         , chartData = Cfg.LineChartData data
     }
+
+lineChartAllExTRF : ChartCell String
+lineChartAllExTRF =
+    lineChart
+        ( "Venue Mkt Share: All ex. TRF"
+        , ""
+        , LC.filterData 0.0 100.0 False
+        )
 
 
 lineChartTRF : ChartCell String

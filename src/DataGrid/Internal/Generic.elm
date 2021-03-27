@@ -3,6 +3,7 @@ module DataGrid.Internal.Generic exposing (render)
 import DataGrid.BarChart as BC
 import DataGrid.BarChartStacked as BCS
 import DataGrid.Config as Cfg exposing (ChartCfg(..), ChartData(..))
+import DataGrid.GridChart as GC
 import DataGrid.LineChart as LC
 import TypedSvg exposing (svg)
 import TypedSvg.Core exposing (Svg)
@@ -17,6 +18,9 @@ render cfg data =
     case cfg of
         Std stdCfg ->
             renderStd stdCfg data
+
+        Grid gridCfg ->
+            renderGrid gridCfg data
 
         DefaultChartCfg ->
             svg [] []
@@ -34,5 +38,15 @@ renderStd cfg data =
         LineChartData d ->
             LC.render cfg d
 
-        DefaultData ->
+        _ ->
+            svg [] []
+
+renderGrid : Cfg.GridChartCfg -> ChartData label -> Svg msg
+renderGrid cfg data =
+    case data of
+
+        GridChartData d ->
+            GC.render cfg d
+
+        _ ->
             svg [] []
