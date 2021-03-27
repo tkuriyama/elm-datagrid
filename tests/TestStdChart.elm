@@ -1,7 +1,7 @@
 module TestStdChart exposing (..)
 
-import DataGrid.Internal.Utils as Utils
 import DataGrid.Internal.StdChart exposing (..)
+import DataGrid.Internal.Utils as Utils
 import Expect exposing (Expectation)
 import Test exposing (..)
 
