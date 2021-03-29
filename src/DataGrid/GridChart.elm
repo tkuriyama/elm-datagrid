@@ -45,6 +45,7 @@ import TypedSvg.Types
 
 --------------------------------------------------------------------------------
 
+
 type alias ChartEnv =
     { w : Float
     , h : Float
@@ -58,26 +59,28 @@ type alias ChartEnv =
     , style : String
     }
 
-genChartEnv : Cfg.GridChartCfg -> List Cfg.GridSeries  -> ChartEnv
+
+genChartEnv : Cfg.GridChartCfg -> List Cfg.GridSeries -> ChartEnv
 genChartEnv cfg data =
     let
         xs =
             Utils.snds data |> List.head |> Maybe.withDefault [] |> Utils.fsts
+
         ys =
             Utils.fsts data
-
     in
-        { w = cfg.w
-        , h = cfg.h
-        , pad = cfg.pad
-        , xScale = genXScale cfg.w (cfg.pad.right + cfg.pad.left) xs
-        , yScale = genYScale cfg.h (cfg.pad.top + cfg.pad.bottom) ys
-        , dataScales = genDataScales cfg data
-        , showHBar = parseChartSpec cfg.chartSpec
-        , baseFontSize = cfg.baseFontSize
-        , tooltips = cfg.tooltips
-        , style = genStyle cfg.fontSpec
-        }
+    { w = cfg.w
+    , h = cfg.h
+    , pad = cfg.pad
+    , xScale = genXScale cfg.w (cfg.pad.right + cfg.pad.left) xs
+    , yScale = genYScale cfg.h (cfg.pad.top + cfg.pad.bottom) ys
+    , dataScales = genDataScales cfg data
+    , showHBar = parseChartSpec cfg.chartSpec
+    , baseFontSize = cfg.baseFontSize
+    , tooltips = cfg.tooltips
+    , style = genStyle cfg.fontSpec
+    }
+
 
 genDataScales :
     Cfg.GridChartCfg
@@ -85,14 +88,15 @@ genDataScales :
     -> List (ContinuousScale Float)
 genDataScales cfg data =
     Utils.transposeSeries data
-        |> Utils.snds 
+        |> Utils.snds
         |> List.map collect
         |> List.map (genDataScale cfg.h (cfg.pad.top + cfg.pad.bottom))
 
-collect : List (Cfg.SeriesName, List Cfg.GridPair) -> List Float
+
+collect : List ( Cfg.SeriesName, List Cfg.GridPair ) -> List Float
 collect pairs =
     Utils.snds pairs
-        |> List.map (LE.last >> Maybe.withDefault ("", 0))
+        |> List.map (LE.last >> Maybe.withDefault ( "", 0 ))
         |> Utils.snds
 
 
@@ -104,6 +108,8 @@ parseChartSpec spec =
 
         _ ->
             False
+
+
 
 --------------------------------------------------------------------------------
 
@@ -169,12 +175,16 @@ genDataScale h padding xs =
 getColor : Float -> Color
 getColor f =
     if f >= 0 then
-        ColorScale.viridisInterpolator ( 1 - f )
+        ColorScale.viridisInterpolator (1 - f)
+
     else
-        ColorScale.plasmaInterpolator ( 1 - abs f )
+        ColorScale.plasmaInterpolator (1 - abs f)
+
 
 
 --------------------------------------------------------------------------------
 
+
 genStyle : Cfg.FontSpec -> String
-genStyle fCfg = ""
+genStyle fCfg =
+    ""

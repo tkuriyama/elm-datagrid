@@ -151,9 +151,8 @@ defaultLineChartSpec =
 
 {-| GridSeries define data for working with GridChartCfg charts.
 -}
-
 type alias GridSeries =
-    ( SeriesName, List (GroupName, List GridPair ))
+    ( SeriesName, List ( GroupName, List GridPair ) )
 
 
 type alias GridPair =
