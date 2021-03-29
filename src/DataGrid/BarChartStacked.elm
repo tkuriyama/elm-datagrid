@@ -72,18 +72,18 @@ genChartEnv :
     Cfg.StdChartCfg label
     -> List ( label, List ( String, Float ) )
     -> ChartEnv label
-genChartEnv cfg model_ =
+genChartEnv cfg data_ =
     let
         names =
-            List.map (Utils.snd >> Utils.fsts) model_
+            List.map (Utils.snd >> Utils.fsts) data_
                 |> List.head
                 |> Maybe.withDefault []
 
         xs =
-            StdChart.toMatrix model_ |> List.map List.sum
+            StdChart.toMatrix data_ |> List.map List.sum
 
         ys =
-            Utils.fsts model_
+            Utils.fsts data_
     in
     { w = cfg.w
     , h = cfg.h
@@ -109,14 +109,14 @@ genChartEnv cfg model_ =
 
 
 render : Cfg.StdChartCfg label -> Cfg.StdSeriesPairs label -> Svg msg
-render cfg model =
+render cfg data =
     let
-        model_ =
-            List.sortBy (\( _, data ) -> Utils.snds data |> List.sum) model
+        data_ =
+            List.sortBy (\( _, pairs ) -> Utils.snds pairs |> List.sum) data
                 |> StdChart.transpose
 
         env =
-            genChartEnv cfg model_
+            genChartEnv cfg data_
     in
     svg
         [ viewBox 0 0 env.w env.h ]
@@ -138,12 +138,12 @@ render cfg model =
             [ class [ "stacked_bars" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            (List.map (renderStackedBar env) model_)
+            (List.map (renderStackedBar env) data_)
         , g
             [ class [ "hover_boxes" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            (List.map (renderHoverBox env) model_)
+            (List.map (renderHoverBox env) data_)
         ]
 
 

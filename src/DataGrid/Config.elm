@@ -150,42 +150,10 @@ defaultLineChartSpec =
 
 
 {-| GridSeries define data for working with GridChartCfg charts.
-
-Each series consists of a name and a lsit of groups, called GridTriples.
-Each GridTriple has a name, a list of datapoints, and an optional datapoint..
-
-  - It is expected that the number of data points is identical across all groups
-  - The optional datapoint, if supplied, will be scaled across all groups
-
-This is not a common chart type so an example may help:
-
-("Apple Mkt Share", [ ( "Americas"
-, [ ( "52 Week", 0.3)
-, ( "Last Month", 0.4)
-]
-, ( "Units Sold", 120000 )
-)
-, ( "EMEA"
-, [ ( "52 Week", 0.2)
-, ( "Last Month", 0.25)
-]
-, ( "Units SOld", 95000 )
-)
-]
-, "Android Mkt SHare", [...]
-)
-
-Because the grid chart represents changes **within** each group,
-supplying an optional datapoint provides a basis of comparison
-across all groups.
-
 -}
+
 type alias GridSeries =
-    ( SeriesName, List GridTriple )
-
-
-type alias GridTriple =
-    ( GroupName, List GridPair, Maybe GridPair )
+    ( SeriesName, List (GroupName, List GridPair ))
 
 
 type alias GridPair =

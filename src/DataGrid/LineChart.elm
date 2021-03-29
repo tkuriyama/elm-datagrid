@@ -70,16 +70,16 @@ type alias ChartEnv label =
 
 
 genChartEnv : Cfg.StdChartCfg label -> Cfg.StdSeriesPairs label -> ChartEnv label
-genChartEnv cfg model =
+genChartEnv cfg data =
     let
         names =
-            List.map Utils.fst model
+            List.map Utils.fst data
 
         xs =
-            List.concatMap (Utils.snd >> Utils.snds) model
+            List.concatMap (Utils.snd >> Utils.snds) data
 
         ys =
-            List.map (Utils.snd >> Utils.fsts) model
+            List.map (Utils.snd >> Utils.fsts) data
                 |> List.head
                 |> Maybe.withDefault []
     in
@@ -119,13 +119,13 @@ parseChartSpec spec =
 
 
 render : Cfg.StdChartCfg label -> Cfg.StdSeriesPairs label -> Svg msg
-render cfg model =
+render cfg data =
     let
         env =
-            genChartEnv cfg model
+            genChartEnv cfg data
 
-        model_ =
-            StdChart.transpose model
+        data_ =
+            Utils.transposeSeries data
     in
     svg
         [ viewBox 0 0 env.w env.h ]
@@ -148,19 +148,19 @@ render cfg model =
             , transform [ Translate env.pad.left env.pad.top ]
             ]
           <|
-            List.map (renderPoints env) model
+            List.map (renderPoints env) data
         , g
             [ class [ "lines" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
           <|
-            List.map (renderLine env) model
+            List.map (renderLine env) data
         , g
             [ class [ "vbars" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
           <|
-            List.map (renderVBarHover env) model_
+            List.map (renderVBarHover env) data_
         ]
 
 

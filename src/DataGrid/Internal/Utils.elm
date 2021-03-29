@@ -74,6 +74,31 @@ splitN i xs =
             ys :: splitN i (List.drop i xs)
 
 
+transposeSeries : List ( a, List ( b, c ) ) -> List ( b, List ( a, c ) )
+transposeSeries pairs =
+    let
+        names =
+            fsts pairs
+
+        m =
+            toMatrix pairs |> LE.transpose
+
+        labels =
+            snds pairs |> List.head |> Maybe.withDefault [] |> fsts
+
+        f x ys =
+            ( x, List.map2 Tuple.pair names ys )
+    in
+    List.map2 f labels m
+
+
+toMatrix : List ( a, List ( b, c ) ) -> List (List c)
+toMatrix pairs =
+    snds pairs
+        |> List.map List.unzip
+        |> snds
+
+
 toggleMember : a -> List a -> List a
 toggleMember x xs =
     if List.member x xs then

@@ -47,7 +47,7 @@ type alias ChartEnv label =
 
 
 genChartEnv : Cfg.StdChartCfg label -> List ( label, Float ) -> ChartEnv label
-genChartEnv cfg model =
+genChartEnv cfg data =
     { w = cfg.w
     , h = cfg.h
     , pad = cfg.pad
@@ -55,10 +55,10 @@ genChartEnv cfg model =
         StdChart.genYScale True
             cfg.h
             (cfg.pad.top + cfg.pad.bottom)
-            (Utils.snds model)
+            (Utils.snds data)
     , labelScale =
         StdChart.genXScale cfg.w (cfg.pad.right + cfg.pad.left) <|
-            Utils.fsts model
+            Utils.fsts data
     , labelShow = cfg.showLabels
     , labelFmt = cfg.labelFormatter
     , dataTickCt = min cfg.dataAxisTicks 10
@@ -85,10 +85,10 @@ parseChartSpec spec =
 
 
 render : Cfg.StdChartCfg label -> Cfg.StdSeriesPair label -> Svg msg
-render cfg ( _, model ) =
+render cfg ( _, data ) =
     let
         env =
-            genChartEnv cfg model
+            genChartEnv cfg data
     in
     svg
         [ viewBox 0 0 env.w env.h ]
@@ -107,12 +107,12 @@ render cfg ( _, model ) =
             [ class [ "bars" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            (List.map (renderBar env) model)
+            (List.map (renderBar env) data)
         , g
             [ class [ "statistics" ]
             , transform [ Translate 0 env.pad.top ]
             ]
-            (renderBoxPlot env <| Utils.snds model)
+            (renderBoxPlot env <| Utils.snds data)
         ]
 
 
