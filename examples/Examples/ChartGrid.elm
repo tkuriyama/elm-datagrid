@@ -72,7 +72,7 @@ venueGrid : ChartCell String
 venueGrid =
     { defaultChartCell
         | title = Just <| "Yesterday: Mkt Share by Venue"
-        , description = Just <| "Per-venue trailing 60, 20, 1 day mkt share"
+        , description = Just <| "trailing 60, 20, 1 day mkt share"
         , chartCfg = Cfg.Grid GC.cfg
         , chartData = Cfg.GridChartData GC.data
     }
