@@ -1,4 +1,4 @@
-module DataGrid.GridChart exposing (render)
+module DataGrid.GridChart exposing (render, sortByRecent)
 
 {-| Render a a single Grid Chart.
 -}
@@ -29,11 +29,7 @@ import TypedSvg.Attributes.InPx
         , strokeWidth
         , width
         , x
-        , x1
-        , x2
         , y
-        , y1
-        , y2
         )
 import TypedSvg.Core exposing (Svg, text)
 import TypedSvg.Types
@@ -66,16 +62,19 @@ type alias ChartEnv =
 genChartEnv : Cfg.GridChartCfg -> List Cfg.GridSeries -> ChartEnv
 genChartEnv cfg data =
     let
+        data_ =
+            sortByRecent data
+
         xs =
             "Labels"
-                :: (Utils.snds data
+                :: (Utils.snds data_
                         |> List.head
                         |> Maybe.withDefault []
                         |> Utils.fsts
                    )
 
         ys =
-            Utils.fsts data
+            Utils.fsts data_
 
         xScale =
             genXScale cfg.w (cfg.pad.right + cfg.pad.left) xs
@@ -131,7 +130,9 @@ render cfg data =
     let
         env =
             genChartEnv cfg data
+
     in
+
     svg
         [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
@@ -147,6 +148,13 @@ render cfg data =
             (List.concatMap (renderGrid env) data)
         ]
 
+sortByRecent : List Cfg.GridSeries -> List Cfg.GridSeries
+sortByRecent =
+    List.sortBy 
+        (Utils.snd >> List.head >> Maybe.withDefault ("", []) >>
+             Utils.snd >> Utils.snds >>
+             LE.last >> Maybe.withDefault 0)
+        >> List.reverse
 
 renderLabel : ChartEnv -> String -> Svg msg
 renderLabel env lbl =
@@ -261,7 +269,7 @@ genYScale h padding ys =
         cfg =
             { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
     in
-    Scale.band cfg ( h - padding, 0 ) ys
+    Scale.band cfg ( 0, h - padding) ys
 
 
 genYAxis : Bool -> BandScale String -> Svg msg
