@@ -24,9 +24,9 @@ main =
 cfg : LayoutCfg
 cfg =
     { defaultLayoutCfg
-        | w = Just 1900
-        , title = Just "Demo Chart Grid"
-        , description = Just "US equity market statistics"
+        | w = Just 1950
+        , title = Just "US Equities"
+        , description = Just "market summary"
         , links =
             [ ( "CBOE"
               , "https://certification.batstrading.com/market_summary/"
@@ -72,7 +72,7 @@ venueGrid : ChartCell String
 venueGrid =
     { defaultChartCell
         | title = Just <| "Yesterday: Mkt Share by Venue"
-        , description = Just <| "trailing 60, 20, 1 day mkt share"
+        , description = Just <| "trailing 60, 20, 1 day means"
         , chartCfg = Cfg.Grid GC.cfg
         , chartData = Cfg.GridChartData GC.data
     }
