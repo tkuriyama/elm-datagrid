@@ -176,5 +176,5 @@ lineChartSmall =
     lineChart
         ( "Venue Mkt Share: Small"
         , "mkt share <= 1%"
-        , LC.filterData 0.0 1.0 False
+        , LC.filterData -0.1 1.0 False
         )
