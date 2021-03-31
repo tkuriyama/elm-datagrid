@@ -180,8 +180,8 @@ type alias GridChartCfg =
     }
 
 
-defaultGridCfg : GridChartCfg
-defaultGridCfg =
+defaultGridChartCfg : GridChartCfg
+defaultGridChartCfg =
     { w = 900
     , h = 450
     , pad = defaultPadding

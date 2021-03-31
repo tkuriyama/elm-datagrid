@@ -24,7 +24,10 @@ import TypedSvg.Attributes
         )
 import TypedSvg.Attributes.InPx
     exposing
-        ( strokeWidth
+        ( height
+        , rx
+        , strokeWidth
+        , width
         , x
         , x1
         , x2
@@ -54,7 +57,6 @@ type alias ChartEnv =
     , yScale : BandScale String
     , dataScales : List (ContinuousScale Float)
     , showHBar : Bool
-    , baseFontSize : Int
     , tooltips : Cfg.Tooltips
     , style : String
     }
@@ -64,33 +66,40 @@ genChartEnv : Cfg.GridChartCfg -> List Cfg.GridSeries -> ChartEnv
 genChartEnv cfg data =
     let
         xs =
-            Utils.snds data |> List.head |> Maybe.withDefault [] |> Utils.fsts
+            "Labels" ::
+                ( Utils.snds data
+                |> List.head
+                |> Maybe.withDefault []
+                |> Utils.fsts
+                )
 
         ys =
             Utils.fsts data
+
+        xScale =
+            genXScale cfg.w (cfg.pad.right + cfg.pad.left) xs
     in
     { w = cfg.w
     , h = cfg.h
     , pad = cfg.pad
-    , xScale = genXScale cfg.w (cfg.pad.right + cfg.pad.left) xs
+    , xScale = xScale
     , yScale = genYScale cfg.h (cfg.pad.top + cfg.pad.bottom) ys
-    , dataScales = genDataScales cfg data
+    , dataScales = genDataScales data (Scale.bandwidth xScale)
     , showHBar = parseChartSpec cfg.chartSpec
-    , baseFontSize = cfg.baseFontSize
     , tooltips = cfg.tooltips
-    , style = genStyle cfg.fontSpec
+    , style = genStyle cfg.baseFontSize cfg.fontSpec cfg.tooltips
     }
 
 
 genDataScales :
-    Cfg.GridChartCfg
-    -> List Cfg.GridSeries
+    List Cfg.GridSeries
+    -> Float
     -> List (ContinuousScale Float)
-genDataScales cfg data =
+genDataScales data w =
     Utils.transposeSeries data
         |> Utils.snds
         |> List.map collect
-        |> List.map (genDataScale cfg.h (cfg.pad.top + cfg.pad.bottom))
+        |> List.map (genDataScale (w / 2))
 
 
 collect : List ( Cfg.SeriesName, List Cfg.GridPair ) -> List Float
@@ -112,16 +121,103 @@ parseChartSpec spec =
 
 
 --------------------------------------------------------------------------------
-
+-- Render
 
 render : Cfg.GridChartCfg -> List Cfg.GridSeries -> Svg msg
 render cfg data =
-    svg [] []
+    let
+        env =
+            genChartEnv cfg data
+    in
+
+    svg
+        [ viewBox 0 0 env.w env.h ]
+        [ style [] [ text <| env.style ]
+        , g
+            [ class [ "grid_labels" ]
+            , transform [ Translate env.pad.left env.pad.top ]
+            ]
+            ( List.map (renderLabel env) <| Utils.fsts data )
+        , g
+            [ class [ "grids" ]
+            , transform [ Translate env.pad.left env.pad.top ]
+            ]
+            ( List.concatMap (renderGrid env) data )
+        ]
 
 
+renderLabel : ChartEnv -> String -> Svg msg
+renderLabel env lbl =
+    text_
+        [ x <| Scale.convert env.xScale "labels"
+        , y <| Scale.convert env.yScale lbl ]
+        [ text lbl ]
+
+
+renderGrid : ChartEnv -> Cfg.GridSeries -> List (Svg msg)
+renderGrid env (lbl, groups) =
+    let
+        y =
+            Scale.convert env.yScale lbl
+        f group =
+            g [ class [ "grid_cells" ] ]
+              [ renderCells env y group ]
+
+    in
+        List.map f groups
+
+renderCells :
+    ChartEnv
+    -> Float
+    -> (String, List Cfg.GridPair)
+    -> Svg msg
+renderCells env y (name, pairs) =
+    let
+        x =
+            Scale.convert env.xScale name
+        xDiv =
+            if env.showHBar then 2.0 else 1.0
+
+        xInc =
+            (Scale.bandwidth env.xScale) / xDiv / (List.length pairs |> toFloat)
+
+        f colorVal (xStart, acc) =
+            (xStart + xInc, (renderCell xStart y xInc colorVal) :: acc)
+    in
+        g
+        [ ]
+        ( relativeScale pairs
+        |> List.foldl f (x, [])
+        |> Utils.snd
+        |> List.reverse
+        )
+
+renderCell : Float -> Float -> Float -> Float -> Svg msg
+renderCell x_ y_ w colorVal =
+    rect
+        [ x x_
+        , y y_
+        , rx 1
+        , width w
+        , height w
+        , fill <| Paint <| getColor colorVal
+        ]
+        []
+
+
+relativeScale : List (a, Float) -> List Float
+relativeScale xs =
+    let f val (scalar, acc) =
+            (scalar, ((val - scalar) / scalar) :: acc)
+    in 
+    case (Utils.snds xs) of
+        [] ->
+            []
+        (y :: ys) ->
+            List.foldl f (y, [0]) ys |> Utils.snd |> List.reverse
 
 --------------------------------------------------------------------------------
--- Scales
+-- Axes and Scales
 
 
 genXScale : Float -> Float -> List String -> BandScale String
@@ -160,8 +256,8 @@ genYAxis show yScale =
         svg [] []
 
 
-genDataScale : Float -> Float -> List Float -> ContinuousScale Float
-genDataScale h padding xs =
+genDataScale : Float -> List Float -> ContinuousScale Float
+genDataScale w xs =
     let
         dispMin =
             Maybe.withDefault 0 <| List.minimum xs
@@ -169,7 +265,7 @@ genDataScale h padding xs =
         dispMax =
             Maybe.withDefault 0 <| List.maximum xs
     in
-    Scale.linear ( h - padding, 0 ) ( dispMin, dispMax )
+    Scale.linear ( 0, w ) ( dispMin, dispMax )
 
 
 getColor : Float -> Color
@@ -185,6 +281,26 @@ getColor f =
 --------------------------------------------------------------------------------
 
 
-genStyle : Cfg.FontSpec -> String
-genStyle fCfg =
-    ""
+genStyle : Int -> Cfg.FontSpec -> Cfg.Tooltips -> String
+genStyle sz fCfg tCfg =
+    let
+        base =
+            genBaseStyle sz fCfg tCfg
+    in
+        base
+
+genBaseStyle : Int -> Cfg.FontSpec -> Cfg.Tooltips -> String
+genBaseStyle sz fCfg tCfg =
+    """
+     text { font-family: {{typeface}}, monospace, sans-serif;
+            fill: {{textColor}}; }
+     .grid_labels { font-size: {{sz}}px; }
+     .tooltip_hover { display: none; font-size: {{szH}}px;
+     .tooltip_hover rect { fill: rgba(250, 250, 250, 1.0); }
+     """
+        |> String.Format.namedValue "sz" (String.fromInt sz)
+        |> String.Format.namedValue "textColor" fCfg.textColor
+        |> String.Format.namedValue "szH" (String.fromInt tCfg.hoverTooltipSize)
+        |> String.Format.namedValue "typeface" fCfg.typeface
+
+

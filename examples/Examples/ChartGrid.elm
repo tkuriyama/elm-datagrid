@@ -9,6 +9,7 @@ import DataGrid.ChartGrid.Types exposing (ChartCell, ChartGrid(..), LayoutCfg)
 import DataGrid.Config as Cfg
 import Examples.BarChart as BC
 import Examples.BarChartStacked as BCS
+import Examples.GridChart as GC
 import Examples.LineChart as LC
 
 
@@ -41,7 +42,7 @@ charts : ChartGrid String
 charts =
     Column ( Nothing, Nothing )
         [ Row ( Nothing, Nothing )
-            [ Cell totalMkt
+            [ Cell venueGrid
             , Cell totalMktNotional
             ]
         , Row ( Nothing, Nothing )
@@ -65,6 +66,16 @@ charts =
 
 --------------------------------------------------------------------------------
 -- Cells
+
+
+venueGrid : ChartCell String
+venueGrid =
+    { defaultChartCell
+        | title = Just <| "Yesterday: Mkt Share by Venue"
+        , description = Just <| "Per-venue trailing 60, 20, 1 day mkt share"
+        , chartCfg = Cfg.Grid GC.cfg
+        , chartData = Cfg.GridChartData GC.data
+    }
 
 
 totalMkt : ChartCell String
