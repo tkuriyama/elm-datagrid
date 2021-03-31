@@ -6,6 +6,7 @@ module DataGrid.GridChart exposing (render, sortByRecent)
 import Axis
 import Color exposing (Color)
 import DataGrid.Config as Cfg
+import DataGrid.Internal.Defaults as Defaults
 import DataGrid.Internal.Utils as Utils
 import List.Extra as LE
 import Scale exposing (BandScale, ContinuousScale, defaultBandConfig)
@@ -88,7 +89,7 @@ genChartEnv cfg data =
     , showHBar = parseChartSpec cfg.chartSpec
     , tooltips = cfg.tooltips
     , baseFontSize = cfg.baseFontSize
-    , style = genStyle cfg.baseFontSize cfg.fontSpec cfg.tooltips
+    , style = genStyle cfg.baseFontSize cfg.chartSpec cfg.fontSpec cfg.tooltips
     }
 
 
@@ -200,10 +201,19 @@ renderGrid env ( lbl, groups ) =
             Scale.convert env.yScale lbl
 
         f group =
-            g [ class [ "grid_cells" ] ]
-                [ renderCells env y group ]
+            g [ class [ "grid_group" ] ]
+              [ renderCells env y group ]
+
+        f2 group scale =
+            g [ class [ "grid_group" ] ]
+              [ renderHBars env y group scale ]
     in
-    List.map f groups
+    List.map f groups ++
+        ( if env.showHBar then
+              List.map2 f2 groups env.dataScales
+          else
+              [] 
+        ) 
 
 
 renderCells :
@@ -215,13 +225,23 @@ renderCells env y_ ( name, pairs ) =
     let
         x_ =
             Scale.convert env.xScale name
+        w =
+            Scale.bandwidth env.xScale
 
         xDiv =
             if env.showHBar then 2.0 else 1.0
 
+
         xInc =
-            Scale.bandwidth env.xScale / xDiv / (List.length pairs |> toFloat)
+            w / xDiv / (List.length pairs |> toFloat)
                 |> min (Scale.bandwidth env.yScale)
+
+        x0 =
+            if env.showHBar then
+                x_
+            else
+                (List.length pairs |> toFloat) * xInc / 2
+                |> (-) (x_ + w / 2)
 
         f colorVal ( xStart, acc ) =
             ( xStart + xInc, renderCell xStart y_ xInc colorVal :: acc )
@@ -230,7 +250,7 @@ renderCells env y_ ( name, pairs ) =
     g
         []
         ( relativeScale pairs
-            |> List.foldl f ( x_, [] )
+            |> List.foldl f ( x0, [] )
             |> Utils.snd
             |> List.reverse
         )
@@ -249,6 +269,8 @@ renderCell x_ y_ w colorVal =
         []
 
 
+-- Scale list tail as percentage of list head
+
 relativeScale : List ( a, Float ) -> List Float
 relativeScale xs =
     let
@@ -264,6 +286,34 @@ relativeScale xs =
         y :: ys ->
             List.foldl f ( y, [ 0 ] ) ys |> Utils.snd |> List.reverse
 
+renderHBars :
+    ChartEnv
+    -> Float
+    -> ( String, List Cfg.GridPair )
+    -> ContinuousScale Float
+    -> Svg msg
+renderHBars env y_ ( name, pairs ) dScale =
+    let
+        x_ =
+            Scale.convert env.xScale name
+                |> (+) (Scale.bandwidth env.xScale / 2)
+
+        val =
+            Utils.snds pairs |> LE.last |> Maybe.withDefault 0
+
+        h =
+            Scale.bandwidth env.yScale 
+
+    in
+        g [ class [ "grid_hbar" ] ]
+          [ rect
+              [ x x_
+              , y <| y_ + h * 0.2
+              , width <| Scale.convert dScale val
+              , height <| h * 0.6
+              ]
+              []
+          ]
 
 
 --------------------------------------------------------------------------------
@@ -327,25 +377,36 @@ getColor f =
         ColorScale.plasmaInterpolator (1 - abs f)
 
 
+--------------------------------------------------------------------------------
+-- Tooltips
+
+
+
 
 --------------------------------------------------------------------------------
 
 
-genStyle : Int -> Cfg.FontSpec -> Cfg.Tooltips -> String
-genStyle sz fCfg tCfg =
+genStyle : Int -> Cfg.ChartSpec -> Cfg.FontSpec -> Cfg.Tooltips -> String
+genStyle sz cCfg fCfg tCfg =
     let
-        base =
-            genBaseStyle sz fCfg tCfg
+        fillColor =
+            case cCfg of
+                Cfg.GridChartSpec spec ->
+                    spec.fillColor
+
+                _ ->
+                    defaultFillColor
     in
-    base
+    genBaseStyle sz fillColor fCfg tCfg
 
 
-genBaseStyle : Int -> Cfg.FontSpec -> Cfg.Tooltips -> String
-genBaseStyle sz fCfg tCfg =
+genBaseStyle : Int -> String -> Cfg.FontSpec -> Cfg.Tooltips -> String
+genBaseStyle sz fillColor fCfg tCfg =
     """
      text { font-family: {{typeface}}, monospace, sans-serif;
             fill: {{textColor}}; }
      .x_labels, .y_labels { font-size: {{sz}}px; }
+     .grid_hbar rect { fill: {{fillColor}}; }
      .tooltip_hover { display: none; font-size: {{szH}}px;
      .tooltip_hover rect { fill: rgba(250, 250, 250, 1.0); }
      """
@@ -353,3 +414,10 @@ genBaseStyle sz fCfg tCfg =
         |> String.Format.namedValue "textColor" fCfg.textColor
         |> String.Format.namedValue "szH" (String.fromInt tCfg.hoverTooltipSize)
         |> String.Format.namedValue "typeface" fCfg.typeface
+        |> String.Format.namedValue "fillColor" fillColor
+
+
+defaultFillColor : String
+defaultFillColor =
+    Defaults.rgbaToString Defaults.defaultFillColor
+
