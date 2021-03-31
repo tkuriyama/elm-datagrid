@@ -153,7 +153,7 @@ tab active name =
                 Element.rgb 1 1 1
     in
     Input.button
-        [ paddingXY 10 5
+        [ paddingXY 7 5
         , Border.widthEach borders
         , Border.roundEach corners
         , Border.color <| Element.rgb 0.3 0.3 0.3
