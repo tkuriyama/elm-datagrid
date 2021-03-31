@@ -58,6 +58,7 @@ type alias ChartEnv =
     , dataScales : List (ContinuousScale Float)
     , showHBar : Bool
     , tooltips : Cfg.Tooltips
+    , baseFontSize : Int
     , style : String
     }
 
@@ -66,12 +67,12 @@ genChartEnv : Cfg.GridChartCfg -> List Cfg.GridSeries -> ChartEnv
 genChartEnv cfg data =
     let
         xs =
-            "Labels" ::
-                ( Utils.snds data
-                |> List.head
-                |> Maybe.withDefault []
-                |> Utils.fsts
-                )
+            "Labels"
+                :: (Utils.snds data
+                        |> List.head
+                        |> Maybe.withDefault []
+                        |> Utils.fsts
+                   )
 
         ys =
             Utils.fsts data
@@ -87,6 +88,7 @@ genChartEnv cfg data =
     , dataScales = genDataScales data (Scale.bandwidth xScale)
     , showHBar = parseChartSpec cfg.chartSpec
     , tooltips = cfg.tooltips
+    , baseFontSize = cfg.baseFontSize
     , style = genStyle cfg.baseFontSize cfg.fontSpec cfg.tooltips
     }
 
@@ -123,13 +125,13 @@ parseChartSpec spec =
 --------------------------------------------------------------------------------
 -- Render
 
+
 render : Cfg.GridChartCfg -> List Cfg.GridSeries -> Svg msg
 render cfg data =
     let
         env =
             genChartEnv cfg data
     in
-
     svg
         [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
@@ -137,12 +139,12 @@ render cfg data =
             [ class [ "grid_labels" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            ( List.map (renderLabel env) <| Utils.fsts data )
+            (List.map (renderLabel env) <| Utils.fsts data)
         , g
             [ class [ "grids" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            ( List.concatMap (renderGrid env) data )
+            (List.concatMap (renderGrid env) data)
         ]
 
 
@@ -150,47 +152,56 @@ renderLabel : ChartEnv -> String -> Svg msg
 renderLabel env lbl =
     text_
         [ x <| Scale.convert env.xScale "labels"
-        , y <| Scale.convert env.yScale lbl ]
+        , y <| Scale.convert env.yScale lbl + (toFloat env.baseFontSize)
+        ]
         [ text lbl ]
 
 
 renderGrid : ChartEnv -> Cfg.GridSeries -> List (Svg msg)
-renderGrid env (lbl, groups) =
+renderGrid env ( lbl, groups ) =
     let
         y =
             Scale.convert env.yScale lbl
+
         f group =
             g [ class [ "grid_cells" ] ]
-              [ renderCells env y group ]
-
+                [ renderCells env y group ]
     in
-        List.map f groups
+    List.map f groups
+
 
 renderCells :
     ChartEnv
     -> Float
-    -> (String, List Cfg.GridPair)
+    -> ( String, List Cfg.GridPair )
     -> Svg msg
-renderCells env y (name, pairs) =
+renderCells env y ( name, pairs ) =
     let
         x =
             Scale.convert env.xScale name
+
         xDiv =
-            if env.showHBar then 2.0 else 1.0
+            if env.showHBar then
+                2.0
+
+            else
+                1.0
 
         xInc =
-            (Scale.bandwidth env.xScale) / xDiv / (List.length pairs |> toFloat)
+            Scale.bandwidth env.xScale / xDiv / (List.length pairs |> toFloat)
+                |> min (Scale.bandwidth env.yScale)
 
-        f colorVal (xStart, acc) =
-            (xStart + xInc, (renderCell xStart y xInc colorVal) :: acc)
+        f colorVal ( xStart, acc ) =
+            ( xStart + xInc, renderCell xStart y xInc colorVal :: acc )
     in
-        g
-        [ ]
-        ( relativeScale pairs
-        |> List.foldl f (x, [])
-        |> Utils.snd
-        |> List.reverse
+    g
+        []
+        (relativeScale pairs
+            |> List.foldl f ( x, [] )
+            |> Utils.snd
+            |> List.reverse
         )
+
 
 renderCell : Float -> Float -> Float -> Float -> Svg msg
 renderCell x_ y_ w colorVal =
@@ -205,16 +216,22 @@ renderCell x_ y_ w colorVal =
         []
 
 
-relativeScale : List (a, Float) -> List Float
+relativeScale : List ( a, Float ) -> List Float
 relativeScale xs =
-    let f val (scalar, acc) =
-            (scalar, ((val - scalar) / scalar) :: acc)
-    in 
-    case (Utils.snds xs) of
+    let
+        f val ( scalar, acc ) =
+            max -1.0 (min 1.0 ((val - scalar) / scalar))
+                |> \val_ -> ( scalar, val_ :: acc )
+
+    in
+    case Utils.snds xs of
         [] ->
             []
-        (y :: ys) ->
-            List.foldl f (y, [0]) ys |> Utils.snd |> List.reverse
+
+        y :: ys ->
+            List.foldl f ( y, [ 0 ] ) ys |> Utils.snd |> List.reverse
+
+
 
 --------------------------------------------------------------------------------
 -- Axes and Scales
@@ -287,7 +304,8 @@ genStyle sz fCfg tCfg =
         base =
             genBaseStyle sz fCfg tCfg
     in
-        base
+    base
+
 
 genBaseStyle : Int -> Cfg.FontSpec -> Cfg.Tooltips -> String
 genBaseStyle sz fCfg tCfg =
@@ -302,5 +320,3 @@ genBaseStyle sz fCfg tCfg =
         |> String.Format.namedValue "textColor" fCfg.textColor
         |> String.Format.namedValue "szH" (String.fromInt tCfg.hoverTooltipSize)
         |> String.Format.namedValue "typeface" fCfg.typeface
-
-
