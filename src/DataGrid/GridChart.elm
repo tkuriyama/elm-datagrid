@@ -74,7 +74,7 @@ genChartEnv cfg data =
                    )
 
         ys =
-            Utils.fsts data_
+            "labels" :: (Utils.fsts data_)
 
         xScale =
             genXScale cfg.w (cfg.pad.right + cfg.pad.left) xs
@@ -131,16 +131,26 @@ render cfg data =
         env =
             genChartEnv cfg data
 
+        group_labels =
+            List.head data
+                |> Maybe.withDefault ("", [])
+                |> Utils.snd
+                |> Utils.fsts
+
     in
 
     svg
         [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
         , g
-            [ class [ "grid_labels" ]
+            [ class [ "x_labels" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            (List.map (renderLabel env) <| Utils.fsts data)
+            (List.map (renderXLabel env) <| Utils.fsts data)
+        , g [ class [ "y_labels" ]
+            , transform [ Translate env.pad.left env.pad.top ]
+            ]
+            (List.map (renderYLabel env) group_labels)
         , g
             [ class [ "grids" ]
             , transform [ Translate env.pad.left env.pad.top ]
@@ -156,13 +166,31 @@ sortByRecent =
              LE.last >> Maybe.withDefault 0)
         >> List.reverse
 
-renderLabel : ChartEnv -> String -> Svg msg
-renderLabel env lbl =
+renderXLabel : ChartEnv -> String -> Svg msg
+renderXLabel env lbl =
     text_
         [ x <| Scale.convert env.xScale "labels"
         , y <| Scale.convert env.yScale lbl + (toFloat env.baseFontSize)
         ]
         [ text lbl ]
+
+renderYLabel : ChartEnv -> String -> Svg msg
+renderYLabel env lbl =
+    let
+        x_ =
+            Scale.convert env.yScale "labels"
+
+        nameX =
+            String.length lbl * env.baseFontSize
+                |> toFloat
+                |> (*) (0.7 / 2)
+                |> (-) (x_ + Scale.bandwidth env.xScale / 2)
+    in
+        text_
+            [ x <| Scale.convert env.xScale lbl + nameX
+            , y <| Scale.convert env.yScale "labels" + (toFloat env.baseFontSize)
+            ]
+            [ text lbl ]
 
 
 renderGrid : ChartEnv -> Cfg.GridSeries -> List (Svg msg)
@@ -183,29 +211,26 @@ renderCells :
     -> Float
     -> ( String, List Cfg.GridPair )
     -> Svg msg
-renderCells env y ( name, pairs ) =
+renderCells env y_ ( name, pairs ) =
     let
-        x =
+        x_ =
             Scale.convert env.xScale name
 
         xDiv =
-            if env.showHBar then
-                2.0
-
-            else
-                1.0
+            if env.showHBar then 2.0 else 1.0
 
         xInc =
             Scale.bandwidth env.xScale / xDiv / (List.length pairs |> toFloat)
                 |> min (Scale.bandwidth env.yScale)
 
         f colorVal ( xStart, acc ) =
-            ( xStart + xInc, renderCell xStart y xInc colorVal :: acc )
+            ( xStart + xInc, renderCell xStart y_ xInc colorVal :: acc )
+
     in
     g
         []
-        (relativeScale pairs
-            |> List.foldl f ( x, [] )
+        ( relativeScale pairs
+            |> List.foldl f ( x_, [] )
             |> Utils.snd
             |> List.reverse
         )
@@ -320,7 +345,7 @@ genBaseStyle sz fCfg tCfg =
     """
      text { font-family: {{typeface}}, monospace, sans-serif;
             fill: {{textColor}}; }
-     .grid_labels { font-size: {{sz}}px; }
+     .x_labels, .y_labels { font-size: {{sz}}px; }
      .tooltip_hover { display: none; font-size: {{szH}}px;
      .tooltip_hover rect { fill: rgba(250, 250, 250, 1.0); }
      """
