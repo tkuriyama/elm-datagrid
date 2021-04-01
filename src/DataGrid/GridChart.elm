@@ -7,6 +7,7 @@ import Axis
 import Color exposing (Color)
 import DataGrid.Config as Cfg
 import DataGrid.Internal.Defaults as Defaults
+import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils
 import List.Extra as LE
 import Scale exposing (BandScale, ContinuousScale, defaultBandConfig)
@@ -153,11 +154,17 @@ render cfg data =
             ]
             (List.map (renderYLabel env) group_labels)
         , g
-            [ class [ "grids" ]
+            [ class [ "grid_data" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            (List.concatMap (renderGrid env) data)
+            (List.map (renderGrid env) data)
+        , g
+            [ class [ "grid_tooltips" ]
+            , transform [ Translate env.pad.left env.pad.top ]
+            ]
+            (List.map (renderTooltips env) data)
         ]
+
 
 sortByRecent : List Cfg.GridSeries -> List Cfg.GridSeries
 sortByRecent =
@@ -194,26 +201,20 @@ renderYLabel env lbl =
             [ text lbl ]
 
 
-renderGrid : ChartEnv -> Cfg.GridSeries -> List (Svg msg)
+renderGrid : ChartEnv -> Cfg.GridSeries -> Svg msg
 renderGrid env ( lbl, groups ) =
     let
         y =
             Scale.convert env.yScale lbl
-
-        f group =
-            g [ class [ "grid_group" ] ]
-              [ renderCells env y group ]
-
-        f2 group scale =
-            g [ class [ "grid_group" ] ]
-              [ renderHBars env y group scale ]
     in
-    List.map f groups ++
-        ( if env.showHBar then
-              List.map2 f2 groups env.dataScales
-          else
-              [] 
-        ) 
+        g [ class [ "grid_group" ] ]
+          ( List.map (renderCells env y) groups ++
+                ( if env.showHBar then
+                      List.map2 (renderHBars env y) groups env.dataScales
+                  else
+                      []
+                )
+          )
 
 
 renderCells :
@@ -298,22 +299,205 @@ renderHBars env y_ ( name, pairs ) dScale =
             Scale.convert env.xScale name
                 |> (+) (Scale.bandwidth env.xScale / 2)
 
-        val =
-            Utils.snds pairs |> LE.last |> Maybe.withDefault 0
+        last =
+             LE.last pairs |> Maybe.withDefault ("", 0)
 
         h =
             Scale.bandwidth env.yScale 
 
     in
         g [ class [ "grid_hbar" ] ]
-          [ rect
-              [ x x_
-              , y <| y_ + h * 0.2
-              , width <| Scale.convert dScale val
-              , height <| h * 0.6
-              ]
-              []
-          ]
+            [ rect
+                  [ x x_
+                  , y <| y_ + h * 0.2
+                  , width <| Scale.convert dScale (Utils.snd last)
+                  , height <| h * 0.6
+                  ]
+                  []
+            ]
+
+--------------------------------------------------------------------------------
+-- Render Tooltips
+
+type alias HasTooltipEnv a =
+    { a
+        | w : Float
+        , h : Float
+        , pad : Cfg.Padding
+        , tooltips : Cfg.Tooltips
+        , xScale : BandScale String
+        , yScale : BandScale String
+    }
+
+
+type alias HoverEnv =
+    { x : Float
+    , y : Float
+    , h : Float
+    , w : Float
+    }
+
+
+renderTooltips : ChartEnv -> Cfg.GridSeries -> Svg msg
+renderTooltips env ( lbl, groups ) =
+    g [ class [ "grid_group" ] ]
+      ( if env.tooltips.showHoverTooltips then
+            List.map (renderHoverTooltips env lbl)  groups
+        else
+            []
+      )
+
+
+renderHoverTooltips :
+    ChartEnv
+    -> String
+    -> ( String, List Cfg.GridPair )
+    -> Svg msg
+renderHoverTooltips env lbl ( name, pairs ) =
+    g [ class [ "grid_tooltip_area" ] ]
+      [ rect
+            [ class [ "transparent" ]
+            , x <| Scale.convert env.xScale name
+            , y <| Scale.convert env.yScale lbl
+            , width <| Scale.bandwidth env.xScale
+            , height <| Scale.bandwidth env.yScale
+            ]
+            []
+      , renderHoverTooltip env lbl name pairs
+      ]
+
+
+renderHoverTooltip :
+    HasTooltipEnv a
+    -> String
+    -> String
+    -> List ( String, Float )
+    -> Svg msg
+renderHoverTooltip env lbl name points =
+    let
+        hEnv =
+            genHoverEnv env lbl name points
+
+        pad =
+            5
+
+        ( lines, lineParams ) =
+            genHoverText env points ( hEnv.x, hEnv.y )
+    in
+    g [ class [ "grid_tooltip_hover" ] ]
+        ([ rect
+            [ class [ "invert" ]
+            , x hEnv.x
+            , y hEnv.y
+            , height hEnv.h
+            , width hEnv.w
+            , rx 3
+            ]
+            []
+         , text_
+            [ x <| (hEnv.x + pad)
+            , y <| hEnv.y + toFloat env.tooltips.hoverTooltipSize + pad
+            ]
+            [ text <| lbl ++ ": " ++ name ]
+         ]
+            ++ List.map2 (renderHoverText pad) lines lineParams
+        )
+
+
+renderHoverText : Float -> String -> ( Float, Float ) -> Svg msg
+renderHoverText pad txt ( hx, hy ) =
+    text_
+        [ x <| hx + pad
+        , y <| hy + pad
+        ]
+        [ text txt ]
+
+
+genHoverEnv :
+    HasTooltipEnv a
+    -> String
+    -> String
+    -> List ( String, Float )
+    -> HoverEnv
+genHoverEnv env lbl name pairs =
+    let
+
+        (xOffset, yOffset) =
+            (5, 5)
+
+        sz =
+            env.tooltips.hoverTooltipSize |> toFloat
+
+        hh =
+            (List.length pairs + 2 |> toFloat) * sz * 1.03
+
+        hw =
+            Utils.fsts pairs
+                |> List.map (String.length >> toFloat)
+                |> List.maximum
+                |> Maybe.withDefault 20
+                |> (\n -> (n + 4) * (sz * 0.7))
+
+        xw =
+            Scale.bandwidth env.xScale
+
+        hx =
+            Scale.convert env.xScale name
+
+        hx_ =
+            if hx + hw + xw + xOffset > (env.w - env.pad.left - env.pad.right) then
+                hx - hw - xOffset
+
+            else
+                hx + xw + xOffset
+
+        hy =
+            Scale.convert env.yScale lbl
+
+        hy_ =
+            if hy + hh + yOffset > (env.h - env.pad.bottom - env.pad.top) then
+                hy - hh - yOffset
+            else
+                hy + yOffset
+
+    in
+    { x = hx_
+    , y = hy
+    , w = hw
+    , h = hh
+    }
+
+
+genHoverText :
+    HasTooltipEnv a
+    -> List ( String, Float )
+    -> ( Float, Float )
+    -> ( List String, List ( Float, Float ) )
+genHoverText env pairs ( x0, y0 ) =
+    let
+        longest =
+            Utils.fsts pairs
+                |> List.map String.length
+                |> List.maximum
+                |> Maybe.withDefault 0
+
+        cmp a b =
+            compare (Utils.snd a) (Utils.snd b)
+
+        fmt ( s, f ) =
+            Utils.twoCols longest 3 s (Utils.fmtFloat 2 f)
+
+        xs =
+            List.repeat (List.length pairs) x0
+
+        ys =
+            List.range 2 (List.length pairs + 1)
+                |> List.map
+                    (\i -> y0 + (i * env.tooltips.hoverTooltipSize |> toFloat) + 5)
+    in
+    ( pairs |> List.map fmt
+    , List.map2 Tuple.pair xs ys
+    )
 
 
 --------------------------------------------------------------------------------
@@ -377,11 +561,6 @@ getColor f =
         ColorScale.plasmaInterpolator (1 - abs f)
 
 
---------------------------------------------------------------------------------
--- Tooltips
-
-
-
 
 --------------------------------------------------------------------------------
 
@@ -407,14 +586,18 @@ genBaseStyle sz fillColor fCfg tCfg =
             fill: {{textColor}}; }
      .x_labels, .y_labels { font-size: {{sz}}px; }
      .grid_hbar rect { fill: {{fillColor}}; }
-     .tooltip_hover { display: none; font-size: {{szH}}px;
-     .tooltip_hover rect { fill: rgba(250, 250, 250, 1.0); }
+     .transparent { opacity: 0.0; }
+     .grid_tooltip_hover { display: none; font-size: {{szH}}px;}
+     .grid_tooltip_hover rect { fill: rgba(250, 250, 250, 1.0); }
+     .grid_tooltip_area:hover .grid_tooltip_hover { display: inline; }
      """
         |> String.Format.namedValue "sz" (String.fromInt sz)
         |> String.Format.namedValue "textColor" fCfg.textColor
         |> String.Format.namedValue "szH" (String.fromInt tCfg.hoverTooltipSize)
         |> String.Format.namedValue "typeface" fCfg.typeface
         |> String.Format.namedValue "fillColor" fillColor
+        |> String.Format.namedValue "showHover"
+             (UI.display tCfg.showHoverTooltips)
 
 
 defaultFillColor : String
