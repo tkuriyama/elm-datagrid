@@ -38,4 +38,5 @@ tooltipsCfg =
     }
 
 data : List Cfg.GridSeries
-data = GridChartSample.data
+data =
+    GridChartSample.data
