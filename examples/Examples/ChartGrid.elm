@@ -42,7 +42,10 @@ charts : ChartGrid String
 charts =
     Column ( Nothing, Nothing )
         [ Row ( Nothing, Nothing )
-            [ Cell venueGrid
+            [ TabbedCell "By Venue"
+                  [ ("By Group", groupGrid)
+                  , ("By Venue", venueGrid)
+                  ]
             , Cell totalMktNotional
             ]
         , Row ( Nothing, Nothing )
@@ -67,6 +70,30 @@ charts =
 --------------------------------------------------------------------------------
 -- Cells
 
+groupGrid : ChartCell String
+groupGrid =
+    let
+        cfg_ =
+            GC.cfg
+
+        spec =
+            Cfg.defaultGridChartSpec
+
+        spec_ =
+            case spec of
+                Cfg.GridChartSpec s ->
+                    Cfg.GridChartSpec { s | showHBar = False }
+                _ ->
+                    Cfg.DefaultSpec
+
+    in 
+    { defaultChartCell
+        | title = Just <| "Yesterday: Mkt Share by Group"
+        , description = Just <| "trailing 60, 20, 1 day means"
+        , chartCfg = Cfg.Grid { cfg_ | chartSpec = spec_ }
+        , chartData = Cfg.GridChartData GC.dataByGroup
+    }
+
 
 venueGrid : ChartCell String
 venueGrid =
@@ -74,7 +101,7 @@ venueGrid =
         | title = Just <| "Yesterday: Mkt Share by Venue"
         , description = Just <| "trailing 60, 20, 1 day means"
         , chartCfg = Cfg.Grid GC.cfg
-        , chartData = Cfg.GridChartData GC.data
+        , chartData = Cfg.GridChartData GC.dataByVenue
     }
 
 

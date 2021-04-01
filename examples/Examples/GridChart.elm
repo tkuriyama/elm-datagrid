@@ -1,4 +1,4 @@
-module Examples.GridChart exposing (cfg, data, main)
+module Examples.GridChart exposing (cfg, dataByGroup, dataByVenue, main)
 
 import DataGrid.GridChart exposing (render)
 import DataGrid.Config as Cfg exposing (defaultPadding, defaultGridChartCfg, defaultTooltips)
@@ -12,7 +12,7 @@ import TypedSvg.Core exposing (Svg)
 
 main : Svg msg
 main =
-    render cfg data
+    render cfg dataByVenue
 
 
 cfg : Cfg.GridChartCfg
@@ -37,6 +37,11 @@ tooltipsCfg =
         , showHoverTooltips = True
     }
 
-data : List Cfg.GridSeries
-data =
-    GridChartSample.data
+dataByVenue : List Cfg.GridSeries
+dataByVenue =
+    GridChartSample.dataByVenue
+
+
+dataByGroup : List Cfg.GridSeries
+dataByGroup =
+    GridChartSample.dataByGroup
