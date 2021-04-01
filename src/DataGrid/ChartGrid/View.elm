@@ -129,7 +129,7 @@ tabs :
     -> Element Msg
 tabs active cfg cells =
     row
-        [ Font.size <| round <| toFloat cfg.cellBaseFontSize
+        [ Font.size <| round <| toFloat cfg.cellBaseFontSize * 0.8
         , centerX
         , alignLeft
         ]

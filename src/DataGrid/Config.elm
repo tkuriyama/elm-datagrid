@@ -102,7 +102,7 @@ type alias StdChartCfg label =
 defaultStdChartCfg : StdChartCfg label
 defaultStdChartCfg =
     { w = 900
-    , h = 450
+    , h = 400
     , pad = defaultPadding
     , chartSpec = DefaultSpec
     , dataAxisTicks = 5
@@ -184,7 +184,7 @@ type alias GridChartCfg =
 defaultGridChartCfg : GridChartCfg
 defaultGridChartCfg =
     { w = 900
-    , h = 450
+    , h = 400
     , pad = defaultPadding
     , baseFontSize = 16
     , chartSpec = DefaultSpec
