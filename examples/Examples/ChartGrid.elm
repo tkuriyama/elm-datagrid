@@ -43,9 +43,9 @@ charts =
     Column ( Nothing, Nothing )
         [ Row ( Nothing, Nothing )
             [ TabbedCell "By Venue"
-                  [ ("By Group", groupGrid)
-                  , ("By Venue", venueGrid)
-                  ]
+                [ ( "By Group", groupGrid )
+                , ( "By Venue", venueGrid )
+                ]
             , Cell totalMktNotional
             ]
         , Row ( Nothing, Nothing )
@@ -70,6 +70,7 @@ charts =
 --------------------------------------------------------------------------------
 -- Cells
 
+
 groupGrid : ChartCell String
 groupGrid =
     let
@@ -83,10 +84,10 @@ groupGrid =
             case spec of
                 Cfg.GridChartSpec s ->
                     Cfg.GridChartSpec { s | showHBar = False }
+
                 _ ->
                     Cfg.DefaultSpec
-
-    in 
+    in
     { defaultChartCell
         | title = Just <| "Yesterday: Mkt Share by Group"
         , description = Just <| "trailing 60, 20, 1 day means"
@@ -153,6 +154,7 @@ lineChart ( title, desc, data ) =
         , chartCfg = Cfg.Std LC.cfg
         , chartData = Cfg.LineChartData data
     }
+
 
 lineChartAllExTRF : ChartCell String
 lineChartAllExTRF =

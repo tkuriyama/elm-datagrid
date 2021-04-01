@@ -89,9 +89,8 @@ genChartEnv cfg data =
         showHBar_ =
             parseChartSpec cfg.chartSpec
 
-        (cw, ch) = 
+        ( cw, ch ) =
             getDims xScale yScale (List.head data_) showHBar_
-
     in
     { w = cfg.w
     , h = cfg.h
@@ -99,7 +98,7 @@ genChartEnv cfg data =
     , cellH = ch
     , pad = cfg.pad
     , xScale = xScale
-    , yScale = yScale 
+    , yScale = yScale
     , dataScales = genDataScales data (Scale.bandwidth xScale)
     , showHBar = showHBar_
     , tooltips = cfg.tooltips
@@ -135,20 +134,22 @@ parseChartSpec spec =
         _ ->
             False
 
+
 getDims :
     BandScale String
     -> BandScale String
     -> Maybe Cfg.GridSeries
     -> Bool
-    -> (Float, Float)
+    -> ( Float, Float )
 getDims xScale yScale series showHBar =
     let
         pairs =
             case series of
-                Just (name, groups) ->
+                Just ( name, groups ) ->
                     List.head groups
-                        |> Maybe.withDefault ("", [])
+                        |> Maybe.withDefault ( "", [] )
                         |> Utils.snd
+
                 Nothing ->
                     []
 
@@ -170,9 +171,10 @@ getDims xScale yScale series showHBar =
 
         cellH =
             cellW
-
     in
-        (cellW, cellH)
+    ( cellW, cellH )
+
+
 
 --------------------------------------------------------------------------------
 -- Render
@@ -360,7 +362,6 @@ renderHBars env y_ ( name, pairs ) dScale =
 
         last =
             LE.last pairs |> Maybe.withDefault ( "", 0 )
-
     in
     g [ class [ "grid_hbar" ] ]
         [ rect
