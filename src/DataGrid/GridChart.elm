@@ -475,7 +475,7 @@ genHoverEnv env lbl name pairs =
             Scale.convert env.yScale lbl
 
         hy_ =
-            if hy + yOffset > (env.h - env.pad.bottom - env.pad.top) then
+            if hy + hh + yOffset > (env.h - env.pad.bottom - env.pad.top) then
                 hy - hh - yOffset
 
             else
