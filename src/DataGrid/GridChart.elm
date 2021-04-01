@@ -50,6 +50,8 @@ import TypedSvg.Types
 type alias ChartEnv =
     { w : Float
     , h : Float
+    , cellW : Float
+    , cellH : Float
     , pad : Cfg.Padding
     , xScale : BandScale String
     , yScale : BandScale String
@@ -80,14 +82,26 @@ genChartEnv cfg data =
 
         xScale =
             genXScale cfg.w (cfg.pad.right + cfg.pad.left) xs
+
+        yScale =
+            genYScale cfg.h (cfg.pad.top + cfg.pad.bottom) ys
+
+        showHBar_ =
+            parseChartSpec cfg.chartSpec
+
+        (cw, ch) = 
+            getDims xScale yScale (List.head data_) showHBar_
+
     in
     { w = cfg.w
     , h = cfg.h
+    , cellW = cw
+    , cellH = ch
     , pad = cfg.pad
     , xScale = xScale
-    , yScale = genYScale cfg.h (cfg.pad.top + cfg.pad.bottom) ys
+    , yScale = yScale 
     , dataScales = genDataScales data (Scale.bandwidth xScale)
-    , showHBar = parseChartSpec cfg.chartSpec
+    , showHBar = showHBar_
     , tooltips = cfg.tooltips
     , baseFontSize = cfg.baseFontSize
     , style = genStyle cfg.baseFontSize cfg.chartSpec cfg.fontSpec cfg.tooltips
@@ -121,7 +135,44 @@ parseChartSpec spec =
         _ ->
             False
 
+getDims :
+    BandScale String
+    -> BandScale String
+    -> Maybe Cfg.GridSeries
+    -> Bool
+    -> (Float, Float)
+getDims xScale yScale series showHBar =
+    let
+        pairs =
+            case series of
+                Just (name, groups) ->
+                    List.head groups
+                        |> Maybe.withDefault ("", [])
+                        |> Utils.snd
+                Nothing ->
+                    []
 
+        w =
+            Scale.bandwidth xScale
+
+        xDiv =
+            if showHBar then
+                2.0
+
+            else
+                1.0
+
+        cellW =
+            w
+                / xDiv
+                / (List.length pairs |> toFloat)
+                |> min (Scale.bandwidth yScale)
+
+        cellH =
+            cellW
+
+    in
+        (cellW, cellH)
 
 --------------------------------------------------------------------------------
 -- Render
@@ -238,31 +289,20 @@ renderCells env y_ ( name, pairs ) =
         w =
             Scale.bandwidth env.xScale
 
-        xDiv =
-            if env.showHBar then
-                2.0
-
-            else
-                1.0
-
-        xInc =
-            w
-                / xDiv
-                / (List.length pairs |> toFloat)
-                |> min (Scale.bandwidth env.yScale)
-
         x0 =
             if env.showHBar then
                 x_
 
             else
                 (List.length pairs |> toFloat)
-                    * xInc
+                    * env.cellW
                     / 2
                     |> (-) (x_ + w / 2)
 
         f colorVal ( xStart, acc ) =
-            ( xStart + xInc, renderCell xStart y_ xInc colorVal :: acc )
+            ( xStart + env.cellW
+            , renderCell xStart y_ env.cellW colorVal :: acc
+            )
     in
     g
         []
@@ -316,19 +356,18 @@ renderHBars env y_ ( name, pairs ) dScale =
         x_ =
             Scale.convert env.xScale name
                 |> (+) (Scale.bandwidth env.xScale / 2)
+                |> (+) 5
 
         last =
             LE.last pairs |> Maybe.withDefault ( "", 0 )
 
-        h =
-            Scale.bandwidth env.yScale
     in
     g [ class [ "grid_hbar" ] ]
         [ rect
             [ x x_
-            , y <| y_ + h * 0.2
+            , y <| y_ + env.cellH * 0.2
             , width <| Scale.convert dScale (Utils.snd last)
-            , height <| h * 0.6
+            , height <| env.cellH * 0.6
             ]
             []
         ]
