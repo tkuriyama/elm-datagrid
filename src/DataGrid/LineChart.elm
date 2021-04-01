@@ -10,6 +10,7 @@ axes is better handled by direct interaction with the elm-visualization API.
 import Color exposing (Color)
 import DataGrid.Config as Cfg
 import DataGrid.Internal.StdChart as StdChart
+import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils
 import List.Extra as LE
 import Path
@@ -267,20 +268,6 @@ renderVBarHover env ( lbl, points ) =
 genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> Bool -> String
 genStyle fCfg cCfg tCfg vbar =
     let
-        display b =
-            if b then
-                "inline"
-
-            else
-                "none"
-
-        reveal b n =
-            if b then
-                String.fromFloat n
-
-            else
-                "0.0"
-
         ( showName, nameSize ) =
             case cCfg of
                 Cfg.LineChartSpec r ->
@@ -308,11 +295,11 @@ genStyle fCfg cCfg tCfg vbar =
          .vbar:hover line { opacity: {{showVBar}}; }
          .vbar:hover .tooltip_hover { display: {{showHoverTT}}; }
      """
-        |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
+        |> String.Format.namedValue "showTT" (UI.display tCfg.showTooltips)
         |> String.Format.namedValue "showLargeTT"
-            (display tCfg.showLargeTooltips)
+            (UI.display tCfg.showLargeTooltips)
         |> String.Format.namedValue "showHoverTT"
-            (display tCfg.showHoverTooltips)
+            (UI.display tCfg.showHoverTooltips)
         |> String.Format.namedValue "showName" showName
         |> String.Format.namedValue "nameSize" nameSize
-        |> String.Format.namedValue "showVBar" (reveal vbar 0.8)
+        |> String.Format.namedValue "showVBar" (UI.reveal vbar 0.8)

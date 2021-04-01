@@ -52,7 +52,7 @@ view model =
         , padding cfg.padding
         ]
         (column
-            [ centerX, height h, width w, spacing cfg.rowSpacing ]
+            [ alignTop, centerX, height h, width w, spacing cfg.rowSpacing ]
             [ el [ UI.padBottom 10, width fill ] gridTitle
             , parseGrid model.cfg model.charts
             ]
@@ -116,7 +116,7 @@ tabbedChartCell active cfg cells =
                 acc
     in
     column
-        [ spacing 5, width fill ]
+        [ alignTop, width fill, spacing 5 ]
         [ tabs active cfg cells
         , List.foldr f Element.none cells
         ]

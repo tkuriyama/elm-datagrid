@@ -11,6 +11,7 @@ import DataGrid.Components as Components
 import DataGrid.Config as Cfg
 import DataGrid.Internal.Defaults as Defaults
 import DataGrid.Internal.StdChart as StdChart
+import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils
 import Scale exposing (BandScale, ContinuousScale)
 import Statistics
@@ -194,13 +195,6 @@ renderBoxPlot env xs =
 genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> Bool -> String
 genStyle fCfg cCfg tCfg showBoxPlot =
     let
-        display b =
-            if b then
-                "inline"
-
-            else
-                "none"
-
         ( fillColor, hoverColor ) =
             case cCfg of
                 Cfg.BarChartSpec spec ->
@@ -220,12 +214,12 @@ genStyle fCfg cCfg tCfg showBoxPlot =
          .statistics .tooltip_hover { display: none; }
          .statistics:hover .tooltip_hover { display: inline; }
          """
-        |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
+        |> String.Format.namedValue "showTT" (UI.display tCfg.showTooltips)
         |> String.Format.namedValue "showLargeTT"
-            (display tCfg.showLargeTooltips)
+            (UI.display tCfg.showLargeTooltips)
         |> String.Format.namedValue "fillColor" fillColor
         |> String.Format.namedValue "hoverColor" hoverColor
-        |> String.Format.namedValue "showBoxPlot" (display showBoxPlot)
+        |> String.Format.namedValue "showBoxPlot" (UI.display showBoxPlot)
 
 
 defaultFillColor : String

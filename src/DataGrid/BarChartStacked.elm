@@ -10,6 +10,7 @@ axes is better handled by direct interaction with the elm-visualization API.
 import Color exposing (Color)
 import DataGrid.Config as Cfg
 import DataGrid.Internal.StdChart as StdChart
+import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils
 import List.Extra as LE
 import Path
@@ -212,19 +213,6 @@ renderHoverBox env ( lbl, points ) =
 genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> String
 genStyle fCfg cCfg tCfg =
     let
-        display b =
-            if b then
-                "inline"
-
-            else
-                "none"
-
-        reveal b n =
-            if b then
-                String.fromFloat n
-
-            else
-                "0.0"
 
         ( showName, nameSize ) =
             case cCfg of
@@ -248,8 +236,8 @@ genStyle fCfg cCfg tCfg =
          .hover_box:hover .invisible { opacity: 0.5; fill: white; }
          .hover_box:hover .tooltip_hover { display: {{showHoverTT}}; }
      """
-        |> String.Format.namedValue "showTT" (display tCfg.showTooltips)
+        |> String.Format.namedValue "showTT" (UI.display tCfg.showTooltips)
         |> String.Format.namedValue "showLargeTT"
-            (display tCfg.showLargeTooltips)
+            (UI.display tCfg.showLargeTooltips)
         |> String.Format.namedValue "showHoverTT"
-            (display tCfg.showHoverTooltips)
+            (UI.display tCfg.showHoverTooltips)

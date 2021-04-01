@@ -188,7 +188,8 @@ defaultGridChartCfg =
     , pad = defaultPadding
     , baseFontSize = 16
     , chartSpec = DefaultSpec
-    , tooltips = defaultTooltips
+    , tooltips = { defaultTooltips
+                     | showHoverTooltips = True }
     , fontSpec = defaultFontSpec
     , legend = defaultLegend
     }
