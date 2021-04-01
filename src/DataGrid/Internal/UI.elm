@@ -143,10 +143,20 @@ maybeLength mn default =
         Nothing ->
             default
 
+
 display : Bool -> String
 display b =
-    if b then "inline" else "none"
+    if b then
+        "inline"
+
+    else
+        "none"
+
 
 reveal : Bool -> Float -> String
-reveal b n = 
-    if b then String.fromFloat n else "0.0"
+reveal b n =
+    if b then
+        String.fromFloat n
+
+    else
+        "0.0"

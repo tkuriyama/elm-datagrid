@@ -213,7 +213,6 @@ renderHoverBox env ( lbl, points ) =
 genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> String
 genStyle fCfg cCfg tCfg =
     let
-
         ( showName, nameSize ) =
             case cCfg of
                 Cfg.LineChartSpec r ->

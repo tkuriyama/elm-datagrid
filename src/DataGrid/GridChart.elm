@@ -76,7 +76,7 @@ genChartEnv cfg data =
                    )
 
         ys =
-            "labels" :: (Utils.fsts data_)
+            "labels" :: Utils.fsts data_
 
         xScale =
             genXScale cfg.w (cfg.pad.right + cfg.pad.left) xs
@@ -135,12 +135,10 @@ render cfg data =
 
         group_labels =
             List.head data
-                |> Maybe.withDefault ("", [])
+                |> Maybe.withDefault ( "", [] )
                 |> Utils.snd
                 |> Utils.fsts
-
     in
-
     svg
         [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
@@ -149,7 +147,8 @@ render cfg data =
             , transform [ Translate env.pad.left env.pad.top ]
             ]
             (List.map (renderXLabel env) <| Utils.fsts data)
-        , g [ class [ "y_labels" ]
+        , g
+            [ class [ "y_labels" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
             (List.map (renderYLabel env) group_labels)
@@ -168,19 +167,26 @@ render cfg data =
 
 sortByRecent : List Cfg.GridSeries -> List Cfg.GridSeries
 sortByRecent =
-    List.sortBy 
-        (Utils.snd >> List.head >> Maybe.withDefault ("", []) >>
-             Utils.snd >> Utils.snds >>
-             LE.last >> Maybe.withDefault 0)
+    List.sortBy
+        (Utils.snd
+            >> List.head
+            >> Maybe.withDefault ( "", [] )
+            >> Utils.snd
+            >> Utils.snds
+            >> LE.last
+            >> Maybe.withDefault 0
+        )
         >> List.reverse
+
 
 renderXLabel : ChartEnv -> String -> Svg msg
 renderXLabel env lbl =
     text_
         [ x <| Scale.convert env.xScale "labels"
-        , y <| Scale.convert env.yScale lbl + (toFloat env.baseFontSize)
+        , y <| Scale.convert env.yScale lbl + toFloat env.baseFontSize
         ]
         [ text lbl ]
+
 
 renderYLabel : ChartEnv -> String -> Svg msg
 renderYLabel env lbl =
@@ -189,16 +195,17 @@ renderYLabel env lbl =
             Scale.convert env.yScale "labels"
 
         nameX =
-            String.length lbl * env.baseFontSize
+            String.length lbl
+                * env.baseFontSize
                 |> toFloat
                 |> (*) (0.7 / 2)
                 |> (-) (x_ + Scale.bandwidth env.xScale / 2)
     in
-        text_
-            [ x <| Scale.convert env.xScale lbl + nameX
-            , y <| Scale.convert env.yScale "labels" + (toFloat env.baseFontSize)
-            ]
-            [ text lbl ]
+    text_
+        [ x <| Scale.convert env.xScale lbl + nameX
+        , y <| Scale.convert env.yScale "labels" + toFloat env.baseFontSize
+        ]
+        [ text lbl ]
 
 
 renderGrid : ChartEnv -> Cfg.GridSeries -> Svg msg
@@ -207,14 +214,15 @@ renderGrid env ( lbl, groups ) =
         y =
             Scale.convert env.yScale lbl
     in
-        g [ class [ "grid_group" ] ]
-          ( List.map (renderCells env y) groups ++
-                ( if env.showHBar then
-                      List.map2 (renderHBars env y) groups env.dataScales
-                  else
-                      []
-                )
-          )
+    g [ class [ "grid_group" ] ]
+        (List.map (renderCells env y) groups
+            ++ (if env.showHBar then
+                    List.map2 (renderHBars env y) groups env.dataScales
+
+                else
+                    []
+               )
+        )
 
 
 renderCells :
@@ -226,31 +234,39 @@ renderCells env y_ ( name, pairs ) =
     let
         x_ =
             Scale.convert env.xScale name
+
         w =
             Scale.bandwidth env.xScale
 
         xDiv =
-            if env.showHBar then 2.0 else 1.0
+            if env.showHBar then
+                2.0
 
+            else
+                1.0
 
         xInc =
-            w / xDiv / (List.length pairs |> toFloat)
+            w
+                / xDiv
+                / (List.length pairs |> toFloat)
                 |> min (Scale.bandwidth env.yScale)
 
         x0 =
             if env.showHBar then
                 x_
+
             else
-                (List.length pairs |> toFloat) * xInc / 2
-                |> (-) (x_ + w / 2)
+                (List.length pairs |> toFloat)
+                    * xInc
+                    / 2
+                    |> (-) (x_ + w / 2)
 
         f colorVal ( xStart, acc ) =
             ( xStart + xInc, renderCell xStart y_ xInc colorVal :: acc )
-
     in
     g
         []
-        ( relativeScale pairs
+        (relativeScale pairs
             |> List.foldl f ( x0, [] )
             |> Utils.snd
             |> List.reverse
@@ -270,15 +286,16 @@ renderCell x_ y_ w colorVal =
         []
 
 
+
 -- Scale list tail as percentage of list head
+
 
 relativeScale : List ( a, Float ) -> List Float
 relativeScale xs =
     let
         f val ( scalar, acc ) =
             max -1.0 (min 1.0 ((val - scalar) / scalar))
-                |> \val_ -> ( scalar, val_ :: acc )
-
+                |> (\val_ -> ( scalar, val_ :: acc ))
     in
     case Utils.snds xs of
         [] ->
@@ -286,6 +303,7 @@ relativeScale xs =
 
         y :: ys ->
             List.foldl f ( y, [ 0 ] ) ys |> Utils.snd |> List.reverse
+
 
 renderHBars :
     ChartEnv
@@ -300,24 +318,26 @@ renderHBars env y_ ( name, pairs ) dScale =
                 |> (+) (Scale.bandwidth env.xScale / 2)
 
         last =
-             LE.last pairs |> Maybe.withDefault ("", 0)
+            LE.last pairs |> Maybe.withDefault ( "", 0 )
 
         h =
-            Scale.bandwidth env.yScale 
-
+            Scale.bandwidth env.yScale
     in
-        g [ class [ "grid_hbar" ] ]
-            [ rect
-                  [ x x_
-                  , y <| y_ + h * 0.2
-                  , width <| Scale.convert dScale (Utils.snd last)
-                  , height <| h * 0.6
-                  ]
-                  []
+    g [ class [ "grid_hbar" ] ]
+        [ rect
+            [ x x_
+            , y <| y_ + h * 0.2
+            , width <| Scale.convert dScale (Utils.snd last)
+            , height <| h * 0.6
             ]
+            []
+        ]
+
+
 
 --------------------------------------------------------------------------------
 -- Render Tooltips
+
 
 type alias HasTooltipEnv a =
     { a
@@ -341,11 +361,12 @@ type alias HoverEnv =
 renderTooltips : ChartEnv -> Cfg.GridSeries -> Svg msg
 renderTooltips env ( lbl, groups ) =
     g [ class [ "grid_group" ] ]
-      ( if env.tooltips.showHoverTooltips then
-            List.map (renderHoverTooltips env lbl)  groups
-        else
+        (if env.tooltips.showHoverTooltips then
+            List.map (renderHoverTooltips env lbl) groups
+
+         else
             []
-      )
+        )
 
 
 renderHoverTooltips :
@@ -355,7 +376,7 @@ renderHoverTooltips :
     -> Svg msg
 renderHoverTooltips env lbl ( name, pairs ) =
     g [ class [ "grid_tooltip_area" ] ]
-      [ rect
+        [ rect
             [ class [ "transparent" ]
             , x <| Scale.convert env.xScale name
             , y <| Scale.convert env.yScale lbl
@@ -363,8 +384,8 @@ renderHoverTooltips env lbl ( name, pairs ) =
             , height <| Scale.bandwidth env.yScale
             ]
             []
-      , renderHoverTooltip env lbl name pairs
-      ]
+        , renderHoverTooltip env lbl name pairs
+        ]
 
 
 renderHoverTooltip :
@@ -421,9 +442,8 @@ genHoverEnv :
     -> HoverEnv
 genHoverEnv env lbl name pairs =
     let
-
-        (xOffset, yOffset) =
-            (5, 5)
+        ( xOffset, yOffset ) =
+            ( 5, 5 )
 
         sz =
             env.tooltips.hoverTooltipSize |> toFloat
@@ -436,7 +456,7 @@ genHoverEnv env lbl name pairs =
                 |> List.map (String.length >> toFloat)
                 |> List.maximum
                 |> Maybe.withDefault 20
-                |> (\n -> (n + 4) * (sz * 0.7))
+                |> (\n -> (n + 3) * (sz * 0.7))
 
         xw =
             Scale.bandwidth env.xScale
@@ -455,14 +475,14 @@ genHoverEnv env lbl name pairs =
             Scale.convert env.yScale lbl
 
         hy_ =
-            if hy + hh + yOffset > (env.h - env.pad.bottom - env.pad.top) then
+            if hy + yOffset > (env.h - env.pad.bottom - env.pad.top) then
                 hy - hh - yOffset
+
             else
                 hy + yOffset
-
     in
     { x = hx_
-    , y = hy
+    , y = hy_
     , w = hw
     , h = hh
     }
@@ -500,6 +520,7 @@ genHoverText env pairs ( x0, y0 ) =
     )
 
 
+
 --------------------------------------------------------------------------------
 -- Axes and Scales
 
@@ -528,7 +549,7 @@ genYScale h padding ys =
         cfg =
             { defaultBandConfig | paddingInner = 0.1, paddingOuter = 0.2 }
     in
-    Scale.band cfg ( 0, h - padding) ys
+    Scale.band cfg ( 0, h - padding ) ys
 
 
 genYAxis : Bool -> BandScale String -> Svg msg
@@ -597,10 +618,9 @@ genBaseStyle sz fillColor fCfg tCfg =
         |> String.Format.namedValue "typeface" fCfg.typeface
         |> String.Format.namedValue "fillColor" fillColor
         |> String.Format.namedValue "showHover"
-             (UI.display tCfg.showHoverTooltips)
+            (UI.display tCfg.showHoverTooltips)
 
 
 defaultFillColor : String
 defaultFillColor =
     Defaults.rgbaToString Defaults.defaultFillColor
-
