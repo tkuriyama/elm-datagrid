@@ -52,6 +52,7 @@ type alias ChartEnv =
     , tooltips : Cfg.Tooltips
     , baseFontSize : Int
     , style : String
+    , legend : Cfg.Legend
     }
 
 
@@ -86,6 +87,7 @@ genChartEnv cfg data =
     , tooltips = cfg.tooltips
     , baseFontSize = cfg.baseFontSize
     , style = genStyle cfg.baseFontSize cfg.chartSpec cfg.fontSpec cfg.tooltips
+    , legend = cfg.legend
     }
 
 

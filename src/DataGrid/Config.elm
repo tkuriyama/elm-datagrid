@@ -279,6 +279,6 @@ defaultFontSpec =
 
 defaultLegend : Legend
 defaultLegend =
-    { show = False
+    { show = True
     , location = Top
     }
