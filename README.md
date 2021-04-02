@@ -42,10 +42,10 @@ Note that `elm-minify` is deprecated. For an alternative minification, see the [
 
 The intended "API" consists of the modules immediately under [`src/DataGrid`](https://github.com/tkuriyama/elm-datagrid/tree/master/src/DataGrid).
 
-Most modules have a corresponding example of the same naem under `examples/Examples`](https://github.com/tkuriyama/elm-datagrid/tree/master/examples/Examples). The repo ships with sample data for each example, under [`examples/SampleData`](https://github.com/tkuriyama/elm-datagrid/tree/master/examples/SampleData).
+Most modules have a corresponding example of the same naem under [`examples/Examples`](https://github.com/tkuriyama/elm-datagrid/tree/master/examples/Examples). The repo ships with sample data for each example, under [`examples/SampleData`](https://github.com/tkuriyama/elm-datagrid/tree/master/examples/SampleData).
 
 
-## Docs
+## See Also
 
 - FAQ
 - Charts
