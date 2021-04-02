@@ -5,9 +5,14 @@ An opinionated library for visualizing data in charts and grids.
 
 The API is deliberately limited; for access to lower-level elements, try [`elm-visualization`](https://package.elm-lang.org/packages/gampleman/elm-visualization/latest/) for charts and [`elm-ui`](https://package.elm-lang.org/packages/mdgriffith/elm-ui/latest/) for UI (both used heavily by this library).
 
+## Live Examples
+
+- ChartGrid: [US Equities Market Summary](https://tarokuriyama.com/useq/)
+
+
 ## Build
 
-**Quick**
+### Quick
 
 All Elm projects can be built with [`elm make`](https://elmprogramming.com/elm-make.html), such as:
 
@@ -18,7 +23,7 @@ elm make examples/Main.elm --optimize --output=elm.js
 ... which builds the example specified in `examples/Main.elm` and compiles it to `elm.js`.
 
 
-**Full**
+### Full
 
 To follow the "full" build for this repo, run the commands in the `all.do` script (`redo all` if you have [`redo`](https://redo.readthedocs.io/en/latest/), or run it as a shell script like `sh all.do`).
 
@@ -33,7 +38,7 @@ npm install -g elm-minify
 
 Note that `elm-minify` is deprecated. For an alternative minification, see the [`terser` command recommended by `elm-optimize-level-2`](https://github.com/mdgriffith/elm-optimize-level-2/blob/HEAD/notes/minification.md).
 
-**Structure**
+## Structure
 
 The intended "API" consists of the modules immediately under [`src/DataGrid`](https://github.com/tkuriyama/elm-datagrid/tree/master/src/DataGrid).
 
@@ -46,6 +51,3 @@ Most modules have a corresponding example of the same naem under `examples/Examp
 - Charts
 - Grids
 
-## Live Examples
-
-- ChartGrid: [US Equities Market Summary](https://tarokuriyama.com/useq/)
