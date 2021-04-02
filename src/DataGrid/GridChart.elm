@@ -19,8 +19,6 @@ import TypedSvg.Attributes
     exposing
         ( class
         , fill
-        , stroke
-        , textAnchor
         , transform
         , viewBox
         )
@@ -28,19 +26,12 @@ import TypedSvg.Attributes.InPx
     exposing
         ( height
         , rx
-        , strokeWidth
         , width
         , x
         , y
         )
 import TypedSvg.Core exposing (Svg, text)
-import TypedSvg.Types
-    exposing
-        ( AlignmentBaseline(..)
-        , AnchorAlignment(..)
-        , Paint(..)
-        , Transform(..)
-        )
+import TypedSvg.Types exposing ( Paint(..), Transform(..) )
 
 
 
@@ -159,19 +150,9 @@ getDims xScale yScale series showHBar =
                 Nothing ->
                     []
 
-        w =
-            Scale.bandwidth xScale
-
-        xDiv =
-            if showHBar then
-                2.0
-
-            else
-                1.0
-
         cellW =
-            w
-                / xDiv
+            Scale.bandwidth xScale
+                / (if showHBar then 2.0 else 1.0)
                 / (List.length pairs |> toFloat)
                 |> min (Scale.bandwidth yScale)
 
@@ -510,11 +491,9 @@ genHoverEnv env lbl name pairs =
             (List.length pairs + 2 |> toFloat) * sz * 1.03
 
         hw =
-            Utils.fsts pairs
-                |> List.map (String.length >> toFloat)
-                |> List.maximum
-                |> Maybe.withDefault 20
-                |> (\n -> (n + 3) * (sz * 0.7))
+            max (String.length lbl) (Utils.pairWidthMax pairs 2)
+                |> toFloat
+                |> (\n -> n * (sz * 0.65))
 
         xw =
             Scale.bandwidth env.xScale

@@ -261,11 +261,9 @@ genHoverEnv env sortLines hx pairs =
             (List.length pairs + 2 |> toFloat) * sz * 1.03
 
         hw =
-            Utils.fsts pairs
-                |> List.map (String.length >> toFloat)
-                |> List.maximum
-                |> Maybe.withDefault 20
-                |> (\n -> (n + 7) * (sz * 0.7))
+           Utils.pairWidthMax pairs 2
+                |> toFloat
+                |> (\n -> (n + 2) * (sz * 0.7))
 
         hx_ =
             if hx > (env.w - env.pad.right) / 2 then
