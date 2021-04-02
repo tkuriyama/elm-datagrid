@@ -1,4 +1,4 @@
-module DataGrid.Components exposing (boxPlot)
+module DataGrid.Internal.Components exposing (boxPlot)
 
 {- Individual SVG components for integration into charts.
 

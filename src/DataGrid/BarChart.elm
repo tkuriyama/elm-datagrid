@@ -7,8 +7,8 @@ axes is better handled by direct interaction with the elm-visualization API.
 
 -}
 
-import DataGrid.Components as Components
 import DataGrid.Config as Cfg
+import DataGrid.Internal.Components as Components
 import DataGrid.Internal.Defaults as Defaults
 import DataGrid.Internal.StdChart as StdChart
 import DataGrid.Internal.UI as UI
