@@ -46,7 +46,9 @@ charts =
                 [ ( "By Group", groupGrid )
                 , ( "By Venue", venueGrid )
                 ]
-            , Cell totalMktNotional
+            , TabbedCell "Placeholder"
+                [ ("Placeholder", totalMktNotional)
+                ] 
             ]
         , Row ( Nothing, Nothing )
             [ TabbedCell "Shares"

@@ -47,6 +47,7 @@ type ChartSpec
         }
     | GridChartSpec
         { showHBar : Bool
+        , labelAlign : Position
         , fillColor : String
         }
     | DefaultSpec
@@ -201,6 +202,7 @@ defaultGridChartSpec : ChartSpec
 defaultGridChartSpec =
     GridChartSpec
         { showHBar = True
+        , labelAlign = Left
         , fillColor = Defaults.rgbaToString Defaults.defaultFillColor
         }
 

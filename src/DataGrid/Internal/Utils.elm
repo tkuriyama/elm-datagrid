@@ -138,3 +138,17 @@ twoCols n extra s1 s2 =
 nbsp : String
 nbsp =
     String.fromChar (Char.fromCode 160)
+
+
+alignRight : List String -> List String
+alignRight xs =
+    let
+        m =
+            List.map String.length xs
+                |> List.maximum
+                |> Maybe.withDefault 0
+
+        padLeft s =
+            (String.repeat (m - String.length s) nbsp) ++ s
+    in
+        List.map padLeft xs

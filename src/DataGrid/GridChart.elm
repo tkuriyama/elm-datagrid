@@ -57,6 +57,7 @@ type alias ChartEnv =
     , yScale : BandScale String
     , dataScales : List (ContinuousScale Float)
     , showHBar : Bool
+    , labelAlign : Cfg.Position
     , tooltips : Cfg.Tooltips
     , baseFontSize : Int
     , style : String
@@ -66,19 +67,9 @@ type alias ChartEnv =
 genChartEnv : Cfg.GridChartCfg -> List Cfg.GridSeries -> ChartEnv
 genChartEnv cfg data =
     let
-        data_ =
-            sortByRecent data
 
-        xs =
-            "Labels"
-                :: (Utils.snds data_
-                        |> List.head
-                        |> Maybe.withDefault []
-                        |> Utils.fsts
-                   )
-
-        ys =
-            "labels" :: Utils.fsts data_
+        (xs, ys) =
+            getLabels <| sortByRecent data
 
         xScale =
             genXScale cfg.w (cfg.pad.right + cfg.pad.left) xs
@@ -86,11 +77,11 @@ genChartEnv cfg data =
         yScale =
             genYScale cfg.h (cfg.pad.top + cfg.pad.bottom) ys
 
-        showHBar_ =
+        (showHBar_, labelAlign_) =
             parseChartSpec cfg.chartSpec
 
         ( cw, ch ) =
-            getDims xScale yScale (List.head data_) showHBar_
+            getDims xScale yScale (List.head data) showHBar_
     in
     { w = cfg.w
     , h = cfg.h
@@ -101,11 +92,26 @@ genChartEnv cfg data =
     , yScale = yScale
     , dataScales = genDataScales data (Scale.bandwidth xScale)
     , showHBar = showHBar_
+    , labelAlign = labelAlign_
     , tooltips = cfg.tooltips
     , baseFontSize = cfg.baseFontSize
     , style = genStyle cfg.baseFontSize cfg.chartSpec cfg.fontSpec cfg.tooltips
     }
 
+getLabels : List Cfg.GridSeries-> (List String, List String)
+getLabels data =
+    let
+        xs =
+            Utils.snds data
+                |> List.head
+                |> Maybe.withDefault []
+                |> Utils.fsts
+
+        ys =
+            Utils.fsts data
+
+    in
+        ( "_"::xs, "labels"::ys)
 
 genDataScales :
     List Cfg.GridSeries
@@ -125,14 +131,14 @@ collect pairs =
         |> Utils.snds
 
 
-parseChartSpec : Cfg.ChartSpec -> Bool
+parseChartSpec : Cfg.ChartSpec -> (Bool, Cfg.Position)
 parseChartSpec spec =
     case spec of
         Cfg.GridChartSpec s ->
-            s.showHBar
+            (s.showHBar, s.labelAlign)
 
         _ ->
-            False
+            (False, Cfg.Inline)
 
 
 getDims :
@@ -199,7 +205,7 @@ render cfg data =
             [ class [ "x_labels" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            (List.map (renderXLabel env) <| Utils.fsts data)
+            (renderXLabels env <| Utils.fsts data)
         , g
             [ class [ "y_labels" ]
             , transform [ Translate env.pad.left env.pad.top ]
@@ -231,14 +237,26 @@ sortByRecent =
         )
         >> List.reverse
 
+renderXLabels : ChartEnv -> List String -> List (Svg msg)
+renderXLabels env xs =
+    let
+        xs_ =
+            case env.labelAlign of
+                Cfg.Right ->
+                    Utils.alignRight xs
+                _ ->
+                   xs
+    in
+        List.map2 (renderXLabel env) xs xs_
 
-renderXLabel : ChartEnv -> String -> Svg msg
-renderXLabel env lbl =
+
+renderXLabel : ChartEnv -> String -> String -> Svg msg
+renderXLabel env lbl lblDisplay =
     text_
         [ x <| Scale.convert env.xScale "labels"
         , y <| Scale.convert env.yScale lbl + toFloat env.baseFontSize
         ]
-        [ text lbl ]
+        [ text lblDisplay ]
 
 
 renderYLabel : ChartEnv -> String -> Svg msg
