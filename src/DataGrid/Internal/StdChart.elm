@@ -331,7 +331,8 @@ genHoverText env sortLines pairs ( x0, y0 ) =
 genBaseStyle : Cfg.FontSpec -> Cfg.Tooltips -> String
 genBaseStyle fCfg tCfg =
     """
-     text { font-family: {{typeface}}, monospace, sans-serif; }
+     text { font-family: {{typeface}}, monospace, sans-serif;
+     fill: {{textColor }}; }
      .tooltip { display: none; font-size: {{sz}}px;
      fill: {{textColor}}; }
      .tooltip_large { display: none; font-size: {{szL}}px;
