@@ -149,15 +149,18 @@ alignRight xs =
                 |> Maybe.withDefault 0
 
         padLeft s =
-            (String.repeat (m - String.length s) nbsp) ++ s
+            String.repeat (m - String.length s) nbsp ++ s
     in
-        List.map padLeft xs
+    List.map padLeft xs
 
-pairWidthMax : List (String, Float) -> Int -> Int
+
+pairWidthMax : List ( String, Float ) -> Int -> Int
 pairWidthMax pairs dp =
     pairs
-        |> List.map (\(s, f) ->
-                         (String.length s, String.length <| fmtFloat dp f))
-        |> List.map (\(a, b) -> a + b)
+        |> List.map
+            (\( s, f ) ->
+                ( String.length s, String.length <| fmtFloat dp f )
+            )
+        |> List.map (\( a, b ) -> a + b)
         |> List.maximum
         |> Maybe.withDefault 0

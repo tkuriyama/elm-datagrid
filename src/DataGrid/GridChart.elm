@@ -31,7 +31,7 @@ import TypedSvg.Attributes.InPx
         , y
         )
 import TypedSvg.Core exposing (Svg, text)
-import TypedSvg.Types exposing ( Paint(..), Transform(..) )
+import TypedSvg.Types exposing (Paint(..), Transform(..))
 
 
 
@@ -58,8 +58,7 @@ type alias ChartEnv =
 genChartEnv : Cfg.GridChartCfg -> List Cfg.GridSeries -> ChartEnv
 genChartEnv cfg data =
     let
-
-        (xs, ys) =
+        ( xs, ys ) =
             getLabels <| sortByRecent data
 
         xScale =
@@ -68,7 +67,7 @@ genChartEnv cfg data =
         yScale =
             genYScale cfg.h (cfg.pad.top + cfg.pad.bottom) ys
 
-        (showHBar_, labelAlign_) =
+        ( showHBar_, labelAlign_ ) =
             parseChartSpec cfg.chartSpec
 
         ( cw, ch ) =
@@ -89,7 +88,8 @@ genChartEnv cfg data =
     , style = genStyle cfg.baseFontSize cfg.chartSpec cfg.fontSpec cfg.tooltips
     }
 
-getLabels : List Cfg.GridSeries-> (List String, List String)
+
+getLabels : List Cfg.GridSeries -> ( List String, List String )
 getLabels data =
     let
         xs =
@@ -100,9 +100,9 @@ getLabels data =
 
         ys =
             Utils.fsts data
-
     in
-        ( "_"::xs, "labels"::ys)
+    ( "_" :: xs, "labels" :: ys )
+
 
 genDataScales :
     List Cfg.GridSeries
@@ -122,14 +122,14 @@ collect pairs =
         |> Utils.snds
 
 
-parseChartSpec : Cfg.ChartSpec -> (Bool, Cfg.Position)
+parseChartSpec : Cfg.ChartSpec -> ( Bool, Cfg.Position )
 parseChartSpec spec =
     case spec of
         Cfg.GridChartSpec s ->
-            (s.showHBar, s.labelAlign)
+            ( s.showHBar, s.labelAlign )
 
         _ ->
-            (False, Cfg.Inline)
+            ( False, Cfg.Inline )
 
 
 getDims :
@@ -152,7 +152,12 @@ getDims xScale yScale series showHBar =
 
         cellW =
             Scale.bandwidth xScale
-                / (if showHBar then 2.0 else 1.0)
+                / (if showHBar then
+                    2.0
+
+                   else
+                    1.0
+                  )
                 / (List.length pairs |> toFloat)
                 |> min (Scale.bandwidth yScale)
 
@@ -218,6 +223,7 @@ sortByRecent =
         )
         >> List.reverse
 
+
 renderXLabels : ChartEnv -> List String -> List (Svg msg)
 renderXLabels env xs =
     let
@@ -225,10 +231,11 @@ renderXLabels env xs =
             case env.labelAlign of
                 Cfg.Right ->
                     Utils.alignRight xs
+
                 _ ->
-                   xs
+                    xs
     in
-        List.map2 (renderXLabel env) xs xs_
+    List.map2 (renderXLabel env) xs xs_
 
 
 renderXLabel : ChartEnv -> String -> String -> Svg msg

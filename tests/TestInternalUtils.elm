@@ -92,3 +92,28 @@ testTwoCols =
                 twoCols 2 2 "a" "b"
                     |> Expect.equal ("a" ++ String.repeat 3 nbsp ++ "b")
         ]
+
+
+testAlignRight : Test
+testAlignRight =
+    describe "Test alignRight for list of strings" <|
+        [ test "empty" <|
+            \_ ->
+                alignRight [ "" ] |> Expect.equal [ "" ]
+        , test "not empty" <|
+            \_ ->
+                alignRight [ "a", "abc" ]
+                    |> Expect.equal [ String.repeat 2 nbsp ++ "a", "abc" ]
+        ]
+
+
+testPairWidthMax : Test
+testPairWidthMax =
+    describe "test pairWidthMax (string, float) pairs" <|
+        [ test "singleton pair 2 dp" <|
+            \_ ->
+                pairWidthMax [ ( "", 0.0 ) ] 2 |> Expect.equal 4
+        , test "singleton pair 3 dp" <|
+            \_ ->
+                pairWidthMax [ ( "", 0.0 ) ] 3 |> Expect.equal 5
+        ]
