@@ -32,8 +32,7 @@ chart s =
 cfg : Cfg.StdChartCfg String
 cfg =
     { defaultStdChartCfg
-        | h = 450
-        , chartSpec = barChartStackedSpec
+        | chartSpec = barChartStackedSpec
         , dataAxisTicks = 5
         , showLabels = False
         , labelFormatter = identity
