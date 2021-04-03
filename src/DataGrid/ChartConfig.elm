@@ -51,7 +51,9 @@ type ChartSpec
         , toggleHeight : Int
         }
     | TileGridChartSpec
-        { 
+        { innerPad : Int
+        , cellBaseFontSize : Int
+        , cellMinFontSize : Int
         }
     | DefaultSpec
 
@@ -210,6 +212,13 @@ defaultFacetGridChartSpec =
         }
 
 
+defaultTileGridChartSpec : ChartSpec
+defaultTileGridChartSpec =
+    TileGridChartSpec
+        { innerPad = 3
+        , cellBaseFontSize = 12
+        , cellMinFontSize = 6
+        }
 
 --------------------------------------------------------------------------------
 -- Helper Types and Defaults
