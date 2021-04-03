@@ -40,14 +40,28 @@ Note that `elm-minify` is deprecated. For an alternative minification, see the [
 
 ## Structure
 
-The intended "API" consists of the modules immediately under [`src/DataGrid`](https://github.com/tkuriyama/elm-datagrid/tree/master/src/DataGrid).
+- The intended "API" consists of the modules immediately under [`src/DataGrid`](https://github.com/tkuriyama/elm-datagrid/tree/master/src/DataGrid).
 
-Most modules have a corresponding example of the same naem under [`examples/Examples`](https://github.com/tkuriyama/elm-datagrid/tree/master/examples/Examples). The repo ships with sample data for each example, under [`examples/SampleData`](https://github.com/tkuriyama/elm-datagrid/tree/master/examples/SampleData).
+- The 
+
+- Most modules have a corresponding example of the same naem under [`examples/Examples`](https://github.com/tkuriyama/elm-datagrid/tree/master/examples/Examples). 
+
+- The repo ships with sample data for each example, under [`examples/SampleData`](https://github.com/tkuriyama/elm-datagrid/tree/master/examples/SampleData).
 
 
-## See Also
+## Compatibility
 
-- [FAQ](https://github.com/tkuriyama/elm-datagrid/blob/master/docs/faq.md)
-- [Charts](https://github.com/tkuriyama/elm-datagrid/blob/master/docs/charts.md)
-- [Grids](https://github.com/tkuriyama/elm-datagrid/blob/master/docs/grids.md)
+### Browser Compatibility
+
+| Browser | Compatibility                     |
+|:--------|:----------------------------------|
+| Chrome  | Supported                         |
+| Safari  | Partial Support (some CSS issues) |
+| Other   | Not Tested                        |
+
+### Browser Extensions
+
+In addition to general browser compabitility, some browser extensions may cause issues (if they also rewrite pages, like screen readers or dark modes).
+
+For Dark Reader users: setting the Mode to `Filter` instead of `Dynamic`usually resolves issues.
 
