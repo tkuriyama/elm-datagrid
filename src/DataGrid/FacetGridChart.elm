@@ -638,7 +638,7 @@ genStyle sz cCfg fCfg tCfg =
         fillColor =
             case cCfg of
                 Cfg.FacetGridChartSpec spec ->
-                    spec.fillColor
+                    spec.barFillColor
 
                 _ ->
                     defaultFillColor

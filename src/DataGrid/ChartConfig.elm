@@ -42,13 +42,16 @@ type ChartSpec
         }
     | FacetGridChartSpec
         { showHBar : Bool
+        , barFillColor : String
         , labelAlign : Position
-        , fillColor : String
         }
     | StackedBarChartSpec
         { toggleSeries : Bool
         , toggleRelative : Bool
         , toggleHeight : Int
+        }
+    | TileGridChartSpec
+        { 
         }
     | DefaultSpec
 
@@ -154,14 +157,14 @@ defaultLineChartSpec =
 {-| GridSeries define data for working with GridChartCfg charts.
 -}
 type alias GridSeries =
-    ( SeriesName, List ( GroupName, List GridPair ) )
+    ( SeriesName, List ( FacetName, List GridPair ) )
 
 
 type alias GridPair =
     ( String, Float )
 
 
-type alias GroupName =
+type alias FacetName =
     String
 
 
@@ -202,8 +205,8 @@ defaultFacetGridChartSpec : ChartSpec
 defaultFacetGridChartSpec =
     FacetGridChartSpec
         { showHBar = True
+        , barFillColor = Defaults.rgbaToString Defaults.defaultFillColor
         , labelAlign = Left
-        , fillColor = Defaults.rgbaToString Defaults.defaultFillColor
         }
 
 
