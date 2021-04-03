@@ -22,6 +22,13 @@ For Dark Reader users: setting the Mode to `Filter` instead of `Dynamic`usually 
 
 **What does this chart mean?**
 
-Some of the charts like bar charts and line charts are (hopefully) self-explanatory; others are more original. 
+Some of the charts like bar charts and line charts are widely used; others are more original and may require some context.
+
+See [`docs/charts.md`](https://github.com/tkuriyama/elm-datagrid/blob/master/docs/charts.md) for overview of chart types.
+
+**What do the chart toggles like `Nominal / Relative` and `0Δ / 1Δ` mean?**
+
+See [`docs/grid.md`](https://github.com/tkuriyama/elm-datagrid/blob/master/docs/grids.md) for an explanation of the various chart grid controls.
+
 
 

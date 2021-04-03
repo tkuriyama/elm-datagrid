@@ -47,7 +47,7 @@ Most modules have a corresponding example of the same naem under [`examples/Exam
 
 ## See Also
 
-- FAQ
-- Charts
-- Grids
+- [FAQ](https://github.com/tkuriyama/elm-datagrid/blob/master/docs/faq.md)
+- [Charts](https://github.com/tkuriyama/elm-datagrid/blob/master/docs/charts.md)
+- [Grids](https://github.com/tkuriyama/elm-datagrid/blob/master/docs/grids.md)
 
