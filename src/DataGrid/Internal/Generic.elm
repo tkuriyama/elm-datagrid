@@ -1,10 +1,10 @@
 module DataGrid.Internal.Generic exposing (render)
 
 import DataGrid.BarChart as BC
-import DataGrid.StackedBarChart as SBC
 import DataGrid.ChartConfig as Cfg exposing (ChartCfg(..), ChartData(..))
 import DataGrid.FacetGridChart as FGC
 import DataGrid.LineChart as LC
+import DataGrid.StackedBarChart as SBC
 import TypedSvg exposing (svg)
 import TypedSvg.Core exposing (Svg)
 

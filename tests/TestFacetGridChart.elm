@@ -1,6 +1,6 @@
-module TestGridChart exposing (..)
+module TestFacetGridChart exposing (..)
 
-import DataGrid.GridChart exposing (..)
+import DataGrid.FacetGridChart exposing (..)
 import DataGrid.Internal.Utils as Utils
 import Expect exposing (Expectation)
 import Test exposing (..)
