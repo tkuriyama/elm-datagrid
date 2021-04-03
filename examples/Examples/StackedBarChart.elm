@@ -1,13 +1,13 @@
-module Examples.BarChartStacked exposing (cfg, dataByGroup, dataByTape, main)
+module Examples.StackedBarChart exposing (cfg, dataByGroup, dataByTape, main)
 
-import DataGrid.BarChartStacked exposing (render)
+import DataGrid.StackedBarChart exposing (render)
 import DataGrid.ChartConfig as Cfg
     exposing
-        ( defaultBarChartStackedSpec
+        ( defaultStackedBarChartSpec
         , defaultStdChartCfg
         , defaultTooltips
         )
-import SampleData.BarChartStackedSample as BarChartStackedSample
+import SampleData.StackedBarChartSample as StackedBarChartSample
 import TypedSvg.Core exposing (Svg)
 
 
@@ -52,12 +52,12 @@ tooltipsCfg =
 
 barChartStackedSpec : Cfg.ChartSpec
 barChartStackedSpec =
-    case defaultBarChartStackedSpec of
-        Cfg.BarChartStackedSpec d ->
-            Cfg.BarChartStackedSpec d
+    case defaultStackedBarChartSpec of
+        Cfg.StackedBarChartSpec d ->
+            Cfg.StackedBarChartSpec d
 
         _ ->
-            defaultBarChartStackedSpec
+            defaultStackedBarChartSpec
 
 
 
@@ -67,9 +67,9 @@ barChartStackedSpec =
 
 dataByTape : Cfg.StdSeriesPairs String
 dataByTape =
-    BarChartStackedSample.dataByTape
+    StackedBarChartSample.dataByTape
 
 
 dataByGroup : Cfg.StdSeriesPairs String
 dataByGroup =
-    BarChartStackedSample.dataByGroup
+    StackedBarChartSample.dataByGroup

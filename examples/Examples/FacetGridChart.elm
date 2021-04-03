@@ -1,8 +1,8 @@
-module Examples.GridChart exposing (cfg, dataByGroup, dataByVenue, main)
+module Examples.FacetGridChart exposing (cfg, dataByGroup, dataByVenue, main)
 
 import DataGrid.ChartConfig as Cfg exposing (defaultGridChartCfg, defaultPadding, defaultTooltips)
-import DataGrid.GridChart exposing (render)
-import SampleData.GridChartSample as GridChartSample
+import DataGrid.FacetGridChart exposing (render)
+import SampleData.FacetGridChartSample as FacetGridChartSample
 import TypedSvg.Core exposing (Svg)
 
 
@@ -19,7 +19,7 @@ cfg : Cfg.GridChartCfg
 cfg =
     { defaultGridChartCfg
         | pad = paddingCfg
-        , chartSpec = Cfg.defaultGridChartSpec
+        , chartSpec = Cfg.defaultFacetGridChartSpec
     }
 
 
@@ -40,9 +40,9 @@ tooltipsCfg =
 
 dataByVenue : List Cfg.GridSeries
 dataByVenue =
-    GridChartSample.dataByVenue
+    FacetGridChartSample.dataByVenue
 
 
 dataByGroup : List Cfg.GridSeries
 dataByGroup =
-    GridChartSample.dataByGroup
+    FacetGridChartSample.dataByGroup

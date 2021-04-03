@@ -1,4 +1,4 @@
-module DataGrid.BarChartStacked exposing (render)
+module DataGrid.StackedBarChart exposing (render)
 
 {-| Render a a single Stacked BarChart with some limited config options.
 

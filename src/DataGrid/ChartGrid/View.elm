@@ -194,7 +194,7 @@ title r textColor baseFont =
 project : ChartCell label -> ChartData label
 project cell =
     case cell.chartData of
-        BarChartStackedData d ->
+        StackedBarChartData d ->
             d
                 |> StdChart.projectSeries cell.hideSeries
                 |> (if cell.showRelative then
@@ -203,7 +203,7 @@ project cell =
                     else
                         identity
                    )
-                |> BarChartStackedData
+                |> StackedBarChartData
 
         LineChartData d ->
             d
@@ -272,7 +272,7 @@ controlSeries attrs cell =
 
     else
         case cell.chartData of
-            BarChartStackedData d ->
+            StackedBarChartData d ->
                 row attrs_ (Utils.fsts d |> List.map f)
 
             LineChartData d ->
@@ -328,7 +328,7 @@ parseToggles cfg =
     case cfg of
         Std c ->
             case c.chartSpec of
-                BarChartStackedSpec spec ->
+                StackedBarChartSpec spec ->
                     ( ( spec.toggleSeries
                       , spec.toggleRelative
                       , False

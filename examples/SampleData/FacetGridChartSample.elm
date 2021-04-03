@@ -1,4 +1,5 @@
-module SampleData.GridChartSample exposing (dataByGroup, dataByVenue)
+
+module SampleData.FacetGridChartSample exposing (dataByGroup, dataByVenue)
 
 {-| Sample data for use in Grid Chart examples.
 Source: <https://www.cboe.com/us/equities/market_share/>

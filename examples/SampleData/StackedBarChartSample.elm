@@ -1,4 +1,4 @@
-module SampleData.BarChartStackedSample exposing (dataByGroup, dataByTape)
+module SampleData.StackedBarChartSample exposing (dataByGroup, dataByTape)
 
 {-| Sample data for use in Stacked Bar Chart examples.
 Source: <https://www.cboe.com/us/equities/market_share/>

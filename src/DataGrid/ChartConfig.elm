@@ -19,9 +19,9 @@ type ChartCfg label
 
 type ChartData label
     = BarChartData (StdSeriesPair label)
-    | BarChartStackedData (StdSeriesPairs label)
     | LineChartData (StdSeriesPairs label)
-    | GridChartData (List GridSeries)
+    | FacetGridChartData (List GridSeries)
+    | StackedBarChartData (StdSeriesPairs label)
     | DefaultData
 
 
@@ -30,11 +30,6 @@ type ChartSpec
         { fillColor : String
         , hoverColor : String
         , showDistribution : Bool
-        }
-    | BarChartStackedSpec
-        { toggleSeries : Bool
-        , toggleRelative : Bool
-        , toggleHeight : Int
         }
     | LineChartSpec
         { showLineName : Bool
@@ -45,10 +40,15 @@ type ChartSpec
         , toggleFirstDeriv : Bool
         , toggleHeight : Int
         }
-    | GridChartSpec
+    | FacetGridChartSpec
         { showHBar : Bool
         , labelAlign : Position
         , fillColor : String
+        }
+    | StackedBarChartSpec
+        { toggleSeries : Bool
+        , toggleRelative : Bool
+        , toggleHeight : Int
         }
     | DefaultSpec
 
@@ -124,9 +124,9 @@ defaultBarChartSpec =
         }
 
 
-defaultBarChartStackedSpec : ChartSpec
-defaultBarChartStackedSpec =
-    BarChartStackedSpec
+defaultStackedBarChartSpec : ChartSpec
+defaultStackedBarChartSpec =
+    StackedBarChartSpec
         { toggleSeries = True
         , toggleRelative = True
         , toggleHeight = 18
@@ -198,9 +198,9 @@ defaultGridChartCfg =
     }
 
 
-defaultGridChartSpec : ChartSpec
-defaultGridChartSpec =
-    GridChartSpec
+defaultFacetGridChartSpec : ChartSpec
+defaultFacetGridChartSpec =
+    FacetGridChartSpec
         { showHBar = True
         , labelAlign = Left
         , fillColor = Defaults.rgbaToString Defaults.defaultFillColor

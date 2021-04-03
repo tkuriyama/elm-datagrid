@@ -1,4 +1,4 @@
-module DataGrid.GridChart exposing (render, sortByRecent)
+module DataGrid.FacetGridChart exposing (render, sortByRecent)
 
 {-| Render a a single Grid Chart.
 -}
@@ -127,7 +127,7 @@ collect pairs =
 parseChartSpec : Cfg.ChartSpec -> ( Bool, Cfg.Position )
 parseChartSpec spec =
     case spec of
-        Cfg.GridChartSpec s ->
+        Cfg.FacetGridChartSpec s ->
             ( s.showHBar, s.labelAlign )
 
         _ ->
@@ -144,8 +144,8 @@ getDims xScale yScale series showHBar =
     let
         pairs =
             case series of
-                Just ( name, groups ) ->
-                    List.head groups
+                Just ( name, facets ) ->
+                    List.head facets
                         |> Maybe.withDefault ( "", [] )
                         |> Utils.snd
 
@@ -180,7 +180,7 @@ render cfg data =
         env =
             genChartEnv cfg data
 
-        group_labels =
+        facet_labels =
             List.head data
                 |> Maybe.withDefault ( "", [] )
                 |> Utils.snd
@@ -198,7 +198,7 @@ render cfg data =
             [ class [ "y_labels" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            (List.map (renderYLabel env) group_labels)
+            (List.map (renderYLabel env) facet_labels)
         , g
             [ class [ "grid_data" ]
             , transform [ Translate env.pad.left env.pad.top ]
@@ -270,15 +270,15 @@ renderYLabel env lbl =
 
 
 renderGrid : ChartEnv -> Cfg.GridSeries -> Svg msg
-renderGrid env ( lbl, groups ) =
+renderGrid env ( lbl, facets ) =
     let
         y =
             Scale.convert env.yScale lbl
     in
-    g [ class [ "grid_group" ] ]
-        (List.map (renderCells env y) groups
+    g [ class [ "grid_facet" ] ]
+        (List.map (renderCells env y) facets
             ++ (if env.showHBar then
-                    List.map2 (renderHBars env y) groups env.dataScales
+                    List.map2 (renderHBars env y) facets env.dataScales
 
                 else
                     []
@@ -407,10 +407,10 @@ type alias HoverEnv =
 
 
 renderTooltips : ChartEnv -> Cfg.GridSeries -> Svg msg
-renderTooltips env ( lbl, groups ) =
-    g [ class [ "grid_group" ] ]
+renderTooltips env ( lbl, facets ) =
+    g [ class [ "grid_facet" ] ]
         (if env.tooltips.showHoverTooltips then
-            List.map (renderHoverTooltips env lbl) groups
+            List.map (renderHoverTooltips env lbl) facets
 
          else
             []
@@ -637,7 +637,7 @@ genStyle sz cCfg fCfg tCfg =
     let
         fillColor =
             case cCfg of
-                Cfg.GridChartSpec spec ->
+                Cfg.FacetGridChartSpec spec ->
                     spec.fillColor
 
                 _ ->

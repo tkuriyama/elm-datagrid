@@ -3,8 +3,9 @@ module DataGrid exposing (main)
 import DataGrid.BarChart
 import DataGrid.ChartConfig
 import DataGrid.ChartGrid
-import DataGrid.GridChart
+import DataGrid.FacetGridChart
 import DataGrid.LineChart
+import DataGrid.StackedBarChart
 import Html exposing (Html)
 
 

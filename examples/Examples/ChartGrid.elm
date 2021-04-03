@@ -8,8 +8,8 @@ import DataGrid.ChartGrid as ChartGrid
         )
 import DataGrid.GridConfig exposing (ChartCell, ChartGrid(..), LayoutCfg)
 import Examples.BarChart as BC
-import Examples.BarChartStacked as BCS
-import Examples.GridChart as GC
+import Examples.StackedBarChart as SBC
+import Examples.FacetGridChart as FGC
 import Examples.LineChart as LC
 
 
@@ -77,15 +77,15 @@ groupGrid : ChartCell String
 groupGrid =
     let
         cfg_ =
-            GC.cfg
+            FGC.cfg
 
         spec =
-            Cfg.defaultGridChartSpec
+            Cfg.defaultFacetGridChartSpec
 
         spec_ =
             case spec of
-                Cfg.GridChartSpec s ->
-                    Cfg.GridChartSpec { s | showHBar = False }
+                Cfg.FacetGridChartSpec s ->
+                    Cfg.FacetGridChartSpec { s | showHBar = False }
 
                 _ ->
                     Cfg.DefaultSpec
@@ -94,7 +94,7 @@ groupGrid =
         | title = Just <| "Yesterday: Mkt Share by Group"
         , description = Just <| "trailing 60, 20, 1 day means"
         , chartCfg = Cfg.Grid { cfg_ | chartSpec = spec_ }
-        , chartData = Cfg.GridChartData GC.dataByGroup
+        , chartData = Cfg.FacetGridChartData FGC.dataByGroup
     }
 
 
@@ -103,8 +103,8 @@ venueGrid =
     { defaultChartCell
         | title = Just <| "Yesterday: Mkt Share by Venue"
         , description = Just <| "trailing 60, 20, 1 day means"
-        , chartCfg = Cfg.Grid GC.cfg
-        , chartData = Cfg.GridChartData GC.dataByVenue
+        , chartCfg = Cfg.Grid FGC.cfg
+        , chartData = Cfg.FacetGridChartData FGC.dataByVenue
     }
 
 
@@ -133,8 +133,8 @@ totalMktByTape =
     { defaultChartCell
         | title = Just <| "Market Volume by Tape"
         , description = Just <| "in billions of shares"
-        , chartCfg = Cfg.Std BCS.cfg
-        , chartData = Cfg.BarChartStackedData BCS.dataByTape
+        , chartCfg = Cfg.Std SBC.cfg
+        , chartData = Cfg.StackedBarChartData SBC.dataByTape
     }
 
 
@@ -143,8 +143,8 @@ totalMktByGroup =
     { defaultChartCell
         | title = Just <| "Market Volume by Group"
         , description = Just <| "in billions of shares"
-        , chartCfg = Cfg.Std BCS.cfg
-        , chartData = Cfg.BarChartStackedData BCS.dataByGroup
+        , chartCfg = Cfg.Std SBC.cfg
+        , chartData = Cfg.StackedBarChartData SBC.dataByGroup
     }
 
 
