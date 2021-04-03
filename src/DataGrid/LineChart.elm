@@ -8,7 +8,7 @@ axes is better handled by direct interaction with the elm-visualization API.
 -}
 
 import Color exposing (Color)
-import DataGrid.Config as Cfg
+import DataGrid.ChartConfig as Cfg
 import DataGrid.Internal.StdChart as StdChart
 import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils

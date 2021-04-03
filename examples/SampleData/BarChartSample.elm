@@ -4,7 +4,7 @@ module SampleData.BarChartSample exposing (dataNotional, dataShares)
 Source: <https://www.cboe.com/us/equities/market_share/>
 -}
 
-import DataGrid.Config as Cfg
+import DataGrid.ChartConfig as Cfg
 
 
 
@@ -132,6 +132,7 @@ dataShares =
         , ( "2021-03-29", 11.36597 )
         , ( "2021-03-30", 10.52879 )
         , ( "2021-03-31", 11.47733 )
+        , ( "2021-04-01", 10.76644 )
         ]
       )
     ]
@@ -258,6 +259,7 @@ dataNotional =
         , ( "2021-03-29", 578.56744 )
         , ( "2021-03-30", 515.5926 )
         , ( "2021-03-31", 617.38467 )
+        , ( "2021-04-01", 566.77256 )
         ]
       )
     ]

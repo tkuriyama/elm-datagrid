@@ -1,7 +1,7 @@
 module TestChartGrid exposing (..)
 
 import DataGrid.ChartGrid exposing (..)
-import DataGrid.ChartGrid.Types exposing (..)
+import DataGrid.GridConfig exposing (..)
 import Expect exposing (Expectation)
 import Test exposing (..)
 

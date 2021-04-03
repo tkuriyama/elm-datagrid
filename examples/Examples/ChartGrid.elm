@@ -1,12 +1,12 @@
 module Examples.ChartGrid exposing (main)
 
+import DataGrid.ChartConfig as Cfg
 import DataGrid.ChartGrid as ChartGrid
     exposing
         ( defaultChartCell
         , defaultLayoutCfg
         )
-import DataGrid.ChartGrid.Types exposing (ChartCell, ChartGrid(..), LayoutCfg)
-import DataGrid.Config as Cfg
+import DataGrid.GridConfig exposing (ChartCell, ChartGrid(..), LayoutCfg)
 import Examples.BarChart as BC
 import Examples.BarChartStacked as BCS
 import Examples.GridChart as GC

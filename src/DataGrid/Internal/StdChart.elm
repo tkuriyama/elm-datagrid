@@ -5,7 +5,7 @@ module DataGrid.Internal.StdChart exposing (..)
 
 import Axis
 import Color exposing (Color)
-import DataGrid.Config as Cfg
+import DataGrid.ChartConfig as Cfg
 import DataGrid.Internal.Utils as Utils
 import List.Extra as LE
 import Scale

@@ -3,13 +3,13 @@ module DataGrid.ChartGrid.View exposing (view)
 {-| Render module for ChartGrid.
 -}
 
-import DataGrid.ChartGrid.Types as T exposing (..)
-import DataGrid.Config as Cfg
+import DataGrid.ChartConfig as Cfg
     exposing
         ( ChartCfg(..)
         , ChartData(..)
         , ChartSpec(..)
         )
+import DataGrid.GridConfig as G exposing (..)
 import DataGrid.Internal.Generic as Generic
 import DataGrid.Internal.StdChart as StdChart
 import DataGrid.Internal.UI as UI
@@ -62,7 +62,7 @@ view model =
 parseGrid : LayoutCfg -> ChartGrid label -> Element Msg
 parseGrid cfg grid =
     case grid of
-        T.Column ( mw, mh ) cells ->
+        G.Column ( mw, mh ) cells ->
             let
                 ( w, h ) =
                     ( UI.maybeLength mw fill, UI.maybeLength mh fill )
@@ -71,7 +71,7 @@ parseGrid cfg grid =
                 [ alignTop, width w, height h, spacing cfg.rowSpacing ]
                 (List.map (parseGrid cfg) cells)
 
-        T.Row ( mw, mh ) cells ->
+        G.Row ( mw, mh ) cells ->
             let
                 ( w, h ) =
                     ( UI.maybeLength mw fill, UI.maybeLength mh fill )
@@ -80,10 +80,10 @@ parseGrid cfg grid =
                 [ alignTop, width w, height h, spacing cfg.colSpacing ]
                 (List.map (parseGrid cfg) cells)
 
-        T.TabbedCell name cells ->
+        G.TabbedCell name cells ->
             tabbedChartCell name cfg cells
 
-        T.Cell cell ->
+        G.Cell cell ->
             chartCell cfg cell
 
 

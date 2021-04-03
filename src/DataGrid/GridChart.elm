@@ -5,7 +5,7 @@ module DataGrid.GridChart exposing (render, sortByRecent)
 
 import Axis
 import Color exposing (Color)
-import DataGrid.Config as Cfg
+import DataGrid.ChartConfig as Cfg
 import DataGrid.Internal.Defaults as Defaults
 import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils

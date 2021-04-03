@@ -13,14 +13,14 @@ where an element is an elm-ui `Element msg`.
 -}
 
 import Browser
-import DataGrid.ChartGrid.Types as Types exposing (..)
-import DataGrid.ChartGrid.View as View
-import DataGrid.Config as Cfg
+import DataGrid.ChartConfig as Cfg
     exposing
         ( ChartCfg(..)
         , ChartData(..)
         , ChartSpec(..)
         )
+import DataGrid.ChartGrid.View as View
+import DataGrid.GridConfig exposing (..)
 import DataGrid.Internal.Defaults as Defaults
 import DataGrid.Internal.Utils as Utils
 import Html exposing (Html)

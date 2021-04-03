@@ -1,7 +1,7 @@
 module Examples.BarChart exposing (cfg, dataNotional, dataShares, main)
 
 import DataGrid.BarChart exposing (render)
-import DataGrid.Config as Cfg exposing (defaultPadding, defaultStdChartCfg, defaultTooltips)
+import DataGrid.ChartConfig as Cfg exposing (defaultPadding, defaultStdChartCfg, defaultTooltips)
 import SampleData.BarChartSample as BarChartSample
 import TypedSvg.Core exposing (Svg)
 

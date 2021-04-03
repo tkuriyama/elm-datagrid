@@ -1,4 +1,4 @@
-module DataGrid.Config exposing (..)
+module DataGrid.ChartConfig exposing (..)
 
 {-| Chart configuration type specifications, as well as defaults.
 -}

@@ -1,6 +1,6 @@
 module Examples.LineChart exposing (cfg, filterData, main)
 
-import DataGrid.Config as Cfg
+import DataGrid.ChartConfig as Cfg
     exposing
         ( defaultLineChartSpec
         , defaultPadding

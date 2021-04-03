@@ -1,7 +1,7 @@
 module Examples.BarChartStacked exposing (cfg, dataByGroup, dataByTape, main)
 
 import DataGrid.BarChartStacked exposing (render)
-import DataGrid.Config as Cfg
+import DataGrid.ChartConfig as Cfg
     exposing
         ( defaultBarChartStackedSpec
         , defaultStdChartCfg

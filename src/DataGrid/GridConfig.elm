@@ -1,6 +1,6 @@
-module DataGrid.ChartGrid.Types exposing (..)
+module DataGrid.GridConfig exposing (..)
 
-import DataGrid.Config as Cfg
+import DataGrid.ChartConfig as Cfg
     exposing
         ( ChartCfg(..)
         , ChartData(..)
@@ -43,6 +43,13 @@ type alias ChartCell label =
     }
 
 
+type ChartGrid label
+    = Column ( GridWidth, GridHeight ) (List (ChartGrid label))
+    | Row ( GridWidth, GridHeight ) (List (ChartGrid label))
+    | TabbedCell String (List ( String, ChartCell label ))
+    | Cell (ChartCell label)
+
+
 
 --------------------------------------------------------------------------------
 -- Internal Types
@@ -54,13 +61,6 @@ type alias GridWidth =
 
 type alias GridHeight =
     Maybe Int
-
-
-type ChartGrid label
-    = Column ( GridWidth, GridHeight ) (List (ChartGrid label))
-    | Row ( GridWidth, GridHeight ) (List (ChartGrid label))
-    | TabbedCell String (List ( String, ChartCell label ))
-    | Cell (ChartCell label)
 
 
 type alias Model label =

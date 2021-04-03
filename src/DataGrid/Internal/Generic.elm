@@ -2,7 +2,7 @@ module DataGrid.Internal.Generic exposing (render)
 
 import DataGrid.BarChart as BC
 import DataGrid.BarChartStacked as BCS
-import DataGrid.Config as Cfg exposing (ChartCfg(..), ChartData(..))
+import DataGrid.ChartConfig as Cfg exposing (ChartCfg(..), ChartData(..))
 import DataGrid.GridChart as GC
 import DataGrid.LineChart as LC
 import TypedSvg exposing (svg)

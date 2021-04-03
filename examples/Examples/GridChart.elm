@@ -1,6 +1,6 @@
 module Examples.GridChart exposing (cfg, dataByGroup, dataByVenue, main)
 
-import DataGrid.Config as Cfg exposing (defaultGridChartCfg, defaultPadding, defaultTooltips)
+import DataGrid.ChartConfig as Cfg exposing (defaultGridChartCfg, defaultPadding, defaultTooltips)
 import DataGrid.GridChart exposing (render)
 import SampleData.GridChartSample as GridChartSample
 import TypedSvg.Core exposing (Svg)
