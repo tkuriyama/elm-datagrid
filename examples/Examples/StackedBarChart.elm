@@ -65,11 +65,11 @@ barChartStackedSpec =
 -- Data
 
 
-dataByTape : Cfg.StdSeriesPairs String
+dataByTape : List (Cfg.StdSeries String)
 dataByTape =
     StackedBarChartSample.dataByTape
 
 
-dataByGroup : Cfg.StdSeriesPairs String
+dataByGroup : List (Cfg.StdSeries String)
 dataByGroup =
     StackedBarChartSample.dataByGroup

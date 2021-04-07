@@ -109,7 +109,7 @@ genChartEnv cfg data_ =
 -- Render
 
 
-render : Cfg.StdChartCfg label -> Cfg.StdSeriesPairs label -> Svg msg
+render : Cfg.StdChartCfg label -> List (Cfg.StdSeries label) -> Svg msg
 render cfg data =
     let
         data_ =

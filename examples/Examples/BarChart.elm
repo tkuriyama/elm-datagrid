@@ -6,7 +6,6 @@ import SampleData.BarChartSample as BarChartSample
 import TypedSvg.Core exposing (Svg)
 
 
-
 --------------------------------------------------------------------------------
 
 
@@ -40,14 +39,14 @@ tooltipsCfg =
     }
 
 
-dataShares : Cfg.StdSeriesPair String
+dataShares : Cfg.StdSeries String
 dataShares =
     BarChartSample.dataShares
         |> List.head
         |> Maybe.withDefault ( "Empty", [] )
 
 
-dataNotional : Cfg.StdSeriesPair String
+dataNotional : Cfg.StdSeries String
 dataNotional =
     BarChartSample.dataNotional
         |> List.head

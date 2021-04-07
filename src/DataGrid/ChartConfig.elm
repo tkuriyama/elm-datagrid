@@ -18,10 +18,11 @@ type ChartCfg label
 
 
 type ChartData label
-    = BarChartData (StdSeriesPair label)
-    | LineChartData (StdSeriesPairs label)
+    = BarChartData (StdSeries label)
+    | LineChartData (List (StdSeries label))
     | FacetGridChartData (List GridSeries)
-    | StackedBarChartData (StdSeriesPairs label)
+    | StackedBarChartData (List (StdSeries label))
+    | TreeGridChartData WeightedTree
     | DefaultData
 
 
@@ -50,7 +51,7 @@ type ChartSpec
         , toggleRelative : Bool
         , toggleHeight : Int
         }
-    | TileGridChartSpec
+    | TreeGridChartSpec
         { innerPad : Int
         , cellBaseFontSize : Int
         , cellMinFontSize : Int
@@ -74,11 +75,7 @@ For consistency, all StdChartCfg charts take a list of StdSeriesPairs,
 even if they only expect a single series (e.g. a simple bar chart).
 
 -}
-type alias StdSeriesPairs label =
-    List (StdSeriesPair label)
-
-
-type alias StdSeriesPair label =
+type alias StdSeries label =
     ( SeriesName, List ( label, Float ) )
 
 
@@ -156,10 +153,15 @@ defaultLineChartSpec =
 -- GridChart Data
 
 
-{-| GridSeries define data for working with GridChartCfg charts.
+{-| GridSeries and WeightedTree define data for working with GridChartCfg charts.
 -}
 type alias GridSeries =
     ( SeriesName, List ( FacetName, List GridPair ) )
+
+
+type WeightedTree
+    = WeightedTree Name Weight (List WeightedTree)
+    | Node Name Weight GridPair
 
 
 type alias GridPair =
@@ -167,6 +169,14 @@ type alias GridPair =
 
 
 type alias FacetName =
+    String
+
+
+type alias Weight =
+    Float
+
+
+type alias Name =
     String
 
 
@@ -212,13 +222,15 @@ defaultFacetGridChartSpec =
         }
 
 
-defaultTileGridChartSpec : ChartSpec
-defaultTileGridChartSpec =
-    TileGridChartSpec
+defaultTreeGridChartSpec : ChartSpec
+defaultTreeGridChartSpec =
+    TreeGridChartSpec
         { innerPad = 3
         , cellBaseFontSize = 12
         , cellMinFontSize = 6
         }
+
+
 
 --------------------------------------------------------------------------------
 -- Helper Types and Defaults

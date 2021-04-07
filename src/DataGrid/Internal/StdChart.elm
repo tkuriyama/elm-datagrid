@@ -378,7 +378,7 @@ toMatrix pairs =
         |> Utils.snds
 
 
-projectRelative : Cfg.StdSeriesPairs label -> Cfg.StdSeriesPairs label
+projectRelative : List (Cfg.StdSeries label) -> List (Cfg.StdSeries label)
 projectRelative pairs =
     let
         sums =
@@ -387,16 +387,16 @@ projectRelative pairs =
     List.foldr (normalize sums) [] pairs |> List.reverse
 
 
-sumSeries : Cfg.StdSeriesPairs label -> List Float
+sumSeries : List (Cfg.StdSeries label) -> List Float
 sumSeries =
     Utils.snds >> List.map Utils.snds >> LE.transpose >> List.map List.sum
 
 
 normalize :
     List Float
-    -> Cfg.StdSeriesPair label
-    -> Cfg.StdSeriesPairs label
-    -> Cfg.StdSeriesPairs label
+    -> Cfg.StdSeries label
+    -> List (Cfg.StdSeries label)
+    -> List (Cfg.StdSeries label)
 normalize sums ( name, xs ) acc =
     let
         ( labels, nums ) =
@@ -408,7 +408,7 @@ normalize sums ( name, xs ) acc =
     ( name, List.map2 Tuple.pair labels nums_ ) :: acc
 
 
-projectFirstDeriv : Cfg.StdSeriesPairs label -> Cfg.StdSeriesPairs label
+projectFirstDeriv : List (Cfg.StdSeries label) -> List (Cfg.StdSeries label)
 projectFirstDeriv =
     List.map (\( name, pairs ) -> ( name, offsetDelta 1 pairs ))
 
@@ -430,7 +430,7 @@ offsetDelta i pairs =
 
 projectSeries :
     List String
-    -> Cfg.StdSeriesPairs label
-    -> Cfg.StdSeriesPairs label
+    -> List (Cfg.StdSeries label)
+    -> List (Cfg.StdSeries label)
 projectSeries hide =
     List.filter (\( name, _ ) -> List.member name hide |> not)

@@ -85,7 +85,7 @@ parseChartSpec spec =
 -- Render
 
 
-render : Cfg.StdChartCfg label -> Cfg.StdSeriesPair label -> Svg msg
+render : Cfg.StdChartCfg label -> Cfg.StdSeries label -> Svg msg
 render cfg ( _, data ) =
     let
         env =

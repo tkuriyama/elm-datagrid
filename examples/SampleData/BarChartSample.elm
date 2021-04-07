@@ -9,7 +9,7 @@ import DataGrid.ChartConfig as Cfg
 
 --------------------------------------------------------------------------------
 
-dataShares : Cfg.StdSeriesPairs String
+dataShares : List (Cfg.StdSeries String)
 dataShares =
   [ ("SUM(mkt_volume)",
       [ ("2020-10-09", 9.02196)
@@ -131,11 +131,13 @@ dataShares =
       , ("2021-03-30", 10.52879)
       , ("2021-03-31", 11.47733)
       , ("2021-04-01", 10.76644)
+      , ("2021-04-05", 10.23502)
+      , ("2021-04-06", 9.80993)
       ]
     )
   ]
 
-dataNotional : Cfg.StdSeriesPairs String
+dataNotional : List (Cfg.StdSeries String)
 dataNotional =
   [ ("SUM(mkt_volume)",
       [ ("2020-10-09", 395.91171)
@@ -257,6 +259,8 @@ dataNotional =
       , ("2021-03-30", 515.59260)
       , ("2021-03-31", 617.38467)
       , ("2021-04-01", 566.77256)
+      , ("2021-04-05", 540.30176)
+      , ("2021-04-06", 494.82691)
       ]
     )
   ]

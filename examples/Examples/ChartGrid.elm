@@ -148,7 +148,7 @@ totalMktByGroup =
     }
 
 
-lineChart : ( String, String, Cfg.StdSeriesPairs String ) -> ChartCell String
+lineChart : ( String, String, List (Cfg.StdSeries String) ) -> ChartCell String
 lineChart ( title, desc, data ) =
     { defaultChartCell
         | title = Just title

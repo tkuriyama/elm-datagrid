@@ -70,7 +70,7 @@ type alias ChartEnv label =
     }
 
 
-genChartEnv : Cfg.StdChartCfg label -> Cfg.StdSeriesPairs label -> ChartEnv label
+genChartEnv : Cfg.StdChartCfg label -> List (Cfg.StdSeries label) -> ChartEnv label
 genChartEnv cfg data =
     let
         names =
@@ -119,7 +119,7 @@ parseChartSpec spec =
 -- Render
 
 
-render : Cfg.StdChartCfg label -> Cfg.StdSeriesPairs label -> Svg msg
+render : Cfg.StdChartCfg label -> List (Cfg.StdSeries label) -> Svg msg
 render cfg data =
     let
         env =
@@ -165,7 +165,7 @@ render cfg data =
         ]
 
 
-renderLine : ChartEnv label -> Cfg.StdSeriesPair label -> Svg msg
+renderLine : ChartEnv label -> Cfg.StdSeries label -> Svg msg
 renderLine env ( name, points ) =
     let
         f ( x, y ) =
@@ -204,7 +204,7 @@ renderLine env ( name, points ) =
         ]
 
 
-renderPoints : ChartEnv label -> Cfg.StdSeriesPair label -> Svg msg
+renderPoints : ChartEnv label -> Cfg.StdSeries label -> Svg msg
 renderPoints env ( name, points ) =
     let
         n =
