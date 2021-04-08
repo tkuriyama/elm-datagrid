@@ -56,7 +56,7 @@ type alias ChartEnv =
     }
 
 
-genChartEnv : Cfg.GridChartCfg -> List Cfg.GridSeries -> ChartEnv
+genChartEnv : Cfg.GridChartCfg -> List (Cfg.GridSeries Cfg.GridPair) -> ChartEnv
 genChartEnv cfg data =
     let
         ( xs, ys ) =
@@ -91,7 +91,7 @@ genChartEnv cfg data =
     }
 
 
-getLabels : List Cfg.GridSeries -> ( List String, List String )
+getLabels : List (Cfg.GridSeries Cfg.GridPair) -> ( List String, List String )
 getLabels data =
     let
         xs =
@@ -107,7 +107,7 @@ getLabels data =
 
 
 genDataScales :
-    List Cfg.GridSeries
+    List (Cfg.GridSeries Cfg.GridPair)
     -> Float
     -> List (ContinuousScale Float)
 genDataScales data w =
@@ -137,7 +137,7 @@ parseChartSpec spec =
 getDims :
     BandScale String
     -> BandScale String
-    -> Maybe Cfg.GridSeries
+    -> Maybe (Cfg.GridSeries Cfg.GridPair)
     -> Bool
     -> ( Float, Float )
 getDims xScale yScale series showHBar =
@@ -174,7 +174,7 @@ getDims xScale yScale series showHBar =
 -- Render
 
 
-render : Cfg.GridChartCfg -> List Cfg.GridSeries -> Svg msg
+render : Cfg.GridChartCfg -> List (Cfg.GridSeries Cfg.GridPair) -> Svg msg
 render cfg data =
     let
         env =
@@ -212,7 +212,7 @@ render cfg data =
         ]
 
 
-sortByRecent : List Cfg.GridSeries -> List Cfg.GridSeries
+sortByRecent : List (Cfg.GridSeries Cfg.GridPair) -> List (Cfg.GridSeries Cfg.GridPair)
 sortByRecent =
     List.sortBy
         (Utils.snd
@@ -269,7 +269,7 @@ renderYLabel env lbl =
         [ text lbl ]
 
 
-renderGrid : ChartEnv -> Cfg.GridSeries -> Svg msg
+renderGrid : ChartEnv -> Cfg.GridSeries Cfg.GridPair -> Svg msg
 renderGrid env ( lbl, facets ) =
     let
         y =
@@ -406,7 +406,7 @@ type alias HoverEnv =
     }
 
 
-renderTooltips : ChartEnv -> Cfg.GridSeries -> Svg msg
+renderTooltips : ChartEnv -> Cfg.GridSeries Cfg.GridPair -> Svg msg
 renderTooltips env ( lbl, facets ) =
     g [ class [ "grid_facet" ] ]
         (if env.tooltips.showHoverTooltips then

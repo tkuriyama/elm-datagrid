@@ -20,9 +20,9 @@ type ChartCfg label
 type ChartData label
     = BarChartData (StdSeries label)
     | LineChartData (List (StdSeries label))
-    | FacetGridChartData (List GridSeries)
+    | FacetGridChartData (List (GridSeries GridPair))
     | StackedBarChartData (List (StdSeries label))
-    | TreeGridChartData WeightedTree
+    | TreeGridChartData (List (GridSeries GridTriple))
     | DefaultData
 
 
@@ -153,30 +153,21 @@ defaultLineChartSpec =
 -- GridChart Data
 
 
-{-| GridSeries and WeightedTree define data for working with GridChartCfg charts.
+{-| GridSeries define data for working with GridChartCfg charts.
 -}
-type alias GridSeries =
-    ( SeriesName, List ( FacetName, List GridPair ) )
-
-
-type WeightedTree
-    = WeightedTree Name Weight (List WeightedTree)
-    | Node Name Weight GridPair
+type alias GridSeries a =
+    ( SeriesName, List ( FacetName, List a ) )
 
 
 type alias GridPair =
     ( String, Float )
 
 
+type alias GridTriple =
+    ( String, Float, Float )
+
+
 type alias FacetName =
-    String
-
-
-type alias Weight =
-    Float
-
-
-type alias Name =
     String
 
 
