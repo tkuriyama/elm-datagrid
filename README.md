@@ -51,11 +51,12 @@ Note that `elm-minify` is deprecated. For an alternative minification, see the [
 
 ### Browser Compatibility
 
-| Browser | Compatibility                     |
-|:--------|:----------------------------------|
-| Chrome  | Supported                         |
-| Safari  | Partial Support (some CSS issues) |
-| Other   | Not Tested                        |
+| Browser | Compatibility                      |
+|:--------|:-----------------------------------|
+| Chrome  | Supported                          |
+| Firefox | Partial Support (minor CSS issues) |
+| Safari  | Partial Support (some CSS issues)  |
+| Other   | Not Tested                         |
 
 ### Browser Extensions
 
