@@ -10,6 +10,7 @@ import DataGrid.GridConfig exposing (ChartCell, ChartGrid(..), LayoutCfg)
 import Examples.BarChart as BC
 import Examples.StackedBarChart as SBC
 import Examples.FacetGridChart as FGC
+import Examples.TreeGridChart as TGC
 import Examples.LineChart as LC
 
 
@@ -46,8 +47,10 @@ charts =
                 [ ( "By Group", groupGrid )
                 , ( "By Venue", venueGrid )
                 ]
-            , TabbedCell "Placeholder"
-                [ ( "Placeholder", totalMktNotional )
+            , TabbedCell "IVV"
+                [ ( "IVV", treeMapIVV )
+                , ( "IJR", treeMapIJR )
+                , ( "IWC", treeMapIWC )
                 ]
             ]
         , Row ( Nothing, Nothing )
@@ -107,7 +110,36 @@ venueGrid =
         , chartData = Cfg.FacetGridChartData FGC.dataByVenue
     }
 
+treeMapIVV : ChartCell String
+treeMapIVV = 
+     { defaultChartCell
+        | title = Just <| "Yesterday: Closing Prices"
+        , description = Just <| "iShares Core S&P 500 ETF Constituents"
+        , chartCfg = Cfg.Grid TGC.cfg
+        , chartData = Cfg.TreeGridChartData TGC.dataIVV
+    }
 
+
+treeMapIJR : ChartCell String
+treeMapIJR = 
+     { defaultChartCell
+        | title = Just <| "Yesterday: Closing Prices"
+        , description = Just <| "iShares U.S. Small Cap ETF Constituents"
+        , chartCfg = Cfg.Grid TGC.cfg
+        , chartData = Cfg.TreeGridChartData TGC.dataIJR
+    }
+
+
+treeMapIWC : ChartCell String
+treeMapIWC = 
+     { defaultChartCell
+        | title = Just <| "Yesterday: Closing Prices"
+        , description = Just <| "iShares U.S. Microcap ETF Constituents"
+        , chartCfg = Cfg.Grid TGC.cfg
+        , chartData = Cfg.TreeGridChartData TGC.dataIWC
+    }
+
+    
 totalMkt : ChartCell String
 totalMkt =
     { defaultChartCell

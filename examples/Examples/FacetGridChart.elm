@@ -38,11 +38,11 @@ tooltipsCfg =
     }
 
 
-dataByVenue : List Cfg.GridSeries
+dataByVenue : List (Cfg.GridSeries Cfg.GridPair)
 dataByVenue =
     FacetGridChartSample.dataByVenue
 
 
-dataByGroup : List Cfg.GridSeries
+dataByGroup : List (Cfg.GridSeries Cfg.GridPair)
 dataByGroup =
     FacetGridChartSample.dataByGroup
