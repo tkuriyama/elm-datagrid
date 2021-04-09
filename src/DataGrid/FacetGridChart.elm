@@ -1,6 +1,6 @@
 module DataGrid.FacetGridChart exposing (render, sortByRecent)
 
-{-| Render a a single Grid Chart.
+{-| Render a a single Facet Grid Chart.
 -}
 
 import Axis
