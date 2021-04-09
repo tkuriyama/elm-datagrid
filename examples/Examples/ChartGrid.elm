@@ -32,6 +32,12 @@ cfg =
             [ ( "CBOE"
               , "https://certification.batstrading.com/market_summary/"
               )
+            , ( "iShares"
+              , "https://www.ishares.com/us"
+              )
+            , ( "IEX Cloud"
+              , "https://iexcloud.io/"
+              )
             , ( "Source"
               , "https://github.com/tkuriyama/elm-datagrid"
               )
