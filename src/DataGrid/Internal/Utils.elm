@@ -59,6 +59,9 @@ fmtFloat dp f =
     FormatNumber.format cfg f
 
 
+approxEqual : Float -> Float -> Float -> Bool
+approxEqual epsilon a b =
+    abs (a - b) <= epsilon
 
 --------------------------------------------------------------------------------
 -- Lists

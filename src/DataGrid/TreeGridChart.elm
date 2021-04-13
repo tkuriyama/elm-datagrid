@@ -53,9 +53,9 @@ type alias ChartEnv =
 genChartEnv : Cfg.GridChartCfg -> List (Cfg.GridSeries Cfg.GridPair) -> ChartEnv
 genChartEnv cfg data =
     let
-        (innerPad_, baseFontSize_, minFontSize_) =
+        ( innerPad_, baseFontSize_, minFontSize_ ) =
             parseChartSpec cfg.chartSpec
-    in 
+    in
     { w = cfg.w
     , h = cfg.h
     , pad = cfg.pad
@@ -66,13 +66,16 @@ genChartEnv cfg data =
     , style = genStyle cfg baseFontSize_
     }
 
-parseChartSpec : Cfg.ChartSpec -> (Int, Int, Int)
+
+parseChartSpec : Cfg.ChartSpec -> ( Int, Int, Int )
 parseChartSpec spec =
     case spec of
         Cfg.TreeGridChartSpec s ->
             ( s.innerPad, s.cellBaseFontSize, s.cellMinFontSize )
+
         _ ->
             ( 0, 0, 0 )
+
 
 
 --------------------------------------------------------------------------------
@@ -84,14 +87,16 @@ render cfg data =
     svg [] []
 
 
+
 --------------------------------------------------------------------------------
 -- Style
 
 
 genStyle : Cfg.GridChartCfg -> Int -> String
 genStyle cfg sz =
-    let (fCfg, tCfg) =
-            (cfg.fontSpec, cfg.tooltips)
+    let
+        ( fCfg, tCfg ) =
+            ( cfg.fontSpec, cfg.tooltips )
     in
     """
      text { font-family: {{typeface}}, monospace, sans-serif;
