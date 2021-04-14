@@ -4,11 +4,15 @@ module DataGrid.Internal.SquarifiedTreemap exposing (..)
 <https://www.win.tue.nl/~vanwijk/stm.pdf>
 -}
 
+import DataGrid.Internal.Utils as Utils
 import List.Nonempty as NE
 
 
-
 --------------------------------------------------------------------------------
+
+
+type alias Row a =
+    NE.Nonempty (HasArea a)
 
 
 type alias HasArea a =
@@ -16,48 +20,120 @@ type alias HasArea a =
 
 
 type alias Dimensions =
-    ( Float, Float )
+    { x : Float
+    , y : Float
+    }
 
-
-
---------------------------------------------------------------------------------
-
-
-makeDimensions : Float -> Float -> Dimensions
-makeDimensions a b =
-    if a < b then
-        ( a, b )
+sizeOrdered : Dimensions -> (Float, Float)
+sizeOrdered dims =
+    let x = dims.x
+        y = dims.y
+    in
+    if x < y then
+        ( x, y )
 
     else
-        ( b, a )
+        ( y, x )
 
 
-shorterDim : Dimensions -> Float
-shorterDim =
-    Tuple.first
+--------------------------------------------------------------------------------
 
-longerDim : Dimensions -> Float
-longerDim =
-    Tuple.second
+type alias SquarifiedTreemap a =
+    NE.Nonempty (Cell a)
+
+
+type alias Cell a =
+    { x : Float
+    , y : Float
+    , w : Float
+    , h : Float
+    , cell : HasArea a
+    }
+
+
+type alias Origin =
+    { x : Float
+    , y : Float
+    }
+
+
+makeTreemap : Dimensions -> NE.Nonempty (HasArea a) -> SquarifiedTreemap a
+makeTreemap dims areas =
+    partition dims areas
+        |> Utils.neMapAccumL rowToCells ({ x = 0, y = 0 }, dims)
+        |> Tuple.first
+        |> NE.concat
+
+
+rowToCells : Row a -> (Origin, Dimensions) -> (NE.Nonempty (Cell a), (Origin, Dimensions))
+rowToCells row (origin, dims) =
+    let
+
+        (origin_, dims_) =
+            updateOriginAndDims origin dims row
+
+        delta =
+            { x = dims.x - dims_.x
+            , y = dims.y - dims_.y
+            }
+
+        cells =
+            Utils.neMapAccumL rowToCellsHelper (origin, delta) row |> Tuple.first
+
+
+    in
+        (cells, (origin_, dims_))
+
+
+rowToCellsHelper : HasArea a -> (Origin, Dimensions) -> (Cell a, (Origin, Dimensions))
+rowToCellsHelper area (origin, delta) =
+    let
+        ((w, h), origin_) =
+            if delta.x > 0 then
+                ( (delta.x, area.area / delta.x)
+                , { origin | y = origin.y + area.area / delta.x }
+                )
+            else
+                ( (area.area / delta.y, delta.y)
+                , { origin | x = origin.x + area.area / delta.y }
+                )
+    in
+        ( { x = origin.x
+          , y = origin.y
+          , w = w
+          , h = h
+          , cell = area
+          }
+        , (origin_, delta)
+        )
+
+
+
+updateOriginAndDims : Origin -> Dimensions -> Row a -> (Origin, Dimensions)
+updateOriginAndDims origin dims row =
+    let
+        dims_ =
+            updateDims dims row
+
+        origin_ = { x = origin.x + dims.x - dims_.x
+                  , y = origin.y + dims.y - dims_.y
+                  }
+    in
+        (origin_, dims_)
 
 
 --------------------------------------------------------------------------------
 
 
-partition : Dimensions -> NE.Nonempty (HasArea a) -> List (Row a)
+partition : Dimensions -> NE.Nonempty (HasArea a) -> NE.Nonempty (Row a)
 partition dims areas =
     NE.tail areas
         |> List.foldl partitionHelper ( dims, NE.fromElement (NE.head areas), [] )
         |> (\( _, row, rows ) ->
-                row
-                    :: rows
-                    |> List.map NE.reverse
-                    |> List.reverse
+                NE.Nonempty row rows
+                    |> NE.map NE.reverse
+                    |> NE.reverse
            )
-
-
-type alias Row a =
-    NE.Nonempty (HasArea a)
 
 
 type alias PartitionAcc a =
@@ -68,7 +144,7 @@ partitionHelper : HasArea a -> PartitionAcc a -> PartitionAcc a
 partitionHelper area ( dims, row, rows ) =
     let
         w =
-            shorterDim dims
+            Tuple.first <| sizeOrdered dims
     in
     if worst row w >= worst (NE.cons area row) w then
         ( dims, NE.cons area row, rows )
@@ -81,13 +157,16 @@ updateDims : Dimensions -> Row a -> Dimensions
 updateDims dims row =
     let
         (s, l) =
-            (shorterDim dims, longerDim dims)
+            sizeOrdered dims
 
-        totalArea =
-            NE.map (.area) row |> NE.foldl1 (+)
+        l_ =
+            l - (totalArea row) / s
 
     in
-        makeDimensions (totalArea / s) (l - (totalArea / s))
+        if s == dims.x then
+            { x = s, y = l_ }
+        else
+            { x = l_, y = s }
 
 
 worst : Row a -> Float -> Float
@@ -103,6 +182,16 @@ worst row w =
             NE.foldl1 min areas
 
         rowTotal =
-            NE.foldl1 (+) areas
+            totalArea row
+
     in
     max (w ^ 2 * rowMax / rowTotal ^ 2) (rowTotal ^ 2 / (w ^ 2 * rowMin))
+
+
+--------------------------------------------------------------------------------
+-- Helpers
+
+
+totalArea : Row a -> Float 
+totalArea =
+    NE.map (.area) >> NE.foldl1 (+)

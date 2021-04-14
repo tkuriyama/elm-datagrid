@@ -19,6 +19,8 @@
             "gampleman/elm-visualization": "2.1.2",
             "jorgengranseth/elm-string-format": "1.0.1",
             "mdgriffith/elm-ui": "1.1.8",
+            "mgold/elm-nonempty-list": "4.1.0",
+            "r-k-b/map-accumulate": "1.0.1",
             "ryannhg/date-format": "2.3.0"
         },
         "indirect": {
