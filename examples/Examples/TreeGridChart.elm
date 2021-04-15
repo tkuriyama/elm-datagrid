@@ -12,7 +12,7 @@ import TypedSvg.Core exposing (Svg)
 
 main : Svg msg
 main =
-    render cfg dataIWC
+    render cfg dataIVV
 
 
 cfg : Cfg.GridChartCfg
@@ -26,7 +26,9 @@ cfg =
 paddingCfg : Cfg.Padding
 paddingCfg =
     { defaultPadding
-        | top = 10
+        | top = 20
+        , left = 10
+        , right = 20
     }
 
 

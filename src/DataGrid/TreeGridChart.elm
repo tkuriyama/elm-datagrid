@@ -209,7 +209,7 @@ genTreeSeries pairs =
                 NE.fromElement ("", default, default)
             (x :: xs) ->
                 NE.Nonempty (f x) (List.map f xs)
-                    |> NE.sortBy (\(_, _, (_, w, _)) -> w * -1)g
+                    |> NE.sortBy (\(_, _, (_, w, _)) -> w * -1)
 
 
 sumWeights : NE.Nonempty TreeTriple -> Float
