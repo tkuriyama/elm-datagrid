@@ -4,7 +4,8 @@ import FormatNumber
 import FormatNumber.Locales exposing (Decimals(..), usLocale)
 import List.Extra as LE
 import List.Nonempty as NE
-import MapAccumulate 
+import MapAccumulate
+
 
 
 --------------------------------------------------------------------------------
@@ -64,6 +65,8 @@ approxEqual : Float -> Float -> Float -> Bool
 approxEqual epsilon a b =
     abs (a - b) <= epsilon
 
+
+
 --------------------------------------------------------------------------------
 -- Lists
 
@@ -112,8 +115,10 @@ toggleMember x xs =
         x :: xs
 
 
+
 --------------------------------------------------------------------------------
 -- Non-Empty Lists
+
 
 neMapAccumL :
     (a -> acc -> ( b, acc ))
@@ -124,9 +129,14 @@ neMapAccumL f z ne =
     case ne of
         NE.Nonempty x xs ->
             let
-                ( y, z_ ) = f x z
-                ( ys, z__) = MapAccumulate.mapAccumL f z_ xs
-            in (NE.Nonempty y ys, z__)
+                ( y, z_ ) =
+                    f x z
+
+                ( ys, z__ ) =
+                    MapAccumulate.mapAccumL f z_ xs
+            in
+            ( NE.Nonempty y ys, z__ )
+
 
 
 --------------------------------------------------------------------------------

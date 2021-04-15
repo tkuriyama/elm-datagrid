@@ -8,6 +8,7 @@ import DataGrid.Internal.Utils as Utils
 import List.Nonempty as NE
 
 
+
 --------------------------------------------------------------------------------
 
 
@@ -24,10 +25,15 @@ type alias Dimensions =
     , y : Float
     }
 
-sizeOrdered : Dimensions -> (Float, Float)
+
+sizeOrdered : Dimensions -> ( Float, Float )
 sizeOrdered dims =
-    let x = dims.x
-        y = dims.y
+    let
+        x =
+            dims.x
+
+        y =
+            dims.y
     in
     if x < y then
         ( x, y )
@@ -36,7 +42,9 @@ sizeOrdered dims =
         ( y, x )
 
 
+
 --------------------------------------------------------------------------------
+
 
 type alias SquarifiedTreemap a =
     NE.Nonempty (Cell a)
@@ -60,16 +68,15 @@ type alias Origin =
 makeTreemap : Dimensions -> NE.Nonempty (HasArea a) -> SquarifiedTreemap a
 makeTreemap dims areas =
     partition dims areas
-        |> Utils.neMapAccumL rowToCells ({ x = 0, y = 0 }, dims)
+        |> Utils.neMapAccumL rowToCells ( { x = 0, y = 0 }, dims )
         |> Tuple.first
         |> NE.concat
 
 
-rowToCells : Row a -> (Origin, Dimensions) -> (NE.Nonempty (Cell a), (Origin, Dimensions))
-rowToCells row (origin, dims) =
+rowToCells : Row a -> ( Origin, Dimensions ) -> ( NE.Nonempty (Cell a), ( Origin, Dimensions ) )
+rowToCells row ( origin, dims ) =
     let
-
-        (origin_, dims_) =
+        ( origin_, dims_ ) =
             updateOriginAndDims origin dims row
 
         delta =
@@ -78,48 +85,48 @@ rowToCells row (origin, dims) =
             }
 
         cells =
-            Utils.neMapAccumL rowToCellsHelper (origin, delta) row |> Tuple.first
-
-
+            Utils.neMapAccumL rowToCellsHelper ( origin, delta ) row |> Tuple.first
     in
-        (cells, (origin_, dims_))
+    ( cells, ( origin_, dims_ ) )
 
 
-rowToCellsHelper : HasArea a -> (Origin, Dimensions) -> (Cell a, (Origin, Dimensions))
-rowToCellsHelper area (origin, delta) =
+rowToCellsHelper : HasArea a -> ( Origin, Dimensions ) -> ( Cell a, ( Origin, Dimensions ) )
+rowToCellsHelper area ( origin, delta ) =
     let
-        ((w, h), origin_) =
+        ( ( w, h ), origin_ ) =
             if delta.x > 0 then
-                ( (delta.x, area.area / delta.x)
+                ( ( delta.x, area.area / delta.x )
                 , { origin | y = origin.y + area.area / delta.x }
                 )
+
             else
-                ( (area.area / delta.y, delta.y)
+                ( ( area.area / delta.y, delta.y )
                 , { origin | x = origin.x + area.area / delta.y }
                 )
     in
-        ( { x = origin.x
-          , y = origin.y
-          , w = w
-          , h = h
-          , cell = area
-          }
-        , (origin_, delta)
-        )
+    ( { x = origin.x
+      , y = origin.y
+      , w = w
+      , h = h
+      , cell = area
+      }
+    , ( origin_, delta )
+    )
 
 
-
-updateOriginAndDims : Origin -> Dimensions -> Row a -> (Origin, Dimensions)
+updateOriginAndDims : Origin -> Dimensions -> Row a -> ( Origin, Dimensions )
 updateOriginAndDims origin dims row =
     let
         dims_ =
             updateDims dims row
 
-        origin_ = { x = origin.x + dims.x - dims_.x
-                  , y = origin.y + dims.y - dims_.y
-                  }
+        origin_ =
+            { x = origin.x + dims.x - dims_.x
+            , y = origin.y + dims.y - dims_.y
+            }
     in
-        (origin_, dims_)
+    ( origin_, dims_ )
+
 
 
 --------------------------------------------------------------------------------
@@ -156,17 +163,17 @@ partitionHelper area ( dims, row, rows ) =
 updateDims : Dimensions -> Row a -> Dimensions
 updateDims dims row =
     let
-        (s, l) =
+        ( s, l ) =
             sizeOrdered dims
 
         l_ =
-            l - (totalArea row) / s
-
+            l - totalArea row / s
     in
-        if s == dims.x then
-            { x = s, y = l_ }
-        else
-            { x = l_, y = s }
+    if s == dims.x then
+        { x = s, y = l_ }
+
+    else
+        { x = l_, y = s }
 
 
 worst : Row a -> Float -> Float
@@ -183,15 +190,15 @@ worst row w =
 
         rowTotal =
             totalArea row
-
     in
     max (w ^ 2 * rowMax / rowTotal ^ 2) (rowTotal ^ 2 / (w ^ 2 * rowMin))
+
 
 
 --------------------------------------------------------------------------------
 -- Helpers
 
 
-totalArea : Row a -> Float 
+totalArea : Row a -> Float
 totalArea =
-    NE.map (.area) >> NE.foldl1 (+)
+    NE.map .area >> NE.foldl1 (+)

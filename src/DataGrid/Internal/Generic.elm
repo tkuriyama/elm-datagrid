@@ -3,6 +3,7 @@ module DataGrid.Internal.Generic exposing (render)
 import DataGrid.BarChart as BC
 import DataGrid.ChartConfig as Cfg exposing (ChartCfg(..), ChartData(..))
 import DataGrid.FacetGridChart as FGC
+import DataGrid.TreeGridChart as TGC
 import DataGrid.LineChart as LC
 import DataGrid.StackedBarChart as SBC
 import TypedSvg exposing (svg)
@@ -47,6 +48,9 @@ renderGrid cfg data =
     case data of
         FacetGridChartData d ->
             FGC.render cfg d
+
+        TreeGridChartData d ->
+            TGC.render cfg d
 
         _ ->
             svg [] []
