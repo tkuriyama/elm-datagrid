@@ -27,7 +27,8 @@ import TypedSvg.Attributes
         )
 import TypedSvg.Attributes.InPx
     exposing
-        ( height
+        ( fontSize
+        , height
         , rx
         , strokeWidth
         , width
@@ -112,7 +113,7 @@ renderNonEmpty env data =
 
         groupCells =
             ST.makeTreemap dims groups
-                |> NE.map (padCell 6)
+                |> NE.map (padCell 10)
     in
     svg [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
@@ -127,6 +128,13 @@ renderNonEmpty env data =
             ]
             (NE.zip groups groupCells
             |> NE.map (renderTree env)
+            |> NE.toList)
+        , g
+            [ class [ "tree_hover" ]
+            , transform [ Translate env.pad.left env.pad.top ]
+            ]
+            (NE.zip groups groupCells
+            |> NE.map (renderTreeHover env)
             |> NE.toList)
         ]
 
@@ -249,7 +257,7 @@ renderTree env (group, cell) =
         g
             [ transform [ Translate cell.x cell.y ]
             ] 
-            (NE.map2 renderTreeCell treeCells treeCells_
+            (NE.map2 (renderTreeCell env) treeCells treeCells_
             |> NE.toList)
 
 
@@ -268,23 +276,55 @@ genTreeCell groupName areaScalar triple =
         , area = cWeight * areaScalar
         }
 
-renderTreeCell : TreeCell -> (ST.Cell a) -> Svg msg
-renderTreeCell t cell =
+renderTreeCell : ChartEnv -> TreeCell -> (ST.Cell a) -> Svg msg
+renderTreeCell env t cell =
     let
+        length =
+            (String.length t.cellName) * env.minFontSize |> toFloat |> (*) 0.7
+
+        fontSz =
+             min
+                (toFloat env.baseFontSize)
+                (cell.w / 0.7 / (String.length t.cellName |> toFloat))
+
+        fits =
+            length * 1.2 < cell.w && fontSz * 1.2 < cell.h
+
         colorVal =
             (t.currentValue - t.previousValue) / t.previousValue
 
     in
-    rect
-        [ x cell.x
-        , y cell.y
-        , width cell.w
-        , height cell.h
-        , fill <| Paint <| GridChart.getColor (colorVal * 10)
-        ]
-        []
+    g []
+      ([ rect [ x cell.x
+              , y cell.y
+              , width cell.w
+              , height cell.h
+              , rx 1
+              , fill <| Paint <| GridChart.getColor (colorVal * 10)
+              ]
+              []
+       ] ++
+       ( if fits then
+             [ text_
+                   [ x <| cell.x + (toFloat env.innerPad)
+                   , y <| cell.y + (toFloat env.innerPad) + fontSz
+                   , fontSize fontSz
+                   ]
+                   [ text t.cellName ]
+             ]
+
+         else
+             []
+       )
+      )
 
 
+--------------------------------------------------------------------------------
+-- Hover Tooltips
+
+renderTreeHover : ChartEnv -> (Group, ST.Cell a) -> Svg msg
+renderTreeHover env (group, cell) =
+    svg [] []
 
 --------------------------------------------------------------------------------
 -- Style
@@ -303,6 +343,7 @@ genStyle cfg sz =
                         stroke: rgb(160, 160, 160); stroke-width: 1.5px; }
      .tree_cell rect { display: inline;
                        stroke: rgb(160, 160, 160); stroke-width: 0.5px; }
+     .tree_cell text { opacity: 0.85; }
      """
         |> String.Format.namedValue "sz" (String.fromInt sz)
         |> String.Format.namedValue "textColor" fCfg.textColor

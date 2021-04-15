@@ -216,9 +216,9 @@ defaultFacetGridChartSpec =
 defaultTreeGridChartSpec : ChartSpec
 defaultTreeGridChartSpec =
     TreeGridChartSpec
-        { innerPad = 3
+        { innerPad = 2
         , cellBaseFontSize = 12
-        , cellMinFontSize = 6
+        , cellMinFontSize = 10
         }
 
 
