@@ -103,7 +103,7 @@ getLabels data =
         ys =
             Utils.fsts data
     in
-    ( "_" :: xs, "labels" :: ys )
+    ( "labels" :: xs, "labels" :: ys )
 
 
 genDataScales :
