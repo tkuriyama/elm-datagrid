@@ -1,4 +1,4 @@
-module DataGrid.TreeGridChart exposing (render, sumWeights)
+module DataGrid.TreeGridChart exposing (render)
 
 {-| Render a a single Tree Grid Chart.
 -}
@@ -7,8 +7,9 @@ import Axis
 import Color exposing (Color)
 import DataGrid.ChartConfig as Cfg
 import DataGrid.Internal.Defaults as Defaults
-import DataGrid.Internal.UI as UI
+import DataGrid.Internal.GridChart as GridChart
 import DataGrid.Internal.SquarifiedTreemap as ST
+import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils
 import List.Extra as LE
 import List.Nonempty as NE
@@ -84,27 +85,21 @@ parseChartSpec spec =
 --------------------------------------------------------------------------------
 -- Render
 
-
-type alias Group =
-    { name : String
-    , area : Float
-    }
-
-
 render : Cfg.GridChartCfg -> List (Cfg.GridSeries Cfg.GridTriple) -> Svg msg
 render cfg data =
     let
         env =
             genChartEnv cfg data
-    in 
+    in
     case data of
         [] ->
             svg [] []
-        (z :: zs) ->
+
+        z :: zs ->
             renderNonEmpty env (NE.Nonempty z zs)
 
 
-renderNonEmpty :  ChartEnv -> NE.Nonempty (Cfg.GridSeries Cfg.GridTriple) -> Svg msg
+renderNonEmpty : ChartEnv -> NE.Nonempty (Cfg.GridSeries Cfg.GridTriple) -> Svg msg
 renderNonEmpty env data =
     let
         dims =
@@ -112,66 +107,184 @@ renderNonEmpty env data =
             , y = env.h - env.pad.top - env.pad.bottom
             }
 
-        groupCells =
+        groups =
             genGroups (dims.x * dims.y) data
-                |> ST.makeTreemap dims
 
+        groupCells =
+            ST.makeTreemap dims groups
+                |> NE.map (padCell 6)
     in
     svg [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
-        , g [ class [ "tree_group" ]
+        , g
+            [ class [ "tree_group" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            ( NE.map (renderGroupCell env) groupCells |> NE.toList )
+            (NE.map (renderGroupCell env) groupCells |> NE.toList)
+        , g
+            [ class [ "tree_cell" ]
+            , transform [ Translate env.pad.left env.pad.top ]
+            ]
+            (NE.zip groups groupCells
+            |> NE.map (renderTree env)
+            |> NE.toList)
         ]
 
-renderGroupCell : ChartEnv -> (ST.Cell a) -> Svg msg
+
+--------------------------------------------------------------------------------
+-- Groups
+
+
+type alias Group =
+    { name : String
+    , area : Float
+    , series : NE.Nonempty TreeTriple
+    }
+
+
+type alias TreeTriple =
+    (String, Cfg.GridTriple, Cfg.GridTriple)
+
+
+renderGroupCell : ChartEnv -> ST.Cell a -> Svg msg
 renderGroupCell env cell =
-    let
-        cell_ =
-            padCell 6 cell
-    in
     rect
-        [ x cell_.x
-        , y cell_.y
-        , width cell_.w
-        , height cell_.h
-        ]
-        []
+    [ x cell.x
+    , y cell.y
+    , width cell.w
+    , height cell.h
+    ]
+    []
+
 
 genGroups : Float -> NE.Nonempty (Cfg.GridSeries Cfg.GridTriple) -> NE.Nonempty Group
 genGroups area data =
     let
-        groups = 
-            NE.map sumWeights data
+
+        groups =
+            NE.map genGroup data
 
         totalWeight =
-            NE.map (.area) groups |> NE.foldl1 (+)
+            NE.map .area groups |> NE.foldl1 (+)
 
         scalar =
             area / totalWeight
     in
-        NE.sortBy (.area >> (*) -1) groups
-        |> NE.map (\s -> { s | area = s.area * scalar})
+    NE.sortBy (.area >> (*) -1) groups
+        |> NE.map (\s -> { s | area = s.area * scalar })
 
 
-sumWeights : Cfg.GridSeries Cfg.GridTriple -> Group
-sumWeights (name, pairs) =
+genGroup : Cfg.GridSeries Cfg.GridTriple -> Group
+genGroup (groupName, pairs) =
     let
-
-        triples =
-            Utils.snds pairs
-                |> List.map (LE.last >> Maybe.withDefault ("", 0, 0))
+        treeSeries =
+               genTreeSeries pairs
 
         area =
-            List.map (\(_, w, _) -> w) triples
-                |> LE.foldl1 (+)
-                |> Maybe.withDefault 0
+            sumWeights treeSeries
 
     in
-    { name = name
+    { name = groupName
     , area = area
+    , series = treeSeries
     }
+
+
+genTreeSeries : List (String, List Cfg.GridTriple) -> NE.Nonempty TreeTriple
+genTreeSeries pairs =
+    let
+        default =
+               ("", 0, 0)
+
+        f (name, triples) =
+            case triples of
+                (x :: y :: []) ->
+                    (name, x, y)
+                _ ->
+                    (name, default, default)
+
+    in
+        case pairs of
+            [] ->
+                NE.fromElement ("", default, default)
+            (x :: xs) ->
+                NE.Nonempty (f x) (List.map f xs)
+                    |> NE.sortBy (\(_, _, (_, w, _)) -> w * -1)g
+
+
+sumWeights : NE.Nonempty TreeTriple -> Float
+sumWeights =
+    NE.map (\(_, _, ( _, w, _ )) -> w) >> NE.foldl1 (+)
+
+
+--------------------------------------------------------------------------------
+-- Trees
+
+type alias TreeCell =
+    { groupName : String
+    , cellName : String
+    , previousLabel : String
+    , previousValue : Float
+    , currentLabel : String
+    , currentValue : Float
+    , area : Float
+    }
+
+renderTree : ChartEnv -> (Group, ST.Cell a) -> Svg msg
+renderTree env (group, cell) =
+    let
+        dims =
+            { x = cell.w, y = cell.h }
+
+        areaScalar =
+            group.area / (sumWeights group.series)
+
+        treeCells =
+            NE.map (genTreeCell group.name areaScalar) group.series
+
+        treeCells_ =
+            ST.makeTreemap dims treeCells
+              |> NE.map (padCell 2)
+    in
+        g
+            [ transform [ Translate cell.x cell.y ]
+            ] 
+            (NE.map2 renderTreeCell treeCells treeCells_
+            |> NE.toList)
+
+
+genTreeCell : String -> Float -> TreeTriple -> TreeCell
+genTreeCell groupName areaScalar triple =
+    let
+        (cellName, (pLbl, pWeight, pVal), (cLbl, cWeight, cVal)) =
+             triple
+    in
+        { groupName = groupName
+        , cellName = cellName
+        , previousLabel = pLbl
+        , previousValue = pVal
+        , currentLabel = cLbl
+        , currentValue = cVal
+        , area = cWeight * areaScalar
+        }
+
+renderTreeCell : TreeCell -> (ST.Cell a) -> Svg msg
+renderTreeCell t cell =
+    let
+        colorVal =
+            (t.currentValue - t.previousValue) / t.previousValue
+
+    in
+    rect
+        [ x cell.x
+        , y cell.y
+        , width cell.w
+        , height cell.h
+        , fill <| Paint <| GridChart.getColor (colorVal * 10)
+        ]
+        []
+
+
 
 --------------------------------------------------------------------------------
 -- Style
@@ -188,6 +301,8 @@ genStyle cfg sz =
             fill: {{textColor}}; }
      .tree_group rect { display: inline; fill: none;
                         stroke: rgb(160, 160, 160); stroke-width: 1.5px; }
+     .tree_cell rect { display: inline;
+                       stroke: rgb(160, 160, 160); stroke-width: 0.5px; }
      """
         |> String.Format.namedValue "sz" (String.fromInt sz)
         |> String.Format.namedValue "textColor" fCfg.textColor
@@ -195,6 +310,7 @@ genStyle cfg sz =
         |> String.Format.namedValue "typeface" fCfg.typeface
         |> String.Format.namedValue "showHover"
             (UI.display tCfg.showHoverTooltips)
+
 
 
 --------------------------------------------------------------------------------
@@ -210,12 +326,13 @@ padCell px cell =
     let
         xPad =
             px / 2
+
         yPad =
             px / 2
     in
-        { cell
-            | x = cell.x + xPad
-            , y = cell.y + yPad
-            , w = cell.w - xPad
-              , h = cell.h - yPad
-        }
+    { cell
+        | x = cell.x + xPad
+        , y = cell.y + yPad
+        , w = cell.w - xPad
+        , h = cell.h - yPad
+    }

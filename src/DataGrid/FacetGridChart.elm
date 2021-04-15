@@ -7,11 +7,11 @@ import Axis
 import Color exposing (Color)
 import DataGrid.ChartConfig as Cfg
 import DataGrid.Internal.Defaults as Defaults
+import DataGrid.Internal.GridChart as GridChart
 import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils
 import List.Extra as LE
 import Scale exposing (BandScale, ContinuousScale, defaultBandConfig)
-import Scale.Color as ColorScale
 import Shape
 import String.Format
 import TypedSvg exposing (g, line, rect, style, svg, text_)
@@ -331,7 +331,7 @@ renderCell x_ y_ w colorVal =
         , rx 1
         , width w
         , height w
-        , fill <| Paint <| getColor colorVal
+        , fill <| Paint <| GridChart.getColor colorVal
         ]
         []
 
@@ -618,14 +618,6 @@ genDataScale w xs =
     in
     Scale.linear ( 0, w ) ( dispMin, dispMax )
 
-
-getColor : Float -> Color
-getColor f =
-    if f >= 0 then
-        ColorScale.viridisInterpolator (1 - f)
-
-    else
-        ColorScale.plasmaInterpolator (1 - abs f)
 
 
 
