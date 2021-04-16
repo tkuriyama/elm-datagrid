@@ -26,7 +26,7 @@ cfg =
 paddingCfg : Cfg.Padding
 paddingCfg =
     { defaultPadding
-        | top = 20
+        | top = 10
         , left = 10
         , right = 20
     }
@@ -64,10 +64,10 @@ rename s =
             "Comm."
 
         "Consumer Discretionary" ->
-            "Con. Disc."
+            "C. Disc."
 
         "Consumer Staples" ->
-            "Con. Stap."
+            "C. Stap."
 
         "Information Technology" ->
             "I.T."
