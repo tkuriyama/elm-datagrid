@@ -223,7 +223,6 @@ project cell =
                    )
                 |> LineChartData
 
-
         TreeGridChartData d ->
             d
                 |> GridChart.projectSeries cell.hideSeries
@@ -363,9 +362,10 @@ parseToggles cfg =
                     ( ( spec.toggleSeries
                       , False
                       , False
-                          )
+                      )
                     , spec.toggleHeight
                     )
+
                 _ ->
                     noToggle
 

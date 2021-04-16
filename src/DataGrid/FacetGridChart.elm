@@ -398,14 +398,6 @@ type alias HasTooltipEnv a =
     }
 
 
-type alias HoverEnv =
-    { x : Float
-    , y : Float
-    , h : Float
-    , w : Float
-    }
-
-
 renderTooltips : ChartEnv -> Cfg.GridSeries Cfg.GridPair -> Svg msg
 renderTooltips env ( lbl, facets ) =
     g [ class [ "grid_facet" ] ]
@@ -487,7 +479,7 @@ genHoverEnv :
     -> String
     -> String
     -> List ( String, Float )
-    -> HoverEnv
+    -> GridChart.HoverEnv
 genHoverEnv env lbl name pairs =
     let
         ( xOffset, yOffset ) =
@@ -500,7 +492,8 @@ genHoverEnv env lbl name pairs =
             (List.length pairs + 2 |> toFloat) * sz * 1.03
 
         hw =
-            max (String.length lbl) (Utils.pairWidthMax pairs 2)
+            max (String.length lbl + String.length name)
+                (Utils.pairWidthMax pairs 2)
                 |> toFloat
                 |> (\n -> n * (sz * 0.65))
 
@@ -617,7 +610,6 @@ genDataScale w xs =
             Maybe.withDefault 0 <| List.maximum xs
     in
     Scale.linear ( 0, w ) ( dispMin, dispMax )
-
 
 
 

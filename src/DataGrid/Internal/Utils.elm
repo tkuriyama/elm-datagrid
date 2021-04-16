@@ -154,13 +154,13 @@ mean xs =
 
 
 twoCols : Int -> Int -> String -> String -> String
-twoCols n extra s1 s2 =
+twoCols leftCol extra s1 s2 =
     let
         l1 =
             String.length s1
 
         spaces =
-            String.repeat (n - l1 + extra) nbsp
+            String.repeat (leftCol - l1 + extra) nbsp
     in
     String.concat [ s1, spaces, s2 ]
 
