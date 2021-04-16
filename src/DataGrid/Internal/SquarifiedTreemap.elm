@@ -25,6 +25,11 @@ type alias Dimensions =
     , y : Float
     }
 
+type alias Delta =
+    { x : Float
+    , y : Float
+    }
+
 
 sizeOrdered : Dimensions -> ( Float, Float )
 sizeOrdered dims =
@@ -90,7 +95,7 @@ rowToCells row ( origin, dims ) =
     ( cells, ( origin_, dims_ ) )
 
 
-rowToCellsHelper : HasArea a -> ( Origin, Dimensions ) -> ( Cell, ( Origin, Dimensions ) )
+rowToCellsHelper : HasArea a -> ( Origin, Delta ) -> ( Cell, ( Origin, Dimensions ) )
 rowToCellsHelper area ( origin, delta ) =
     let
         ( ( w, h ), origin_ ) =
