@@ -83,7 +83,7 @@ genHoverLineCoords env lines (x0, y0) =
 
         ys =
             NE.Nonempty
-                (f 1)
+                ((f 1) - 5)
                 (List.range 2 (NE.length lines) |> List.map f)
     in
         NE.zip xs ys
