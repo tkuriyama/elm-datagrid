@@ -5,7 +5,9 @@ import DataGrid.ChartConfig as Cfg
 import DataGrid.Internal.Utils as Utils
 import List.Nonempty as NE
 import Scale.Color as ColorScale
-
+import TypedSvg exposing (text_)
+import TypedSvg.Attributes.InPx exposing (x, y)
+import TypedSvg.Core exposing (Svg, text)
 
 --------------------------------------------------------------------------------
 -- Axes and Scales
@@ -89,3 +91,20 @@ genHoverLineCoords env lines (x0, y0) =
         NE.zip xs ys
 
 
+hoverDims : Float -> NE.Nonempty String -> (Float, Float)
+hoverDims sz lines =
+    ( NE.map (String.length) lines
+        |> NE.foldl1 max
+        |> toFloat
+        |> (\n -> n * (sz * 0.65))
+    , (NE.length lines + 1 |> toFloat) * sz * 1.03
+    ) 
+
+
+renderHoverText : Float -> String -> ( Float, Float ) -> Svg msg
+renderHoverText pad txt ( hx, hy ) =
+    text_
+        [ x <| hx + pad
+        , y <| hy + pad
+        ]
+        [ text txt ]

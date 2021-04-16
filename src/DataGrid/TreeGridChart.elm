@@ -404,18 +404,9 @@ renderHoverTooltip env groupCell t cell =
               ]
               []
         ] ++
-        (NE.map2 (renderHoverText pad) lines lineCoords
+        (NE.map2 (GridChart.renderHoverText pad) lines lineCoords
         |> NE.toList)
       )
-
-
-renderHoverText : Float -> String -> ( Float, Float ) -> Svg msg
-renderHoverText pad txt ( hx, hy ) =
-    text_
-        [ x <| hx + pad
-        , y <| hy + pad
-        ]
-        [ text txt ]
 
 
 genHoverEnv :
@@ -432,14 +423,8 @@ genHoverEnv env lines groupCell cell =
         sz =
             env.tooltips.hoverTooltipSize |> toFloat
 
-        hh =
-            (NE.length lines + 2 |> toFloat) * sz * 1.03
-
-        hw =
-            NE.map (String.length) lines
-                |> NE.foldl1 max
-                |> toFloat
-                |> (\n -> n * (sz * 0.65))
+        (hw, hh) =
+            GridChart.hoverDims sz lines 
 
         hx =
             if (groupCell.x + cell.x + cell.w / 2) > env.w / 2 then

@@ -11,6 +11,7 @@ import DataGrid.Internal.GridChart as GridChart
 import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils
 import List.Extra as LE
+import List.Nonempty as NE
 import Scale exposing (BandScale, ContinuousScale, defaultBandConfig)
 import Shape
 import String.Format
@@ -436,14 +437,18 @@ renderHoverTooltip :
     -> Svg msg
 renderHoverTooltip env lbl name points =
     let
-        hEnv =
-            genHoverEnv env lbl name points
+       lines =
+           genHoverLines lbl name points
 
-        pad =
+       hEnv =
+            genHoverEnv env lbl name lines
+
+       lineCoords =
+            GridChart.genHoverLineCoords env lines (hEnv.x, hEnv.y)
+
+       pad =
             5
 
-        ( lines, lineParams ) =
-            genHoverText env points ( hEnv.x, hEnv.y )
     in
     g [ class [ "grid_tooltip_hover" ] ]
         ([ rect
@@ -455,32 +460,18 @@ renderHoverTooltip env lbl name points =
             , rx 3
             ]
             []
-         , text_
-            [ x <| (hEnv.x + pad)
-            , y <| hEnv.y + toFloat env.tooltips.hoverTooltipSize + pad
-            ]
-            [ text <| lbl ++ ": " ++ name ]
-         ]
-            ++ List.map2 (renderHoverText pad) lines lineParams
+         ] ++
+         (NE.map2 (GridChart.renderHoverText pad) lines lineCoords |> NE.toList)
         )
-
-
-renderHoverText : Float -> String -> ( Float, Float ) -> Svg msg
-renderHoverText pad txt ( hx, hy ) =
-    text_
-        [ x <| hx + pad
-        , y <| hy + pad
-        ]
-        [ text txt ]
 
 
 genHoverEnv :
     HasTooltipEnv a
-    -> String
-    -> String
-    -> List ( String, Float )
-    -> GridChart.HoverEnv
-genHoverEnv env lbl name pairs =
+     -> String
+     -> String
+     -> NE.Nonempty String
+     -> GridChart.HoverEnv
+genHoverEnv env lbl name lines =
     let
         ( xOffset, yOffset ) =
             ( 5, 5 )
@@ -488,14 +479,8 @@ genHoverEnv env lbl name pairs =
         sz =
             env.tooltips.hoverTooltipSize |> toFloat
 
-        hh =
-            (List.length pairs + 2 |> toFloat) * sz * 1.03
-
-        hw =
-            max (String.length lbl + String.length name)
-                (Utils.pairWidthMax pairs 2)
-                |> toFloat
-                |> (\n -> n * (sz * 0.65))
+        (hw, hh) =
+            GridChart.hoverDims sz lines 
 
         xw =
             Scale.bandwidth env.xScale
@@ -526,38 +511,12 @@ genHoverEnv env lbl name pairs =
     , h = hh
     }
 
-
-genHoverText :
-    HasTooltipEnv a
-    -> List ( String, Float )
-    -> ( Float, Float )
-    -> ( List String, List ( Float, Float ) )
-genHoverText env pairs ( x0, y0 ) =
-    let
-        longest =
-            Utils.fsts pairs
-                |> List.map String.length
-                |> List.maximum
-                |> Maybe.withDefault 0
-
-        cmp a b =
-            compare (Utils.snd a) (Utils.snd b)
-
-        fmt ( s, f ) =
-            Utils.twoCols longest 3 s (Utils.fmtFloat 2 f)
-
-        xs =
-            List.repeat (List.length pairs) x0
-
-        ys =
-            List.range 2 (List.length pairs + 1)
-                |> List.map
-                    (\i -> y0 + (i * env.tooltips.hoverTooltipSize |> toFloat) + 5)
-    in
-    ( pairs |> List.map fmt
-    , List.map2 Tuple.pair xs ys
-    )
-
+genHoverLines : String -> String -> List (String, Float)  -> NE.Nonempty String
+genHoverLines lbl name pairs =
+    NE.Nonempty
+        (lbl ++ ": " ++ name, "")
+        (List.map (Tuple.mapSecond (Utils.fmtFloat 2)) pairs)
+        |> GridChart.pairsToStrings identity 3
 
 
 --------------------------------------------------------------------------------
