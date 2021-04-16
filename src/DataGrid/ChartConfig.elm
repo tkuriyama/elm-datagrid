@@ -55,6 +55,8 @@ type ChartSpec
         { innerPad : Int
         , cellBaseFontSize : Int
         , cellMinFontSize : Int
+        , toggleSeries : Bool
+        , toggleHeight : Int
         }
     | DefaultSpec
 
@@ -219,6 +221,8 @@ defaultTreeGridChartSpec =
         { innerPad = 2
         , cellBaseFontSize = 12
         , cellMinFontSize = 10
+        , toggleSeries = True
+        , toggleHeight = 18
         }
 
 

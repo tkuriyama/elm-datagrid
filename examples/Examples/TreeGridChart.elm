@@ -42,14 +42,53 @@ tooltipsCfg =
 
 dataIVV : List (Cfg.GridSeries Cfg.GridTriple)
 dataIVV =
-    TreeGridChartSample.dataIVV
+    TreeGridChartSample.dataIVV |> List.map (Tuple.mapFirst rename)
 
 
 dataIJR : List (Cfg.GridSeries Cfg.GridTriple)
 dataIJR =
-    TreeGridChartSample.dataIJR
+    TreeGridChartSample.dataIJR |> List.map (Tuple.mapFirst rename)
 
 dataIWC : List (Cfg.GridSeries Cfg.GridTriple)
 dataIWC =
-    TreeGridChartSample.dataIWC
+    TreeGridChartSample.dataIWC |> List.map (Tuple.mapFirst rename)
 
+
+
+--------------------------------------------------------------------------------
+
+rename : String -> String
+rename s =
+    case s of
+        "Communication" ->
+            "Comm."
+
+        "Consumer Discretionary" ->
+            "Con. Disc."
+
+        "Consumer Staples" ->
+            "Con. Stap."
+
+        "Information Technology" ->
+            "I.T."
+
+        "Real Estate" ->
+            "R.E."
+
+        "Financials" ->
+            "Fin."
+
+        "Industrials" ->
+            "Ind."
+
+        "Materials" ->
+            "Mat."
+
+        "Health Care" ->
+            "Health"
+
+        "Utilities" ->
+            "Util."
+
+        _ ->
+            s

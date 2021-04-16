@@ -46,16 +46,16 @@ sizeOrdered dims =
 --------------------------------------------------------------------------------
 
 
-type alias SquarifiedTreemap a =
-    NE.Nonempty (Cell a)
+type alias SquarifiedTreemap =
+    NE.Nonempty Cell
 
 
-type alias Cell a =
+type alias Cell =
     { x : Float
     , y : Float
     , w : Float
     , h : Float
-    , cell : HasArea a
+    , area : Float
     }
 
 
@@ -65,7 +65,7 @@ type alias Origin =
     }
 
 
-makeTreemap : Dimensions -> NE.Nonempty (HasArea a) -> SquarifiedTreemap a
+makeTreemap : Dimensions -> NE.Nonempty (HasArea a) -> SquarifiedTreemap
 makeTreemap dims areas =
     partition dims areas
         |> Utils.neMapAccumL rowToCells ( { x = 0, y = 0 }, dims )
@@ -73,7 +73,7 @@ makeTreemap dims areas =
         |> NE.concat
 
 
-rowToCells : Row a -> ( Origin, Dimensions ) -> ( NE.Nonempty (Cell a), ( Origin, Dimensions ) )
+rowToCells : Row a -> ( Origin, Dimensions ) -> ( NE.Nonempty Cell, ( Origin, Dimensions ) )
 rowToCells row ( origin, dims ) =
     let
         ( origin_, dims_ ) =
@@ -90,7 +90,7 @@ rowToCells row ( origin, dims ) =
     ( cells, ( origin_, dims_ ) )
 
 
-rowToCellsHelper : HasArea a -> ( Origin, Dimensions ) -> ( Cell a, ( Origin, Dimensions ) )
+rowToCellsHelper : HasArea a -> ( Origin, Dimensions ) -> ( Cell, ( Origin, Dimensions ) )
 rowToCellsHelper area ( origin, delta ) =
     let
         ( ( w, h ), origin_ ) =
@@ -108,7 +108,7 @@ rowToCellsHelper area ( origin, delta ) =
       , y = origin.y
       , w = w
       , h = h
-      , cell = area
+      , area = area.area
       }
     , ( origin_, delta )
     )

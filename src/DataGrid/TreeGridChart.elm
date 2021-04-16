@@ -1,4 +1,4 @@
-module DataGrid.TreeGridChart exposing (render)
+module DataGrid.TreeGridChart exposing (..)
 
 {-| Render a a single Tree Grid Chart.
 -}
@@ -114,6 +114,11 @@ renderNonEmpty env data =
         groupCells =
             ST.makeTreemap dims groups
                 |> NE.map (padCell 10)
+
+
+        subtrees =
+            NE.map2 genSubtree groups groupCells
+
     in
     svg [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
@@ -126,16 +131,12 @@ renderNonEmpty env data =
             [ class [ "tree_cell" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            (NE.zip groups groupCells
-            |> NE.map (renderTree env)
-            |> NE.toList)
+            (NE.map (renderSubtree env) subtrees |> NE.toList)
         , g
             [ class [ "tree_hover" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
-            (NE.zip groups groupCells
-            |> NE.map (renderTreeHover env)
-            |> NE.toList)
+            (NE.map (renderTreeHover env) subtrees |> NE.toList)
         ]
 
 
@@ -154,7 +155,7 @@ type alias TreeTriple =
     (String, Cfg.GridTriple, Cfg.GridTriple)
 
 
-renderGroupCell : ChartEnv -> ST.Cell a -> Svg msg
+renderGroupCell : ChartEnv -> ST.Cell -> Svg msg
 renderGroupCell env cell =
     rect
     [ x cell.x
@@ -226,7 +227,11 @@ sumWeights =
 
 
 --------------------------------------------------------------------------------
--- Trees
+-- Subtrees
+
+type alias Subtree =
+    (ST.Cell, NE.Nonempty TreeCell, ST.SquarifiedTreemap)
+
 
 type alias TreeCell =
     { groupName : String
@@ -238,11 +243,12 @@ type alias TreeCell =
     , area : Float
     }
 
-renderTree : ChartEnv -> (Group, ST.Cell a) -> Svg msg
-renderTree env (group, cell) =
+
+genSubtree : Group -> ST.Cell -> Subtree
+genSubtree group groupCell =
     let
         dims =
-            { x = cell.w, y = cell.h }
+            { x = groupCell.w, y = groupCell.h }
 
         areaScalar =
             group.area / (sumWeights group.series)
@@ -250,15 +256,12 @@ renderTree env (group, cell) =
         treeCells =
             NE.map (genTreeCell group.name areaScalar) group.series
 
-        treeCells_ =
+        treemap =
             ST.makeTreemap dims treeCells
               |> NE.map (padCell 2)
+
     in
-        g
-            [ transform [ Translate cell.x cell.y ]
-            ] 
-            (NE.map2 (renderTreeCell env) treeCells treeCells_
-            |> NE.toList)
+        (groupCell, treeCells, treemap)
 
 
 genTreeCell : String -> Float -> TreeTriple -> TreeCell
@@ -276,7 +279,17 @@ genTreeCell groupName areaScalar triple =
         , area = cWeight * areaScalar
         }
 
-renderTreeCell : ChartEnv -> TreeCell -> (ST.Cell a) -> Svg msg
+
+renderSubtree : ChartEnv -> Subtree -> Svg msg
+renderSubtree env (groupCell, treeCells, treemap) =
+    g
+    [ transform [ Translate groupCell.x groupCell.y ]
+    ] 
+    (NE.map2 (renderTreeCell env) treeCells treemap
+    |> NE.toList)
+
+
+renderTreeCell : ChartEnv -> TreeCell -> ST.Cell -> Svg msg
 renderTreeCell env t cell =
     let
         length =
@@ -322,8 +335,8 @@ renderTreeCell env t cell =
 --------------------------------------------------------------------------------
 -- Hover Tooltips
 
-renderTreeHover : ChartEnv -> (Group, ST.Cell a) -> Svg msg
-renderTreeHover env (group, cell) =
+renderTreeHover : ChartEnv -> Subtree -> Svg msg
+renderTreeHover env (groupCell, treeCells, treemap) =
     svg [] []
 
 --------------------------------------------------------------------------------
@@ -358,11 +371,7 @@ genStyle cfg sz =
 -- Helpers
 
 
-type alias HasXYWH a =
-    { a | x : Float, y : Float, w : Float, h : Float }
-
-
-padCell : Float -> HasXYWH a -> HasXYWH a
+padCell : Float -> ST.Cell -> ST.Cell
 padCell px cell =
     let
         xPad =

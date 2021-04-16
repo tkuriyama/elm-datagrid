@@ -11,6 +11,7 @@ import DataGrid.ChartConfig as Cfg
         )
 import DataGrid.GridConfig as G exposing (..)
 import DataGrid.Internal.Generic as Generic
+import DataGrid.Internal.GridChart as GridChart
 import DataGrid.Internal.StdChart as StdChart
 import DataGrid.Internal.UI as UI
 import DataGrid.Internal.Utils as Utils
@@ -222,6 +223,12 @@ project cell =
                    )
                 |> LineChartData
 
+
+        TreeGridChartData d ->
+            d
+                |> GridChart.projectSeries cell.hideSeries
+                |> TreeGridChartData
+
         _ ->
             cell.chartData
 
@@ -276,6 +283,9 @@ controlSeries attrs cell =
                 row attrs_ (Utils.fsts d |> List.map f)
 
             LineChartData d ->
+                row attrs_ (Utils.fsts d |> List.map f)
+
+            TreeGridChartData d ->
                 row attrs_ (Utils.fsts d |> List.map f)
 
             _ ->
@@ -348,7 +358,16 @@ parseToggles cfg =
                     noToggle
 
         Grid c ->
-            noToggle
+            case c.chartSpec of
+                TreeGridChartSpec spec ->
+                    ( ( spec.toggleSeries
+                      , False
+                      , False
+                          )
+                    , spec.toggleHeight
+                    )
+                _ ->
+                    noToggle
 
         DefaultChartCfg ->
             noToggle
