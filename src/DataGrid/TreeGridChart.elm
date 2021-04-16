@@ -337,7 +337,21 @@ renderTreeCell env t cell =
 
 renderTreeHover : ChartEnv -> Subtree -> Svg msg
 renderTreeHover env (groupCell, treeCells, treemap) =
+    g
+    [ transform [ Translate groupCell.x groupCell.y ]
+    ]
+    ( if env.tooltips.showHoverTooltips then
+          NE.map2 (renderTreeCellHover env) treeCells treemap
+          |> NE.toList
+      else
+          []
+    )
+
+
+renderTreeCellHover : ChartEnv -> TreeCell -> ST.Cell -> Svg msg
+renderTreeCellHover env t cell =
     svg [] []
+
 
 --------------------------------------------------------------------------------
 -- Style
