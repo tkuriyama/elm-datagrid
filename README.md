@@ -44,23 +44,23 @@ Note that `elm-minify` is deprecated. For an alternative minification, see the [
 
 - Most modules have a corresponding example of the same name under [`examples/Examples`](https://github.com/tkuriyama/elm-datagrid/tree/master/examples/Examples). 
 
-- The repo ships with sample data for each example, under [`examples/SampleData`](https://github.com/tkuriyama/elm-datagrid/tree/master/examples/SampleData).
+- The repo ships with sample data for each examplxe, under [`examples/SampleData`](https://github.com/tkuriyama/elm-datagrid/tree/master/examples/SampleData).
 
 
 ## Compatibility
 
 ### Browser Compatibility
 
-| Browser | Compatibility                      |
-|:--------|:-----------------------------------|
-| Chrome  | Supported                          |
-| Firefox | Partial Support (minor CSS issues) |
-| Safari  | Partial Support (some CSS issues)  |
-| Other   | Not Tested                         |
+| Browser | Compatibility                        |
+|:--------|:-------------------------------------|
+| Chrome  | Supported                            |
+| Safari  | Tentatively Supported                |
+| Firefox | Mostly Supportted (minor CSS issues) |
+| Other   | Not Tested                           |
 
 ### Browser Extensions
 
 In addition to general browser compabitility, some browser extensions may cause issues (if they also rewrite pages, like screen readers or dark modes).
 
-For Dark Reader users: setting the Mode to `Filter` instead of `Dynamic`usually resolves issues.
+For Dark Reader users: setting the Mode to `Filter` instead of `Dynamic`usually resolves issues (relating to the "Virtual DOM" when redrawing charts).
 
