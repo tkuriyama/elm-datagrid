@@ -114,7 +114,6 @@ renderNonEmpty env data =
 
         groupCells =
             ST.makeTreemap dims groups
-                |> NE.map (padCell 10)
 
         subtrees =
             NE.map2 genSubtree groups groupCells
@@ -122,15 +121,15 @@ renderNonEmpty env data =
     svg [ viewBox 0 0 env.w env.h ]
         [ style [] [ text <| env.style ]
         , g
-            [ class [ "tree_group" ]
-            , transform [ Translate env.pad.left env.pad.top ]
-            ]
-            (NE.map (renderGroupCell env) groupCells |> NE.toList)
-        , g
             [ class [ "tree_cell" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
             (NE.map (renderSubtree env) subtrees |> NE.toList)
+        , g
+            [ class [ "tree_group" ]
+            , transform [ Translate env.pad.left env.pad.top ]
+            ]
+            (NE.map (renderGroupCell env) groupCells |> NE.toList)
         , g
             [ class [ "tree_hover" ]
             , transform [ Translate env.pad.left env.pad.top ]
@@ -259,7 +258,7 @@ genSubtree group groupCell =
 
         treemap =
             ST.makeTreemap dims treeCells
-                |> NE.map (padCell 2)
+
     in
     ( groupCell, treeCells, treemap )
 
@@ -348,11 +347,12 @@ type alias HasTooltipEnv a =
 
 
 renderTreeHover : ChartEnv -> Subtree -> Svg msg
-renderTreeHover env (groupCell, treeCells, treemap) =
+renderTreeHover env ( groupCell, treeCells, treemap ) =
     if env.tooltips.showHoverTooltips then
         g [ transform [ Translate groupCell.x groupCell.y ] ]
-          ( NE.map2 (renderTreeCellHover env groupCell) treeCells treemap 
-          |> NE.toList )
+            (NE.map2 (renderTreeCellHover env groupCell) treeCells treemap
+                |> NE.toList
+            )
 
     else
         g [] []
@@ -388,25 +388,26 @@ renderHoverTooltip env groupCell t cell =
             genHoverEnv env lines groupCell cell
 
         lineCoords =
-            GridChart.genHoverLineCoords env lines (hEnv.x, hEnv.y)
+            GridChart.genHoverLineCoords env lines ( hEnv.x, hEnv.y )
 
         pad =
             5
     in
     g [ class [ "tree_tooltip_hover" ] ]
-      ( [ rect
-              [ class [ "invert" ]
-              , x hEnv.x
-              , y hEnv.y
-              , height hEnv.h
-              , width hEnv.w
-              , rx 3
-              ]
-              []
-        ] ++
-        (NE.map2 (GridChart.renderHoverText pad) lines lineCoords
-        |> NE.toList)
-      )
+        ([ rect
+            [ class [ "invert" ]
+            , x hEnv.x
+            , y hEnv.y
+            , height hEnv.h
+            , width hEnv.w
+            , rx 3
+            ]
+            []
+         ]
+            ++ (NE.map2 (GridChart.renderHoverText pad) lines lineCoords
+                    |> NE.toList
+               )
+        )
 
 
 genHoverEnv :
@@ -415,7 +416,7 @@ genHoverEnv :
     -> ST.Cell
     -> ST.Cell
     -> GridChart.HoverEnv
-genHoverEnv env lines groupCell cell = 
+genHoverEnv env lines groupCell cell =
     let
         ( xOffset, yOffset ) =
             ( 5, 5 )
@@ -423,12 +424,13 @@ genHoverEnv env lines groupCell cell =
         sz =
             env.tooltips.hoverTooltipSize |> toFloat
 
-        (hw, hh) =
-            GridChart.hoverDims sz lines 
+        ( hw, hh ) =
+            GridChart.hoverDims sz lines
 
         hx =
             if (groupCell.x + cell.x + cell.w / 2) > env.w / 2 then
                 cell.x + cell.w / 2 - xOffset - hw
+
             else
                 cell.x + cell.w / 2 + xOffset
 
@@ -449,11 +451,12 @@ genHoverEnv env lines groupCell cell =
 genHoverLines : TreeCell -> NE.Nonempty String
 genHoverLines t =
     NE.Nonempty
-        (t.groupName, t.cellName)
-        [ (t.previousLabel, Utils.fmtFloat 2 t.previousValue)
-        , (t.currentLabel, Utils.fmtFloat 2 t.currentValue)
+        ( t.groupName, t.cellName )
+        [ ( t.previousLabel, Utils.fmtFloat 2 t.previousValue )
+        , ( t.currentLabel, Utils.fmtFloat 2 t.currentValue )
         ]
         |> GridChart.pairsToStrings identity 3
+
 
 
 --------------------------------------------------------------------------------
@@ -470,7 +473,7 @@ genStyle cfg sz =
      text { font-family: {{typeface}}, monospace, sans-serif;
             fill: {{textColor}}; }
      .tree_group rect { display: inline; fill: none;
-                        stroke: rgb(160, 160, 160); stroke-width: 1.5px; }
+                        stroke: rgb(120, 120, 120); stroke-width: 1.5px; }
      .tree_cell rect { display: inline;
                        stroke: rgb(160, 160, 160); stroke-width: 0.5px; }
      .tree_cell text { opacity: 0.85; }
@@ -487,23 +490,3 @@ genStyle cfg sz =
             (UI.display tCfg.showHoverTooltips)
 
 
-
---------------------------------------------------------------------------------
--- Helpers
-
-
-padCell : Float -> ST.Cell -> ST.Cell
-padCell px cell =
-    let
-        xPad =
-            px / 2
-
-        yPad =
-            px / 2
-    in
-    { cell
-        | x = cell.x + xPad
-        , y = cell.y + yPad
-        , w = cell.w - xPad
-        , h = cell.h - yPad
-    }

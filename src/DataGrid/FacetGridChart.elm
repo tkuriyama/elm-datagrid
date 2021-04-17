@@ -437,18 +437,17 @@ renderHoverTooltip :
     -> Svg msg
 renderHoverTooltip env lbl name points =
     let
-       lines =
-           genHoverLines lbl name points
+        lines =
+            genHoverLines lbl name points
 
-       hEnv =
+        hEnv =
             genHoverEnv env lbl name lines
 
-       lineCoords =
-            GridChart.genHoverLineCoords env lines (hEnv.x, hEnv.y)
+        lineCoords =
+            GridChart.genHoverLineCoords env lines ( hEnv.x, hEnv.y )
 
-       pad =
+        pad =
             5
-
     in
     g [ class [ "grid_tooltip_hover" ] ]
         ([ rect
@@ -460,17 +459,17 @@ renderHoverTooltip env lbl name points =
             , rx 3
             ]
             []
-         ] ++
-         (NE.map2 (GridChart.renderHoverText pad) lines lineCoords |> NE.toList)
+         ]
+            ++ (NE.map2 (GridChart.renderHoverText pad) lines lineCoords |> NE.toList)
         )
 
 
 genHoverEnv :
     HasTooltipEnv a
-     -> String
-     -> String
-     -> NE.Nonempty String
-     -> GridChart.HoverEnv
+    -> String
+    -> String
+    -> NE.Nonempty String
+    -> GridChart.HoverEnv
 genHoverEnv env lbl name lines =
     let
         ( xOffset, yOffset ) =
@@ -479,8 +478,8 @@ genHoverEnv env lbl name lines =
         sz =
             env.tooltips.hoverTooltipSize |> toFloat
 
-        (hw, hh) =
-            GridChart.hoverDims sz lines 
+        ( hw, hh ) =
+            GridChart.hoverDims sz lines
 
         xw =
             Scale.bandwidth env.xScale
@@ -511,12 +510,14 @@ genHoverEnv env lbl name lines =
     , h = hh
     }
 
-genHoverLines : String -> String -> List (String, Float)  -> NE.Nonempty String
+
+genHoverLines : String -> String -> List ( String, Float ) -> NE.Nonempty String
 genHoverLines lbl name pairs =
     NE.Nonempty
-        (lbl ++ ": " ++ name, "")
+        ( lbl ++ ": " ++ name, "" )
         (List.map (Tuple.mapSecond (Utils.fmtFloat 2)) pairs)
         |> GridChart.pairsToStrings identity 3
+
 
 
 --------------------------------------------------------------------------------

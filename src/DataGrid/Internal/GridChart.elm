@@ -9,6 +9,8 @@ import TypedSvg exposing (text_)
 import TypedSvg.Attributes.InPx exposing (x, y)
 import TypedSvg.Core exposing (Svg, text)
 
+
+
 --------------------------------------------------------------------------------
 -- Axes and Scales
 
@@ -35,14 +37,17 @@ projectSeries hide =
     List.filter (\( name, _ ) -> List.member name hide |> not)
 
 
+
 --------------------------------------------------------------------------------
 -- Tooltips
 
+
 type alias HasTooltips a =
-    { a | tooltips : Cfg.Tooltips } 
+    { a | tooltips : Cfg.Tooltips }
+
 
 type alias Coord =
-    (Float, Float)
+    ( Float, Float )
 
 
 type alias HoverEnv =
@@ -56,7 +61,7 @@ type alias HoverEnv =
 pairsToStrings :
     (a -> String)
     -> Int
-    -> NE.Nonempty (String, a)
+    -> NE.Nonempty ( String, a )
     -> NE.Nonempty String
 pairsToStrings fmt space pairs =
     let
@@ -65,40 +70,40 @@ pairsToStrings fmt space pairs =
                 |> NE.map String.length
                 |> NE.foldl1 max
     in
-        NE.map (\(a, b) -> Utils.twoCols longest space a (fmt b)) pairs
+    NE.map (\( a, b ) -> Utils.twoCols longest space a (fmt b)) pairs
 
 
 genHoverLineCoords :
     HasTooltips a
     -> NE.Nonempty String
-    -> (Float, Float)
+    -> ( Float, Float )
     -> NE.Nonempty Coord
-genHoverLineCoords env lines (x0, y0) =
+genHoverLineCoords env lines ( x0, y0 ) =
     let
         xs =
-           NE.Nonempty
-               x0
-               (List.repeat (NE.length lines - 1) x0)
+            NE.Nonempty
+                x0
+                (List.repeat (NE.length lines - 1) x0)
 
         f i =
             y0 + (i * env.tooltips.hoverTooltipSize |> toFloat) + 5
 
         ys =
             NE.Nonempty
-                ((f 1) - 5)
+                (f 1 - 5)
                 (List.range 2 (NE.length lines) |> List.map f)
     in
-        NE.zip xs ys
+    NE.zip xs ys
 
 
-hoverDims : Float -> NE.Nonempty String -> (Float, Float)
+hoverDims : Float -> NE.Nonempty String -> ( Float, Float )
 hoverDims sz lines =
-    ( NE.map (String.length) lines
+    ( NE.map String.length lines
         |> NE.foldl1 max
         |> toFloat
         |> (\n -> n * (sz * 0.65))
     , (NE.length lines + 1 |> toFloat) * sz * 1.03
-    ) 
+    )
 
 
 renderHoverText : Float -> String -> ( Float, Float ) -> Svg msg
