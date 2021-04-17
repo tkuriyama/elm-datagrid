@@ -258,7 +258,6 @@ genSubtree group groupCell =
 
         treemap =
             ST.makeTreemap dims treeCells
-
     in
     ( groupCell, treeCells, treemap )
 
@@ -488,5 +487,3 @@ genStyle cfg sz =
         |> String.Format.namedValue "typeface" fCfg.typeface
         |> String.Format.namedValue "showHover"
             (UI.display tCfg.showHoverTooltips)
-
-
