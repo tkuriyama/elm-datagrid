@@ -260,7 +260,7 @@ controlSeries : Attributes Msg -> ChartCell label -> Element Msg
 controlSeries attrs cell =
     let
         attrs_ =
-            attrs ++ [ alignLeft, spacing 10 ]
+            attrs ++ [ alignLeft, spacing 10, width fill ]
 
         ( ( toggleSs, _, _ ), _ ) =
             parseToggles cell.chartCfg
@@ -279,13 +279,13 @@ controlSeries attrs cell =
     else
         case cell.chartData of
             StackedBarChartData d ->
-                row attrs_ (Utils.fsts d |> List.map f)
+                wrappedRow attrs_ (Utils.fsts d |> List.map f)
 
             LineChartData d ->
-                row attrs_ (Utils.fsts d |> List.map f)
+                wrappedRow attrs_ (Utils.fsts d |> List.map f)
 
             TreeGridChartData d ->
-                row attrs_ (Utils.fsts d |> List.map f)
+                wrappedRow attrs_ (Utils.fsts d |> List.map f)
 
             _ ->
                 Element.none
