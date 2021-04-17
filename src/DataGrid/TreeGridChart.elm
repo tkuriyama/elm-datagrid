@@ -1,4 +1,4 @@
-module DataGrid.TreeGridChart exposing (..)
+module DataGrid.TreeGridChart exposing (render)
 
 {-| Render a a single Tree Grid Chart.
 -}
