@@ -301,7 +301,7 @@ genHoverText env sortLines pairs ( x0, y0 ) =
             compare (Utils.snd a) (Utils.snd b)
 
         fmt ( s, f ) =
-            Utils.twoCols longest 3 s (Utils.fmtFloat 2 f)
+            Utils.twoCols longest 3 s (Utils.fmtFloat 3 f)
 
         sorted =
             if sortLines then
