@@ -93,6 +93,7 @@ type alias SeriesName =
 type alias StdChartCfg label =
     { w : Float
     , h : Float
+    , axesSpec : AxesSpec
     , pad : Padding
     , chartSpec : ChartSpec
     , dataAxisTicks : Int
@@ -108,6 +109,7 @@ defaultStdChartCfg : StdChartCfg label
 defaultStdChartCfg =
     { w = 900
     , h = 400
+    , axesSpec = defaultAxesSpec
     , pad = defaultPadding
     , chartSpec = DefaultSpec
     , dataAxisTicks = 5
@@ -116,6 +118,11 @@ defaultStdChartCfg =
     , tooltips = defaultTooltips
     , fontSpec = defaultFontSpec
     , legend = defaultLegend
+    }
+
+
+defaultAxesSpec =
+    { yAxisMax = Nothing
     }
 
 
@@ -229,6 +236,11 @@ defaultTreeGridChartSpec =
 
 --------------------------------------------------------------------------------
 -- Helper Types and Defaults
+
+
+type alias AxesSpec =
+    { yAxisMax : Maybe Float
+    }
 
 
 type alias Padding =

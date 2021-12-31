@@ -53,9 +53,10 @@ genChartEnv cfg data =
     , h = cfg.h
     , pad = cfg.pad
     , dataScale =
-        StdChart.genYScale True
+        StdChart.genYScaleWithMax True
             cfg.h
             (cfg.pad.top + cfg.pad.bottom)
+            cfg.axesSpec.yAxisMax
             (Utils.snds data)
     , labelScale =
         StdChart.genXScale cfg.w (cfg.pad.right + cfg.pad.left) <|

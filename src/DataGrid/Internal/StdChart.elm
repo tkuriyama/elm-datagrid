@@ -36,6 +36,17 @@ import TypedSvg.Types
 
 genYScale : Bool -> Float -> Float -> List Float -> ContinuousScale Float
 genYScale zeroY h padding xs =
+    genYScaleWithMax zeroY h padding Nothing xs
+
+
+genYScaleWithMax :
+    Bool
+    -> Float
+    -> Float
+    -> Maybe Float
+    -> List Float
+    -> ContinuousScale Float
+genYScaleWithMax zeroY h padding maybeYMax xs =
     let
         minY =
             Maybe.withDefault 0 <| List.minimum xs
@@ -48,7 +59,12 @@ genYScale zeroY h padding xs =
                 min 0 minY
 
         dispMax =
-            Maybe.withDefault 0 <| List.maximum xs
+            case maybeYMax of
+                Nothing ->
+                    Maybe.withDefault 0 <| List.maximum xs
+
+                Just yMax ->
+                    yMax
     in
     Scale.linear ( h - padding, 0 ) ( dispMin, dispMax )
 
