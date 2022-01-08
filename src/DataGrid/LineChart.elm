@@ -65,6 +65,8 @@ type alias ChartEnv label =
     , labelShow : Bool
     , labelFmt : label -> String
     , dataTickCt : Int
+    , lineThickness : Float
+    , showYZeroLine : Bool
     , tooltips : Cfg.Tooltips
     , style : String
     }
@@ -83,6 +85,9 @@ genChartEnv cfg data =
             List.map (Utils.snd >> Utils.fsts) data
                 |> List.head
                 |> Maybe.withDefault []
+
+        ( showVBar, lineThickness, showYZeroLine ) =
+            parseChartSpec cfg.chartSpec
     in
     { w = cfg.w
     , h = cfg.h
@@ -97,21 +102,22 @@ genChartEnv cfg data =
     , labelShow = cfg.showLabels
     , labelFmt = cfg.labelFormatter
     , dataTickCt = min cfg.dataAxisTicks 10
+    , lineThickness = lineThickness
+    , showYZeroLine = showYZeroLine
     , tooltips = cfg.tooltips
     , style =
-        genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips <|
-            parseChartSpec cfg.chartSpec
+        genStyle cfg.fontSpec cfg.chartSpec cfg.tooltips showVBar
     }
 
 
-parseChartSpec : Cfg.ChartSpec -> Bool
+parseChartSpec : Cfg.ChartSpec -> ( Bool, Float, Bool )
 parseChartSpec spec =
     case spec of
         Cfg.LineChartSpec r ->
-            r.showVBar
+            ( r.showVBar, r.lineThickness, r.showYZeroLine )
 
         _ ->
-            False
+            ( False, 1, False )
 
 
 
@@ -145,6 +151,11 @@ render cfg data =
             ]
             [ StdChart.genYAxis env.dataTickCt env.dataScale ]
         , g
+            [ class [ "zeroYLine" ]
+            , transform [ Translate 0 env.pad.top ]
+            ]
+            [ renderZeroYLine env ]
+        , g
             [ class [ "points" ]
             , transform [ Translate env.pad.left env.pad.top ]
             ]
@@ -163,6 +174,25 @@ render cfg data =
           <|
             List.map (renderVBarHover env) data_
         ]
+
+
+renderZeroYLine : ChartEnv label -> Svg msg
+renderZeroYLine env =
+    if env.showYZeroLine then
+        g [ class [ "zeroLine" ] ]
+            [ line
+                [ x1 <| env.pad.left
+                , x2 <| env.w - env.pad.left
+                , y1 <| Scale.convert env.dataScale 0
+                , y2 <| Scale.convert env.dataScale 0
+                , strokeWidth 1
+                , stroke <| Paint <| Color.rgb 0.5 0.5 0.5
+                ]
+                []
+            ]
+
+    else
+        g [] []
 
 
 renderLine : ChartEnv label -> Cfg.StdSeries label -> Svg msg
@@ -187,7 +217,7 @@ renderLine env ( name, points ) =
         [ Path.element
             path
             [ stroke <| Paint <| StdChart.getColor env.colorScale name
-            , strokeWidth 1
+            , strokeWidth env.lineThickness
             , fill PaintNone
             ]
         , text_
@@ -217,7 +247,7 @@ renderPoint : ChartEnv label -> String -> Float -> ( label, Float ) -> Svg msg
 renderPoint env name ct ( lbl, val ) =
     let
         rSize =
-            min 3.0 (env.w / ct / 4)
+            min (env.lineThickness * 1.75) (env.w / ct / 4)
     in
     g [ class [ "point" ] ]
         [ circle
@@ -270,7 +300,7 @@ renderVBarHover env ( lbl, points ) =
 genStyle : Cfg.FontSpec -> Cfg.ChartSpec -> Cfg.Tooltips -> Bool -> String
 genStyle fCfg cCfg tCfg vbar =
     let
-        ( showName, nameSize ) =
+        ( showName, nameSize, lineThickness ) =
             case cCfg of
                 Cfg.LineChartSpec r ->
                     ( if r.showLineName then
@@ -279,16 +309,17 @@ genStyle fCfg cCfg tCfg vbar =
                       else
                         "none"
                     , r.lineNameSize |> String.fromInt
+                    , max 4 (r.lineThickness * 2 |> round) |> String.fromInt
                     )
 
                 _ ->
-                    ( "none", "0px" )
+                    ( "none", "0", "4" )
     in
     StdChart.genBaseStyle fCfg tCfg
         ++ """
          .point:hover .tooltip { display: {{showTT}}; }
          .point:hover .tooltip_large { display: {{showLargeTT}}; }
-         .line:hover path { stroke-width: 4px; }
+         .line:hover path { stroke-width: {{lineThickness}}px; }
          .line:hover text { font-weight: bold; }
          .name { display: {{showName}}; font-size: {{nameSize}}px; }
          .name:hover { font-weight: bold; }
@@ -304,4 +335,5 @@ genStyle fCfg cCfg tCfg vbar =
             (UI.display tCfg.showHoverTooltips)
         |> String.Format.namedValue "showName" showName
         |> String.Format.namedValue "nameSize" nameSize
+        |> String.Format.namedValue "lineThickness" lineThickness
         |> String.Format.namedValue "showVBar" (UI.reveal vbar 0.8)

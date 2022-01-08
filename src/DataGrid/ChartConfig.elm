@@ -35,7 +35,9 @@ type ChartSpec
     | LineChartSpec
         { showLineName : Bool
         , lineNameSize : Int
+        , lineThickness : Float
         , showVBar : Bool
+        , showYZeroLine : Bool
         , toggleSeries : Bool
         , toggleRelative : Bool
         , toggleFirstDeriv : Bool
@@ -149,7 +151,9 @@ defaultLineChartSpec =
     LineChartSpec
         { showLineName = True
         , lineNameSize = 12
+        , lineThickness = 1
         , showVBar = True
+        , showYZeroLine = False
         , toggleSeries = True
         , toggleRelative = True
         , toggleFirstDeriv = True
