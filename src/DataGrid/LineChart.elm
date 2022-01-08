@@ -230,12 +230,14 @@ renderPoint env name ct ( lbl, val ) =
         , "{{name}} {{lbl}}: {{val}}"
             |> String.Format.namedValue "name" name
             |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-            |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+            |> String.Format.namedValue "val"
+                (Utils.fmtFloat env.tooltips.floatDp val)
             |> StdChart.genTooltip env lbl
         , "{{name}} {{lbl}}: {{val}}"
             |> String.Format.namedValue "name" name
             |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-            |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+            |> String.Format.namedValue "val"
+                (Utils.fmtFloat env.tooltips.floatDp val)
             |> StdChart.genLargeTooltip env
         ]
 

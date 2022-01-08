@@ -438,7 +438,7 @@ renderHoverTooltip :
 renderHoverTooltip env lbl name points =
     let
         lines =
-            genHoverLines lbl name points
+            genHoverLines env.tooltips lbl name points
 
         hEnv =
             genHoverEnv env lbl name lines
@@ -511,11 +511,11 @@ genHoverEnv env lbl name lines =
     }
 
 
-genHoverLines : String -> String -> List ( String, Float ) -> NE.Nonempty String
-genHoverLines lbl name pairs =
+genHoverLines : Cfg.Tooltips -> String -> String -> List ( String, Float ) -> NE.Nonempty String
+genHoverLines cfg lbl name pairs =
     NE.Nonempty
         ( lbl ++ ": " ++ name, "" )
-        (List.map (Tuple.mapSecond (Utils.fmtFloat 2)) pairs)
+        (List.map (Tuple.mapSecond (Utils.fmtFloat cfg.floatDp)) pairs)
         |> GridChart.pairsToStrings identity 3
 
 

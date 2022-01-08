@@ -148,11 +148,13 @@ renderBar env ( lbl, val ) =
                 []
             , "{{lbl}}: {{val}}"
                 |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-                |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+                |> String.Format.namedValue "val"
+                    (Utils.fmtFloat env.tooltips.floatDp val)
                 |> StdChart.genTooltip env lbl
             , "{{lbl}}: {{val}}"
                 |> String.Format.namedValue "lbl" (env.labelFmt lbl)
-                |> String.Format.namedValue "val" (Utils.fmtFloat 2 val)
+                |> String.Format.namedValue "val"
+                    (Utils.fmtFloat env.tooltips.floatDp val)
                 |> StdChart.genLargeTooltip env
             ]
         ]

@@ -258,6 +258,7 @@ type alias Tooltips =
     , largeTooltipSize : Int
     , showHoverTooltips : Bool
     , hoverTooltipSize : Int
+    , floatDp : Int
     }
 
 
@@ -298,6 +299,7 @@ defaultTooltips =
     , largeTooltipSize = 20
     , showHoverTooltips = False
     , hoverTooltipSize = 16
+    , floatDp = 2
     }
 
 

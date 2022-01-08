@@ -381,7 +381,7 @@ renderHoverTooltip :
 renderHoverTooltip env groupCell t cell =
     let
         lines =
-            genHoverLines t
+            genHoverLines env.tooltips t
 
         hEnv =
             genHoverEnv env lines groupCell cell
@@ -447,12 +447,12 @@ genHoverEnv env lines groupCell cell =
     }
 
 
-genHoverLines : TreeCell -> NE.Nonempty String
-genHoverLines t =
+genHoverLines : Cfg.Tooltips -> TreeCell -> NE.Nonempty String
+genHoverLines cfg t =
     NE.Nonempty
         ( t.groupName, t.cellName )
-        [ ( t.previousLabel, Utils.fmtFloat 2 t.previousValue )
-        , ( t.currentLabel, Utils.fmtFloat 2 t.currentValue )
+        [ ( t.previousLabel, Utils.fmtFloat cfg.floatDp t.previousValue )
+        , ( t.currentLabel, Utils.fmtFloat cfg.floatDp t.currentValue )
         ]
         |> GridChart.pairsToStrings identity 3
 
