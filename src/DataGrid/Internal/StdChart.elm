@@ -277,16 +277,16 @@ genHoverEnv env sortLines hx pairs =
             (List.length pairs + 2 |> toFloat) * sz * 1.03
 
         hw =
-            Utils.pairWidthMax pairs 2
+            Utils.pairWidthMax pairs env.tooltips.floatDp
                 |> toFloat
-                |> (\n -> (n + 2) * (sz * 0.7))
+                |> (\n -> (n + 1) * (sz * 0.7))
 
         hx_ =
             if hx > (env.w - env.pad.right) / 2 then
                 hx - hw - xOffset
 
             else
-                hx + xOffset
+                hx + xOffset * 2
 
         hy =
             max 0 (env.h / 2 - hh)
