@@ -79,6 +79,32 @@ testSplitN =
         ]
 
 
+testSumRange =
+    describe "Test sumRange"
+        [ test
+            "positive and negative sample"
+            (\_ ->
+                sumRange [ 1, 2, -1 ]
+                    |> List.sort
+                    |> Expect.equal [ -1, 3 ]
+            )
+        , test
+            "positive only"
+            (\_ ->
+                sumRange [ 1, 2 ]
+                    |> List.sort
+                    |> Expect.equal [ 0, 3 ]
+            )
+        , test
+            "negative only"
+            (\_ ->
+                sumRange [ -1, -2 ]
+                    |> List.sort
+                    |> Expect.equal [ -3, 0 ]
+            )
+        ]
+
+
 
 --------------------------------------------------------------------------------
 -- Strings

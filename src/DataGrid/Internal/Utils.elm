@@ -115,6 +115,18 @@ toggleMember x xs =
         x :: xs
 
 
+sumRange : List Float -> List Float
+sumRange xs =
+    let
+        positive =
+            List.filter ((>=) 0) xs |> List.sum
+
+        negative =
+            List.filter ((<) 0) xs |> List.sum
+    in
+    [ positive, negative ]
+
+
 
 --------------------------------------------------------------------------------
 -- Non-Empty Lists

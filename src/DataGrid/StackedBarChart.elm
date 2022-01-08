@@ -81,7 +81,7 @@ genChartEnv cfg data =
                 |> Maybe.withDefault []
 
         data_ =
-            StdChart.toMatrix data |> List.map List.sum
+            StdChart.toMatrix data |> List.concatMap Utils.sumRange
 
         labels =
             Utils.fsts data
@@ -163,7 +163,7 @@ renderStackedBar env ( lbl, pairs ) =
     in
     g [ class [ "stacked_bar" ] ] <|
         (List.foldr (renderSubBar env lbl) ( 0, [] ) positive |> Utils.snd)
-            ++ (List.foldr (renderSubBar env lbl) ( zeroY, [] ) negative |> Utils.snd)
+            ++ (List.foldr (renderSubBar env lbl) ( 0, [] ) negative |> Utils.snd)
 
 
 renderSubBar :
@@ -186,7 +186,7 @@ renderSubBar env lbl ( name, val ) ( yStart, acc ) =
                             Scale.convert env.dataScale (yStart + val)
 
                         else
-                            yStart
+                            zeroY + yStart
                     , width <| Scale.bandwidth env.labelScale
                     , height <|
                         if val >= 0 then
@@ -195,6 +195,7 @@ renderSubBar env lbl ( name, val ) ( yStart, acc ) =
 
                         else
                             Scale.convert env.dataScale val
+                                - zeroY
                     , fill <| Paint <| StdChart.getColor env.colorScale name
                     ]
                     []
