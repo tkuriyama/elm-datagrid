@@ -120,17 +120,30 @@ render cfg ( _, data ) =
 
 renderBar : ChartEnv label -> ( label, Float ) -> Svg msg
 renderBar env ( lbl, val ) =
+    let
+        zeroY =
+            Scale.convert env.dataScale 0
+    in
     svg
         []
         [ g [ class [ "bar" ] ]
             [ rect
                 [ x <| Scale.convert env.labelScale lbl
-                , y <| Scale.convert env.dataScale val
+                , y <|
+                    if val > 0 then
+                        Scale.convert env.dataScale val
+
+                    else
+                        zeroY
                 , width <| Scale.bandwidth env.labelScale
                 , height <|
-                    env.h
-                        - Scale.convert env.dataScale val
-                        - (env.pad.bottom + env.pad.top)
+                    if val > 0 then
+                        zeroY
+                            - Scale.convert env.dataScale val
+
+                    else
+                        Scale.convert env.dataScale val
+                            - zeroY
                 ]
                 []
             , "{{lbl}}: {{val}}"
