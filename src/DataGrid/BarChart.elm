@@ -130,14 +130,14 @@ renderBar env ( lbl, val ) =
             [ rect
                 [ x <| Scale.convert env.labelScale lbl
                 , y <|
-                    if val > 0 then
+                    if val >= 0 then
                         Scale.convert env.dataScale val
 
                     else
                         zeroY
                 , width <| Scale.bandwidth env.labelScale
                 , height <|
-                    if val > 0 then
+                    if val >= 0 then
                         zeroY
                             - Scale.convert env.dataScale val
 

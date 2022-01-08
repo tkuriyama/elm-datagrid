@@ -73,18 +73,18 @@ genChartEnv :
     Cfg.StdChartCfg label
     -> List ( label, List ( String, Float ) )
     -> ChartEnv label
-genChartEnv cfg data_ =
+genChartEnv cfg data =
     let
         names =
-            List.map (Utils.snd >> Utils.fsts) data_
+            List.map (Utils.snd >> Utils.fsts) data
                 |> List.head
                 |> Maybe.withDefault []
 
-        xs =
-            StdChart.toMatrix data_ |> List.map List.sum
+        data_ =
+            StdChart.toMatrix data |> List.map List.sum
 
-        ys =
-            Utils.fsts data_
+        labels =
+            Utils.fsts data
     in
     { w = cfg.w
     , h = cfg.h
@@ -94,8 +94,8 @@ genChartEnv cfg data_ =
             cfg.h
             (cfg.pad.top + cfg.pad.bottom)
             cfg.axesSpec.yAxisMax
-            xs
-    , labelScale = StdChart.genXScale cfg.w (cfg.pad.right + cfg.pad.left) ys
+            data_
+    , labelScale = StdChart.genXScale cfg.w (cfg.pad.right + cfg.pad.left) labels
     , colorScale = StdChart.genColorScale names
     , labelShow = cfg.showLabels
     , labelFmt = cfg.labelFormatter
@@ -151,8 +151,19 @@ render cfg data =
 
 renderStackedBar : ChartEnv label -> ( label, List ( String, Float ) ) -> Svg msg
 renderStackedBar env ( lbl, pairs ) =
-    g [ class [ "stacked_bar" ] ]
-        (List.foldr (renderSubBar env lbl) ( 0, [] ) pairs |> Utils.snd)
+    let
+        zeroY =
+            Scale.convert env.dataScale 0
+
+        positive =
+            List.filter (\( _, val ) -> val >= 0) pairs
+
+        negative =
+            List.filter (\( _, val ) -> val < 0) pairs
+    in
+    g [ class [ "stacked_bar" ] ] <|
+        (List.foldr (renderSubBar env lbl) ( 0, [] ) positive |> Utils.snd)
+            ++ (List.foldr (renderSubBar env lbl) ( zeroY, [] ) negative |> Utils.snd)
 
 
 renderSubBar :
@@ -163,16 +174,27 @@ renderSubBar :
     -> ( Float, List (Svg msg) )
 renderSubBar env lbl ( name, val ) ( yStart, acc ) =
     let
+        zeroY =
+            Scale.convert env.dataScale 0
+
         elem =
             g [ class [ "sub_bar" ] ]
                 [ rect
                     [ x <| Scale.convert env.labelScale lbl
-                    , y <| Scale.convert env.dataScale (yStart + val)
+                    , y <|
+                        if val >= 0 then
+                            Scale.convert env.dataScale (yStart + val)
+
+                        else
+                            yStart
                     , width <| Scale.bandwidth env.labelScale
                     , height <|
-                        env.h
-                            - Scale.convert env.dataScale val
-                            - (env.pad.bottom + env.pad.top)
+                        if val >= 0 then
+                            zeroY
+                                - Scale.convert env.dataScale val
+
+                        else
+                            Scale.convert env.dataScale val
                     , fill <| Paint <| StdChart.getColor env.colorScale name
                     ]
                     []
